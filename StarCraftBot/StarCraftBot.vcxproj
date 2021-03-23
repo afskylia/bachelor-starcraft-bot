@@ -12,9 +12,10 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{2E63AE74-758A-4607-9DE4-D28E814A6E13}</ProjectGuid>
-    <RootNamespace>ExampleAIModule</RootNamespace>
+    <RootNamespace>StarCraftBot</RootNamespace>
     <Keyword>Win32Proj</Keyword>
     <WindowsTargetPlatformVersion>7.0</WindowsTargetPlatformVersion>
+    <ProjectName>StarCraftBot</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -95,10 +96,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Source\Dll.cpp" />
-    <ClCompile Include="Source\ExampleAIModule.cpp" />
+    <ClCompile Include="Source\StarCraftBot.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\ExampleAIModule.h" />
+    <ClInclude Include="Source\StarCraftBot.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BWAPILIB\BWAPILIB.vcxproj">
