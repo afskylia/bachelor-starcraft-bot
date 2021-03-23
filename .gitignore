@@ -1,7 +1,10 @@
 Chaoslauncher/
 MPQDraft/
 Shared/
-Starcraft/
+
+!Starcraft/
+Starcraft/*
+!Starcraft/bwapi-data/
 
 
 # Created by https://www.toptal.com/developers/gitignore/api/visualstudio,c++
