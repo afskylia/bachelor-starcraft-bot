@@ -1,4 +1,4 @@
-#include "ExampleAIModule.h"
+#include "StarCraftBot.h"
 #include <iostream>
 
 using namespace BWAPI;
