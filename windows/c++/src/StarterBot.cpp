@@ -138,11 +138,15 @@ void StarterBot::sendScout()
         if (!BWAPI::Broodwar->isExplored(position)) {
             const BWAPI::Position pos(position);
 
+            auto command = m_scout->getLastCommand();
+            if (command.getTargetPosition() == pos) { return; }
+        	
             m_scout->move(pos);
             return;
         }
 	}
-    m_scouted = true;
+	// Return to home
+    m_scout->move(BWAPI::Position(BWAPI::Broodwar->self()->getStartLocation()));
 }
 
 // Called whenever a unit is destroyed, with a pointer to the unit
