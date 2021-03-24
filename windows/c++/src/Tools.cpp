@@ -41,7 +41,7 @@ BWAPI::Unit Tools::GetUnitOfType(BWAPI::UnitType type)
     for (auto& unit : BWAPI::Broodwar->self()->getUnits())
     {
         // if the unit is of the correct type, and it actually has been constructed, return it
-        if (unit->getType() == type && unit->isCompleted())
+        if (unit->getType() == type && unit->isCompleted() && unit->isIdle())
         {
             return unit;
         }

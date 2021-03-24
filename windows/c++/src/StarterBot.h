@@ -7,6 +7,11 @@
 class StarterBot
 {
     MapTools m_mapTools;
+	BWAPI::Unit m_scout = nullptr;
+    /**
+	 * \brief true if map is scouted
+	 */
+	bool m_scouted = false;
 
 public:
 
@@ -17,6 +22,7 @@ public:
     void trainAdditionalWorkers();
     void buildAdditionalSupply();
     void drawDebugInformation();
+    void sendScout();
 
     // functions that are triggered by various BWAPI events from main.cpp
 	void onStart();

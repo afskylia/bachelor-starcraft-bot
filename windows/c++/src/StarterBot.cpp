@@ -19,6 +19,7 @@ void StarterBot::onStart()
 
     // Call MapTools OnStart
     m_mapTools.onStart();
+
 }
 
 // Called whenever the game ends and tells you if you won or not
@@ -33,6 +34,9 @@ void StarterBot::onFrame()
     // Update our MapTools information
     m_mapTools.onFrame();
 
+    // Send a Scout ASAP
+    sendScout();
+	
     // Send our idle workers to mine minerals so they don't just stand there
     sendIdleWorkersToMinerals();
 
@@ -61,7 +65,7 @@ void StarterBot::sendIdleWorkersToMinerals()
         if (unit->getType().isWorker() && unit->isIdle())
         {
             // Get the closest mineral to this worker unit
-            BWAPI::Unit closestMineral = Tools::GetClosestUnitTo(unit, BWAPI::Broodwar->getMinerals());
+            const BWAPI::Unit closestMineral = Tools::GetClosestUnitTo(unit, BWAPI::Broodwar->getMinerals());
 
             // If a valid mineral was found, right click it with the unit in order to start harvesting
             if (closestMineral) { unit->rightClick(closestMineral); }
@@ -111,6 +115,34 @@ void StarterBot::drawDebugInformation()
     BWAPI::Broodwar->drawTextScreen(BWAPI::Position(10, 10), "Hello, World!\n");
     Tools::DrawUnitCommands();
     Tools::DrawUnitBoundingBoxes();
+}
+
+/**
+ * \brief Sends one Scout to figure out enemy location and race
+ */
+void StarterBot::sendScout()
+{
+	// don't scout if map is already scouted
+	if (m_scouted) return;
+	
+	// Get a scout
+    if (!m_scout) {
+        m_scout = Tools::GetUnitOfType(BWAPI::Broodwar->self()->getRace().getWorker());
+    }
+
+	auto& startLocations = BWAPI::Broodwar->getStartLocations();
+
+	// Loop through all starting positions
+	for (BWAPI::TilePosition position : startLocations)
+	{
+        if (!BWAPI::Broodwar->isExplored(position)) {
+            const BWAPI::Position pos(position);
+
+            m_scout->move(pos);
+            return;
+        }
+	}
+    m_scouted = true;
 }
 
 // Called whenever a unit is destroyed, with a pointer to the unit
