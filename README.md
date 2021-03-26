@@ -1,17 +1,6 @@
-# STARTcraft
+# Great Example Bot
 
-Get started with Starcraft AI Development as fast as possible. 
-
-New to Starfcraft or AI Programming? Watch the tutorial video(s): 
-* Starcraft AI Intro: https://www.youtube.com/watch?v=czhNqUxmLks
-* STARTcraft Programming: https://www.youtube.com/watch?v=FEEkO6__GKw
-
-Currently Supported (more coming soon):
-* Windows / C++ Development using BWAPI
-
-# Setup Instructions:
-
-## Windows / C++
+## Setup Instructions:
 
 StartCraft comes with a StarterBot written in C++ using BWAPI 4.4.0. This repo comes with BWAPI, and uses Injectory to launch Starcraft with BWAPI, so Chaoslauncher is not required.
 
