@@ -12,6 +12,9 @@ class StarterBot
 	 * \brief true if map is scouted
 	 */
 	bool m_scouted = false;
+	//BWAPI::Race enemyRace = BWAPI::Races::None;
+	bool foundEnemy = false;
+	BWAPI::Race enemyRace = BWAPI::Races::None;
 
 public:
 
