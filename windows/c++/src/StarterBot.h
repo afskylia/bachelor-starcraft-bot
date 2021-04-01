@@ -15,6 +15,7 @@ class StarterBot
 	//BWAPI::Race enemyRace = BWAPI::Races::None;
 	bool foundEnemy = false;
 	BWAPI::Race enemyRace = BWAPI::Races::None;
+	BWAPI::TilePosition enemyStartLocation = BWAPI::TilePositions::None;
 
 public:
 

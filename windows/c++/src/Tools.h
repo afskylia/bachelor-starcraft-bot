@@ -16,7 +16,8 @@ namespace Tools
 
     void DrawUnitBoundingBoxes();
     void DrawUnitCommands();
-
+    void DrawEnemyBases(BWAPI::TilePosition);
+	
     void SmartRightClick(BWAPI::Unit unit, BWAPI::Unit target);
 
     int GetTotalSupply(bool inProgress = false);

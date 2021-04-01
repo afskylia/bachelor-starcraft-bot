@@ -118,6 +118,9 @@ void StarterBot::drawDebugInformation()
 	BWAPI::Broodwar->drawTextScreen(BWAPI::Position(10, 10), "Hello, World!\n");
 	Tools::DrawUnitCommands();
 	Tools::DrawUnitBoundingBoxes();
+
+	if (foundEnemy) Tools::DrawEnemyBases(enemyStartLocation);
+
 }
 
 /**
@@ -197,7 +200,27 @@ void StarterBot::onUnitShow(BWAPI::Unit unit)
 	{
 		enemyRace = unit->getType().getRace();
 		foundEnemy = true;
-		std::cout << "Enemy is " << enemyRace;
+		std::cout << "Enemy is " << enemyRace << "\n";
+
+		auto& startLocations = BWAPI::Broodwar->getStartLocations();
+
+		// Find closest starting location to enemy unit
+		// TODO: Also save locations of other enemy bases they might build later in the game
+		double shortestDistance = INT_MAX;
+		for (BWAPI::TilePosition position : startLocations)
+		{
+			const auto distance = position.getDistance(unit->getTilePosition());
+			if (distance < shortestDistance)
+			{
+				shortestDistance = distance;
+				enemyStartLocation = position;
+			}
+		}
+
+
+
+		std::cout << "Enemy starting location: " << enemyStartLocation << "\n";
+
 	}
 }
 
