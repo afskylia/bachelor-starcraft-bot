@@ -84,7 +84,7 @@ void StarterBot::sendIdleWorkersToMinerals()
 void StarterBot::trainAdditionalWorkers()
 {
 	const BWAPI::UnitType workerType = BWAPI::Broodwar->self()->getRace().getWorker();
-	const int workersWanted = 20;
+	const int workersWanted = 30;
 	const int workersOwned = Tools::CountUnitsOfType(workerType, BWAPI::Broodwar->self()->getUnits());
 	if (workersOwned < workersWanted)
 	{
@@ -112,6 +112,7 @@ void StarterBot::buildAdditionalSupply()
 		// Otherwise, we are going to build a supply provider
 		const BWAPI::UnitType supplyProviderType = BWAPI::Broodwar->self()->getRace().getSupplyProvider();
 
+		//std::cout << BWAPI::Broodwar->self()->mine
 		const bool startedBuilding = Tools::BuildBuilding(supplyProviderType);
 		if (startedBuilding)
 		{
@@ -140,12 +141,15 @@ void StarterBot::buildGateway()
 
 void StarterBot::buildAttackUnits()
 {
-	const BWAPI::Unit gateway = Tools::GetUnitOfType(BWAPI::UnitTypes::Protoss_Gateway);
 	const BWAPI::UnitType unitType = BWAPI::UnitTypes::Protoss_Zealot;
-	if (gateway && !gateway->isTraining() && BWAPI::Broodwar->self()->minerals() >= unitType.mineralPrice())
+	if (BWAPI::Broodwar->self()->minerals() < unitType.mineralPrice()) { return; }
+	auto gateways = Tools::GetUnitsOfType(BWAPI::UnitTypes::Protoss_Gateway);
+	for (auto* gateway : gateways)
 	{
-		std::cout << "Building zealot\n";
-		gateway->train(unitType);
+		if (gateway && !gateway->isTraining())
+		{
+			if (gateway->train(unitType)) { std::cout << "Training zealot\n"; }
+		}
 	}
 }
 
@@ -188,7 +192,7 @@ void StarterBot::sendScout()
 		}
 	}
 	// Return to home
-	m_scout->move(BWAPI::Position(BWAPI::Broodwar->self()->getStartLocation()));
+	//m_scout->move(BWAPI::Position(BWAPI::Broodwar->self()->getStartLocation()));
 }
 
 // Called whenever a unit is destroyed, with a pointer to the unit

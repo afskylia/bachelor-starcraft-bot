@@ -84,9 +84,8 @@ bool Tools::BuildBuilding(BWAPI::UnitType type)
 
 	// Get a unit that we own that is of the given type so it can build
 	// If we can't find a valid builder unit, then we have to cancel the building
-	BWAPI::Unit builder = Tools::GetUnitOfType(builderType);
-	if (!builder) {return false; }
-
+	BWAPI::Unit builder = GetUnitOfType(builderType);
+	if (!builder) { return false; }
 	// Get a location that we want to build the building next to
 	BWAPI::TilePosition desiredPos = BWAPI::Broodwar->self()->getStartLocation();
 
