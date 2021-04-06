@@ -25,6 +25,8 @@ public:
     void sendIdleWorkersToMinerals();
     void trainAdditionalWorkers();
     void buildAdditionalSupply();
+	void buildGateway();
+	void buildAttackUnits();
     void drawDebugInformation();
     void sendScout();
 

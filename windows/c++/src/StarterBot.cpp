@@ -40,17 +40,21 @@ void StarterBot::onFrame()
 	// Send a Scout ASAP
 	sendScout();
 
-	// Send our idle workers to mine minerals so they don't just stand there
-	sendIdleWorkersToMinerals();
+	// Build more supply if we are going to run out soon
+	buildAdditionalSupply();
+
+	buildGateway();
+
+	buildAttackUnits();
 
 	// Train more workers so we can gather more income
 	trainAdditionalWorkers();
 
-	// Build more supply if we are going to run out soon
-	buildAdditionalSupply();
-
 	// Draw unit health bars, which brood war unfortunately does not do
 	Tools::DrawUnitHealthBars();
+
+	// Send our idle workers to mine minerals so they don't just stand there
+	sendIdleWorkersToMinerals();
 
 	// Draw some relevent information to the screen to help us debug the bot
 	drawDebugInformation();
@@ -97,20 +101,55 @@ void StarterBot::trainAdditionalWorkers()
 void StarterBot::buildAdditionalSupply()
 {
 	// Get the amount of supply supply we currently have unused
-	const int unusedSupply = Tools::GetTotalSupply(true) - BWAPI::Broodwar->self()->supplyUsed();
+	//const int unusedSupply = Tools::GetTotalSupply(true) - BWAPI::Broodwar->self()->supplyUsed();
 
 	// If we have a sufficient amount of supply, we don't need to do anything
-	if (unusedSupply >= 2) { return; }
-
-	// Otherwise, we are going to build a supply provider
-	const BWAPI::UnitType supplyProviderType = BWAPI::Broodwar->self()->getRace().getSupplyProvider();
-
-	const bool startedBuilding = Tools::BuildBuilding(supplyProviderType);
-	if (startedBuilding)
+	if (BWAPI::Broodwar->self()->supplyUsed() + 8 >= Tools::GetTotalSupply(true))
 	{
-		BWAPI::Broodwar->printf("Started Building %s", supplyProviderType.getName().c_str());
+		//if (unusedSupply >= 3) { return; }
+		//BWAPI::UnitTypes::Protoss_Zealot.supplyRequired()
+
+		// Otherwise, we are going to build a supply provider
+		const BWAPI::UnitType supplyProviderType = BWAPI::Broodwar->self()->getRace().getSupplyProvider();
+
+		const bool startedBuilding = Tools::BuildBuilding(supplyProviderType);
+		if (startedBuilding)
+		{
+			BWAPI::Broodwar->printf("Started Building %s", supplyProviderType.getName().c_str());
+		}
 	}
 }
+
+void StarterBot::buildGateway()
+{
+	// Get the amount of supply supply we currently have unused
+	//const int unusedSupply = Tools::GetTotalSupply(true) - BWAPI::Broodwar->self()->supplyUsed();
+	//if (unusedSupply > 7) { return; }
+
+	const BWAPI::UnitType unitType = BWAPI::UnitTypes::Protoss_Gateway;
+	if (Tools::CountUnitsOfType(unitType) < 4)
+	{
+		const bool startedBuilding = Tools::BuildBuilding(unitType);
+		if (startedBuilding)
+		{
+			BWAPI::Broodwar->printf("Started Building %s", unitType.getName().c_str());
+		}
+
+	}
+}
+
+void StarterBot::buildAttackUnits()
+{
+	const BWAPI::Unit gateway = Tools::GetUnitOfType(BWAPI::UnitTypes::Protoss_Gateway);
+	const BWAPI::UnitType unitType = BWAPI::UnitTypes::Protoss_Zealot;
+	if (gateway && !gateway->isTraining() && BWAPI::Broodwar->self()->minerals() >= unitType.mineralPrice())
+	{
+		std::cout << "Building zealot\n";
+		gateway->train(unitType);
+	}
+}
+
+
 
 // Draw some relevent information to the screen to help us debug the bot
 void StarterBot::drawDebugInformation()
@@ -128,9 +167,6 @@ void StarterBot::drawDebugInformation()
  */
 void StarterBot::sendScout()
 {
-	// don't scout if map is already scouted
-	if (m_scouted) return;
-
 	// Get a scout
 	if (!m_scout) {
 		m_scout = Tools::GetUnitOfType(BWAPI::Broodwar->self()->getRace().getWorker());
