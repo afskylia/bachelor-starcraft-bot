@@ -6,8 +6,8 @@
 
 class StarterBot
 {
-    MapTools m_mapTools;
 	BWAPI::Unit m_scout = nullptr;
+    MapTools m_mapTools;
     /**
 	 * \brief true if map is scouted
 	 */
@@ -44,5 +44,5 @@ public:
 	void onUnitComplete(BWAPI::Unit unit);
 	void onUnitShow(BWAPI::Unit unit);
 	void onUnitHide(BWAPI::Unit unit);
-	void onUnitRenegade(BWAPI::Unit unit);
+	void onUnitRenegade(BWAPI::Unit unit);	
 };

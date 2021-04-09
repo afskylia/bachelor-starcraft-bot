@@ -1,4 +1,5 @@
 #include "Tools.h"
+#include "StarterBot.h"
 
 BWAPI::Unit Tools::GetClosestUnitTo(BWAPI::Position p, const BWAPI::Unitset& units)
 {
@@ -26,7 +27,7 @@ int Tools::CountUnitsOfType(BWAPI::UnitType type, const BWAPI::Unitset& units)
 	int sum = 0;
 	for (auto& unit : units)
 	{
-		if (unit->getType() == type && unit->getPlayer()==BWAPI::Broodwar->self())
+		if (unit->getType() == type && unit->getPlayer() == BWAPI::Broodwar->self())
 		{
 			sum++;
 		}
@@ -35,8 +36,23 @@ int Tools::CountUnitsOfType(BWAPI::UnitType type, const BWAPI::Unitset& units)
 	return sum;
 }
 
-BWAPI::Unit Tools::GetWorker()
+BWAPI::Unit Tools::GetWorker(BWAPI::UnitType unitType)
 {
+	// TODO: get closest to where it is needed
+	// TODO: Make sure only resource-gathering units are selected
+	//&& unit->getLastCommand().getType() == BWAPI::UnitCommandTypes::Gather
+
+	for (auto& unit : BWAPI::Broodwar->self()->getUnits())
+	{
+		// if the unit is of the correct type, and it actually has been constructed, return it
+		if (unit->getType() == unitType)
+		{
+			return unit;
+		}
+	}
+
+	// If we didn't find a valid unit to return, make sure we return nullptr
+	return nullptr;
 }
 
 BWAPI::Unit Tools::GetUnitOfType(BWAPI::UnitType type)
@@ -88,7 +104,7 @@ bool Tools::BuildBuilding(BWAPI::UnitType type)
 
 	// Get a unit that we own that is of the given type so it can build
 	// If we can't find a valid builder unit, then we have to cancel the building
-	BWAPI::Unit builder = GetUnitOfType(builderType);
+	BWAPI::Unit builder = GetWorker(builderType);
 	if (!builder) { return false; }
 	// Get a location that we want to build the building next to
 	BWAPI::TilePosition desiredPos = BWAPI::Broodwar->self()->getStartLocation();

@@ -7,7 +7,6 @@
 
 StarterBot::StarterBot()
 {
-	
 }
 
 // Called when the bot starts!
@@ -76,6 +75,7 @@ void StarterBot::sendIdleWorkersToMinerals()
 		// Check the unit type, if it is an idle worker, then we want to send it somewhere
 		if (unit->getType().isWorker() && unit->isIdle())
 		{
+			std::cout << "Idle" << "\n";
 			//unit->gather(unit->getClosestUnit(BWAPI::Filter::IsMineralField));
 			unit->gather(Tools::GetClosestUnitTo(BWAPI::Position(mainBase), BWAPI::Broodwar->getMinerals()));
 
