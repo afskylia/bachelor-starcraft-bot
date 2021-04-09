@@ -26,13 +26,17 @@ int Tools::CountUnitsOfType(BWAPI::UnitType type, const BWAPI::Unitset& units)
 	int sum = 0;
 	for (auto& unit : units)
 	{
-		if (unit->getType() == type)
+		if (unit->getType() == type && unit->getPlayer()==BWAPI::Broodwar->self())
 		{
 			sum++;
 		}
 	}
 
 	return sum;
+}
+
+BWAPI::Unit Tools::GetWorker()
+{
 }
 
 BWAPI::Unit Tools::GetUnitOfType(BWAPI::UnitType type)

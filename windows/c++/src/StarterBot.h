@@ -16,6 +16,9 @@ class StarterBot
 	bool foundEnemy = false;
 	BWAPI::Race enemyRace = BWAPI::Races::None;
 	BWAPI::TilePosition enemyStartLocation = BWAPI::TilePositions::None;
+	//BWAPI::Unitset workers = BWAPI::Unitset::none;
+	//BWAPI::Unitset attackUnits = BWAPI::Unitset::none;
+	BWAPI::TilePosition mainBase = BWAPI::TilePositions::None;
 
 public:
 

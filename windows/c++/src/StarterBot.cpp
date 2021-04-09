@@ -7,7 +7,7 @@
 
 StarterBot::StarterBot()
 {
-
+	
 }
 
 // Called when the bot starts!
@@ -17,11 +17,14 @@ void StarterBot::onStart()
 	BWAPI::Broodwar->setLocalSpeed(10);
 	BWAPI::Broodwar->setFrameSkip(0);
 
+	mainBase = BWAPI::Broodwar->self()->getStartLocation();
+
 	// Enable the flag that tells BWAPI top let users enter input while bot plays
 	BWAPI::Broodwar->enableFlag(BWAPI::Flag::UserInput);
 
 	// Call MapTools OnStart
 	m_mapTools.onStart();
+
 
 }
 
@@ -34,14 +37,16 @@ void StarterBot::onEnd(bool isWinner)
 // Called on each frame of the game
 void StarterBot::onFrame()
 {
+	// Build more supply if we are going to run out soon
+	buildAdditionalSupply();
+	
 	// Update our MapTools information
 	m_mapTools.onFrame();
 
 	// Send a Scout ASAP
 	sendScout();
 
-	// Build more supply if we are going to run out soon
-	buildAdditionalSupply();
+	
 
 	buildGateway();
 
@@ -71,11 +76,15 @@ void StarterBot::sendIdleWorkersToMinerals()
 		// Check the unit type, if it is an idle worker, then we want to send it somewhere
 		if (unit->getType().isWorker() && unit->isIdle())
 		{
-			// Get the closest mineral to this worker unit
-			const BWAPI::Unit closestMineral = Tools::GetClosestUnitTo(unit, BWAPI::Broodwar->getMinerals());
+			//unit->gather(unit->getClosestUnit(BWAPI::Filter::IsMineralField));
+			unit->gather(Tools::GetClosestUnitTo(BWAPI::Position(mainBase), BWAPI::Broodwar->getMinerals()));
 
-			// If a valid mineral was found, right click it with the unit in order to start harvesting
-			if (closestMineral) { unit->rightClick(closestMineral); }
+
+			//// Get the closest mineral to this worker unit
+			//const BWAPI::Unit closestMineral = Tools::GetClosestUnitTo(unit, BWAPI::Broodwar->getMinerals());
+
+			//// If a valid mineral was found, right click it with the unit in order to start harvesting
+			//if (closestMineral) { unit->gather(closestMineral); }
 		}
 	}
 }
@@ -113,6 +122,7 @@ void StarterBot::buildAdditionalSupply()
 		const BWAPI::UnitType supplyProviderType = BWAPI::Broodwar->self()->getRace().getSupplyProvider();
 
 		//std::cout << BWAPI::Broodwar->self()->mine
+		if (BWAPI::Broodwar->self()->minerals() < supplyProviderType.mineralPrice()) { return; }
 		const bool startedBuilding = Tools::BuildBuilding(supplyProviderType);
 		if (startedBuilding)
 		{
@@ -128,7 +138,9 @@ void StarterBot::buildGateway()
 	//if (unusedSupply > 7) { return; }
 
 	const BWAPI::UnitType unitType = BWAPI::UnitTypes::Protoss_Gateway;
-	if (Tools::CountUnitsOfType(unitType) < 4)
+	if (BWAPI::Broodwar->self()->minerals() < unitType.mineralPrice()) { return; }
+	
+	if (Tools::CountUnitsOfType(unitType) < 3)
 	{
 		const bool startedBuilding = Tools::BuildBuilding(unitType);
 		if (startedBuilding)
@@ -142,20 +154,16 @@ void StarterBot::buildGateway()
 void StarterBot::buildAttackUnits()
 {
 	const BWAPI::UnitType unitType = BWAPI::UnitTypes::Protoss_Zealot;
-	if (BWAPI::Broodwar->self()->minerals() < unitType.mineralPrice()) { return; }
 	auto gateways = Tools::GetUnitsOfType(BWAPI::UnitTypes::Protoss_Gateway);
 	for (auto* gateway : gateways)
 	{
-		if (gateway && !gateway->isTraining())
-		{
-			if (gateway->train(unitType)) { std::cout << "Training zealot\n"; }
-		}
+		if (gateway && !gateway->isTraining()) { gateway->train(unitType); }
 	}
 }
 
 
 
-// Draw some relevent information to the screen to help us debug the bot
+// Draw some relevant information to the screen to help us debug the bot
 void StarterBot::drawDebugInformation()
 {
 	BWAPI::Broodwar->drawTextScreen(BWAPI::Position(10, 10), "Hello, World!\n");
