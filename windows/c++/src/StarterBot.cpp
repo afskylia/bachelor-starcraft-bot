@@ -45,8 +45,6 @@ void StarterBot::onFrame()
 	// Send a Scout ASAP
 	sendScout();
 
-	
-
 	buildGateway();
 
 	buildAttackUnits();
@@ -59,6 +57,8 @@ void StarterBot::onFrame()
 
 	// Send our idle workers to mine minerals so they don't just stand there
 	sendIdleWorkersToMinerals();
+
+	rushEnemyBase();
 
 	// Draw some relevent information to the screen to help us debug the bot
 	drawDebugInformation();
@@ -77,7 +77,7 @@ void StarterBot::sendIdleWorkersToMinerals()
 		{
 			std::cout << "Idle" << "\n";
 			//unit->gather(unit->getClosestUnit(BWAPI::Filter::IsMineralField));
-			unit->gather(Tools::GetClosestUnitTo(BWAPI::Position(mainBase), BWAPI::Broodwar->getMinerals()));
+			unit->gather(Tools::GetClosestUnitTo(BWAPI::Position(mainBase), BWAPI::Broodwar->getMinerals())); // TODO gather could fail if to many workers are on it
 
 
 			//// Get the closest mineral to this worker unit
@@ -140,7 +140,7 @@ void StarterBot::buildGateway()
 	const BWAPI::UnitType unitType = BWAPI::UnitTypes::Protoss_Gateway;
 	if (BWAPI::Broodwar->self()->minerals() < unitType.mineralPrice()) { return; }
 	
-	if (Tools::CountUnitsOfType(unitType) < 3)
+	if (Tools::CountUnitsOfType(unitType) < 4)
 	{
 		const bool startedBuilding = Tools::BuildBuilding(unitType);
 		if (startedBuilding)
@@ -203,10 +203,21 @@ void StarterBot::sendScout()
 	//m_scout->move(BWAPI::Position(BWAPI::Broodwar->self()->getStartLocation()));
 }
 
+void StarterBot::rushEnemyBase()
+{
+	if (enemyStartLocation != BWAPI::TilePositions::None && m_zealot.size() > 10)
+	{
+		for (auto* zealot : m_zealot)
+		{
+			zealot->attack(BWAPI::Position(enemyStartLocation));
+		}
+		m_zealot.empty();
+	}
+}
+
 // Called whenever a unit is destroyed, with a pointer to the unit
 void StarterBot::onUnitDestroy(BWAPI::Unit unit)
 {
-
 }
 
 // Called whenever a unit is morphed, with a pointer to the unit
@@ -236,7 +247,13 @@ void StarterBot::onUnitCreate(BWAPI::Unit unit)
 // Called whenever a unit finished construction, with a pointer to the unit
 void StarterBot::onUnitComplete(BWAPI::Unit unit)
 {
-
+	switch (unit->getType())
+	{
+	case BWAPI::UnitTypes::Protoss_Zealot:
+		m_zealot.push_back(unit);
+		break;
+		default: break;
+	}
 }
 
 // Called whenever a unit appears, with a pointer to the destroyed unit

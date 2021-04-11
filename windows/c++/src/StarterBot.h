@@ -6,7 +6,7 @@
 
 class StarterBot
 {
-	BWAPI::Unit m_scout = nullptr;
+
     MapTools m_mapTools;
     /**
 	 * \brief true if map is scouted
@@ -19,9 +19,16 @@ class StarterBot
 	//BWAPI::Unitset workers = BWAPI::Unitset::none;
 	//BWAPI::Unitset attackUnits = BWAPI::Unitset::none;
 	BWAPI::TilePosition mainBase = BWAPI::TilePositions::None;
+	int m_zealot_count = 0;
+
+	/**
+	 * \brief rushing zealots
+	 */
+	std::vector<BWAPI::Unit> m_zealot;
 
 public:
-
+	static inline BWAPI::Unit m_scout = nullptr;
+	
     StarterBot();
 
     // helper functions to get you started with bot programming and learn the API
@@ -32,6 +39,7 @@ public:
 	void buildAttackUnits();
     void drawDebugInformation();
     void sendScout();
+	void rushEnemyBase();
 
     // functions that are triggered by various BWAPI events from main.cpp
 	void onStart();

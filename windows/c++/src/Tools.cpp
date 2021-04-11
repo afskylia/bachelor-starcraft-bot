@@ -45,7 +45,7 @@ BWAPI::Unit Tools::GetWorker(BWAPI::UnitType unitType)
 	for (auto& unit : BWAPI::Broodwar->self()->getUnits())
 	{
 		// if the unit is of the correct type, and it actually has been constructed, return it
-		if (unit->getType() == unitType)
+		if (unit->getType() == unitType && unit != StarterBot::m_scout)
 		{
 			return unit;
 		}
