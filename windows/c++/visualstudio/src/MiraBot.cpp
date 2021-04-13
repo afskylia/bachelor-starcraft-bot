@@ -7,7 +7,6 @@
 
 MiraBot::MiraBot()
 {
-	
 }
 
 // Called when the bot starts!
@@ -17,15 +16,13 @@ void MiraBot::onStart()
 	BWAPI::Broodwar->setLocalSpeed(10);
 	BWAPI::Broodwar->setFrameSkip(0);
 
-	mainBase = BWAPI::Broodwar->self()->getStartLocation();
+	mainBase = BWAPI::Broodwar->getClosestUnit(BWAPI::Position(BWAPI::Broodwar->self()->getStartLocation()), BWAPI::Filter::IsResourceDepot);
 
 	// Enable the flag that tells BWAPI top let users enter input while bot plays
 	BWAPI::Broodwar->enableFlag(BWAPI::Flag::UserInput);
 
 	// Call MapTools OnStart
 	m_mapTools.onStart();
-
-
 }
 
 // Called whenever the game ends and tells you if you won or not
@@ -52,7 +49,6 @@ void MiraBot::onFrame()
 }
 
 
-
 // Draw some relevant information to the screen to help us debug the bot
 void MiraBot::drawDebugInformation()
 {
@@ -61,7 +57,6 @@ void MiraBot::drawDebugInformation()
 	Tools::DrawUnitBoundingBoxes();
 
 	if (foundEnemy) Tools::DrawEnemyBases(enemyStartLocation);
-
 }
 
 // Called whenever a unit is destroyed, with a pointer to the unit
@@ -73,7 +68,6 @@ void MiraBot::onUnitDestroy(BWAPI::Unit unit)
 // Zerg units morph when they turn into other units
 void MiraBot::onUnitMorph(BWAPI::Unit unit)
 {
-
 }
 
 // Called whenever a text is sent to the game by a user
@@ -90,7 +84,6 @@ void MiraBot::onSendText(std::string text)
 // so this will trigger when you issue the build command for most units
 void MiraBot::onUnitCreate(BWAPI::Unit unit)
 {
-
 }
 
 // Called whenever a unit finished construction, with a pointer to the unit
@@ -101,7 +94,7 @@ void MiraBot::onUnitComplete(BWAPI::Unit unit)
 	case BWAPI::UnitTypes::Protoss_Zealot:
 		m_zealot.push_back(unit);
 		break;
-		default: break;
+	default: break;
 	}
 }
 
@@ -132,9 +125,7 @@ void MiraBot::onUnitShow(BWAPI::Unit unit)
 		}
 
 
-
 		std::cout << "Enemy starting location: " << enemyStartLocation << "\n";
-
 	}
 }
 
@@ -142,12 +133,10 @@ void MiraBot::onUnitShow(BWAPI::Unit unit)
 // This is usually triggered when units enter the fog of war and are no longer visible
 void MiraBot::onUnitHide(BWAPI::Unit unit)
 {
-
 }
 
 // Called whenever a unit switches player control
 // This usually happens when a dark archon takes control of a unit
 void MiraBot::onUnitRenegade(BWAPI::Unit unit)
 {
-
 }

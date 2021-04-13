@@ -38,17 +38,40 @@ int Tools::CountUnitsOfType(BWAPI::UnitType type, const BWAPI::Unitset& units)
 
 BWAPI::Unit Tools::GetWorker(BWAPI::UnitType unitType)
 {
-	// TODO: get closest to where it is needed
+	return GetWorker(unitType, BWAPI::Positions::None);
+}
+
+BWAPI::Unit Tools::GetWorker(BWAPI::UnitType unitType, BWAPI::Position building_position)
+{
 	// TODO: Make sure only resource-gathering units are selected
 	//&& unit->getLastCommand().getType() == BWAPI::UnitCommandTypes::Gather
 
+	BWAPI::Unit closestUnit = nullptr;
+
 	for (auto& unit : BWAPI::Broodwar->self()->getUnits())
 	{
-		// if the unit is of the correct type, and it actually has been constructed, return it
-		if (unit->getType() == unitType && unit != MiraBot::m_scout)
+		if (!closestUnit)
 		{
-			return unit;
+			closestUnit = unit;
 		}
+		if (unit->isCompleted() && unit->getType() == unitType && unit != MiraBot::m_scout)
+		{
+			// if the unit is of the correct type, and it actually has been constructed, return it
+			if (building_position == BWAPI::Positions::None)
+			{
+				return unit;
+			}
+			// if the distance should be accounted for
+			if (closestUnit->getDistance(building_position) > unit->getDistance(building_position))
+			{
+				closestUnit = unit;
+			}
+		}
+	}
+
+	if (closestUnit)
+	{
+		return closestUnit;
 	}
 
 	// If we didn't find a valid unit to return, make sure we return nullptr
@@ -102,10 +125,7 @@ bool Tools::BuildBuilding(BWAPI::UnitType type)
 
 	if (BWAPI::Broodwar->self()->minerals() < type.mineralPrice()) { return false; }
 
-	// Get a unit that we own that is of the given type so it can build
-	// If we can't find a valid builder unit, then we have to cancel the building
-	BWAPI::Unit builder = GetWorker(builderType);
-	if (!builder) { return false; }
+
 	// Get a location that we want to build the building next to
 	BWAPI::TilePosition desiredPos = BWAPI::Broodwar->self()->getStartLocation();
 
@@ -113,6 +133,12 @@ bool Tools::BuildBuilding(BWAPI::UnitType type)
 	int maxBuildRange = 64;
 	bool buildingOnCreep = type.requiresCreep();
 	BWAPI::TilePosition buildPos = BWAPI::Broodwar->getBuildLocation(type, desiredPos, maxBuildRange, buildingOnCreep);
+	
+	// Get a unit that we own that is of the given type so it can build
+	// If we can't find a valid builder unit, then we have to cancel the building
+	BWAPI::Unit builder = GetWorker(builderType, BWAPI::Position(buildPos));
+	if (!builder) { return false; }
+	
 	return builder->build(type, buildPos);
 }
 

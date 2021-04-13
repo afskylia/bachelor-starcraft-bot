@@ -9,6 +9,8 @@ namespace Tools
 
 	int CountUnitsOfType(BWAPI::UnitType type, const BWAPI::Unitset& units = BWAPI::Broodwar->self()->getUnits());
 
+	BWAPI::Unit GetWorker(BWAPI::UnitType unitType, BWAPI::Position building_position);
+
 	BWAPI::Unit GetUnitOfType(BWAPI::UnitType type);
 	std::vector<BWAPI::Unit> GetUnitsOfType(BWAPI::UnitType type);
 	BWAPI::Unit GetDepot();

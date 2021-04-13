@@ -26,21 +26,18 @@ class MiraBot
 
 public:
 	static inline BWAPI::Unit m_scout = nullptr;
-	static inline BWAPI::TilePosition mainBase = BWAPI::TilePositions::None;
+	static inline BWAPI::Unit mainBase = nullptr;
 	static inline BWAPI::Race enemyRace = BWAPI::Races::None;
 	static inline BWAPI::TilePosition enemyStartLocation = BWAPI::TilePositions::None;
 	/**
- * \brief rushing zealots
- */
+	* \brief rushing zealots
+	*/
 	static inline std::vector<BWAPI::Unit> m_zealot;
 
 	MiraBot();
 
 	// helper functions to get you started with bot programming and learn the API
-	void buildAttackUnits();
 	void drawDebugInformation();
-	void sendScout();
-	void rushEnemyBase();
 
 	// functions that are triggered by various BWAPI events from main.cpp
 	void onStart();
