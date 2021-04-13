@@ -43,7 +43,6 @@ BWAPI::Unit Tools::GetWorker(BWAPI::UnitType unitType)
 
 BWAPI::Unit Tools::GetWorker(BWAPI::UnitType unitType, BWAPI::Position building_position)
 {
-	// TODO: get closest to where it is needed
 	// TODO: Make sure only resource-gathering units are selected
 	//&& unit->getLastCommand().getType() == BWAPI::UnitCommandTypes::Gather
 
@@ -55,14 +54,18 @@ BWAPI::Unit Tools::GetWorker(BWAPI::UnitType unitType, BWAPI::Position building_
 		{
 			closestUnit = unit;
 		}
-		if (unit->isCompleted() && building_position == BWAPI::Positions::None && unit->getType() == unitType && unit != MiraBot::m_scout)
+		if (unit->isCompleted() && unit->getType() == unitType && unit != MiraBot::m_scout)
 		{
-			return unit;
-		}
-		// if the unit is of the correct type, and it actually has been constructed, return it
-		if (unit->isCompleted() && unit->getType() == unitType && unit != MiraBot::m_scout && closestUnit->getDistance(building_position) > unit->getDistance(building_position))
-		{
-			closestUnit = unit;
+			// if the unit is of the correct type, and it actually has been constructed, return it
+			if (building_position == BWAPI::Positions::None)
+			{
+				return unit;
+			}
+			// if the distance should be accounted for
+			if (closestUnit->getDistance(building_position) > unit->getDistance(building_position))
+			{
+				closestUnit = unit;
+			}
 		}
 	}
 
