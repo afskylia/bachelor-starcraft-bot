@@ -1,4 +1,4 @@
-﻿#include "WorkerManager.h"
+#include "WorkerManager.h"
 
 #include <BWAPI/Client/Client.h>
 
@@ -32,16 +32,9 @@ void WorkerManager::sendIdleWorkersToMinerals()
 		// Check the unit type, if it is an idle worker, then we want to send it somewhere
 		if (unit->getType().isWorker() && unit->isIdle())
 		{
-			std::cout << "Idle" << "\n";
 			//unit->gather(unit->getClosestUnit(BWAPI::Filter::IsMineralField));
-			unit->gather(Tools::GetClosestUnitTo(BWAPI::Position(MiraBot::mainBase), BWAPI::Broodwar->getMinerals())); // TODO gather could fail if to many workers are on it
-
-
-			//// Get the closest mineral to this worker unit
-			//const BWAPI::Unit closestMineral = Tools::GetClosestUnitTo(unit, BWAPI::Broodwar->getMinerals());
-
-			//// If a valid mineral was found, right click it with the unit in order to start harvesting
-			//if (closestMineral) { unit->gather(closestMineral); }
+			BWAPI::Unitset minerals_near_base = MiraBot::mainBase->getUnitsInRadius(1024, BWAPI::Filter::IsMineralField);
+			unit->gather(Tools::GetClosestUnitTo(MiraBot::mainBase->getPosition(), minerals_near_base)); // TODO gather could fail if to many workers are on it
 		}
 	}
 }

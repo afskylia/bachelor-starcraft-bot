@@ -16,7 +16,7 @@ void MiraBot::onStart()
 	BWAPI::Broodwar->setLocalSpeed(10);
 	BWAPI::Broodwar->setFrameSkip(0);
 
-	mainBase = BWAPI::Broodwar->self()->getStartLocation();
+	mainBase = BWAPI::Broodwar->getClosestUnit(BWAPI::Position(BWAPI::Broodwar->self()->getStartLocation()), BWAPI::Filter::IsResourceDepot);
 
 	// Enable the flag that tells BWAPI top let users enter input while bot plays
 	BWAPI::Broodwar->enableFlag(BWAPI::Flag::UserInput);

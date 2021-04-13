@@ -26,7 +26,7 @@ class MiraBot
 
 public:
 	static inline BWAPI::Unit m_scout = nullptr;
-	static inline BWAPI::TilePosition mainBase = BWAPI::TilePositions::None;
+	static inline BWAPI::Unit mainBase = nullptr;
 	static inline BWAPI::Race enemyRace = BWAPI::Races::None;
 	static inline BWAPI::TilePosition enemyStartLocation = BWAPI::TilePositions::None;
 	/**
