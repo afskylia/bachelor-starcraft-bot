@@ -1,4 +1,4 @@
 cd bin
-start cmd /c "StarterBot.exe"
+start cmd /c "MiraBot.exe"
 cd ../starcraft
 start cmd /c RunStarcraftWithBWAPI.bat

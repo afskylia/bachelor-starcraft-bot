@@ -11,19 +11,25 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\Grid.hpp" />
-    <ClInclude Include="..\src\MapTools.h" />
-    <ClInclude Include="..\src\StarterBot.h" />
-    <ClInclude Include="..\src\Tools.h" />
+    <ClInclude Include="CombatManager.h" />
+    <ClInclude Include="src\Grid.hpp" />
+    <ClInclude Include="src\MapTools.h" />
+    <ClInclude Include="src\MiraBot.h" />
+    <ClInclude Include="src\ProductionManager.h" />
+    <ClInclude Include="src\Tools.h" />
+    <ClInclude Include="src\WorkerManager.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\main.cpp" />
-    <ClCompile Include="..\src\MapTools.cpp" />
-    <ClCompile Include="..\src\StarterBot.cpp" />
-    <ClCompile Include="..\src\Tools.cpp" />
+    <ClCompile Include="CombatManager.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\MapTools.cpp" />
+    <ClCompile Include="src\MiraBot.cpp" />
+    <ClCompile Include="src\ProductionManager.cpp" />
+    <ClCompile Include="src\Tools.cpp" />
+    <ClCompile Include="src\WorkerManager.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectName>StarterBot</ProjectName>
+    <ProjectName>MiraBot</ProjectName>
     <ProjectGuid>{B2D2AD6C-D98B-42D0-8E4B-3C79D9DB27B7}</ProjectGuid>
     <RootNamespace>ExampleAIModule</RootNamespace>
     <Keyword>Win32Proj</Keyword>

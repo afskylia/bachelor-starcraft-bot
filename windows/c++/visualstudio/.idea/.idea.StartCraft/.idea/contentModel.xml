@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ContentModelStore">
+    <e p="C:\Repos\bachelor-starcraft-bot\windows\bin" t="ExcludeRecursive" />
+    <e p="C:\Repos\bachelor-starcraft-bot\windows\c++\src" t="Include">
+      <e p="Grid.hpp" t="Include" />
+      <e p="main.cpp" t="Include" />
+      <e p="MapTools.cpp" t="Include" />
+      <e p="MapTools.h" t="Include" />
+      <e p="MiraBot.cpp" t="Include" />
+      <e p="MiraBot.h" t="Include" />
+      <e p="Tools.cpp" t="Include" />
+      <e p="Tools.h" t="Include" />
+    </e>
+    <e p="C:\Repos\bachelor-starcraft-bot\windows\c++\visualstudio" t="IncludeRecursive">
+      <e p="Debug\MiraBot" t="ExcludeRecursive" />
+      <e p="packages" t="ExcludeRecursive" />
+      <e p="ProductionManager.cpp" t="Include" />
+      <e p="ProductionManager.h" t="Include" />
+      <e p="StartCraft.sln" t="IncludeFlat" />
+      <e p="StarterBot.vcxproj" t="IncludeRecursive" />
+      <e p="WorkerManager.cpp" t="Include" />
+      <e p="WorkerManager.h" t="Include" />
+    </e>
+    <e p="C:\Users\MikkelRosenfeldtAnde\AppData\Local\JetBrains\Rider2020.3\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\MikkelRosenfeldtAnde\AppData\Local\JetBrains\Rider2020.3\resharper-host\Local\Transient\Rider\v203\SolutionCaches\_StartCraft.-2099719181.00" t="ExcludeRecursive" />
+  </component>
+</project>
