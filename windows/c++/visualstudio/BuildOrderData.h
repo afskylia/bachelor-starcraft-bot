@@ -2,21 +2,20 @@
 
 #include "BWAPI.h"
 /**
- * struct for storing one build step in a build order
- */
-struct build_step
-{
-	int supply_level{};
-	BWAPI::UnitType unit;
-};
-
-/**
- * struct for storing a build order
+ * Class for storing a build order
  * if nothing else is noted in between two Supply marks - the player should build Probes and send them to mine
  */
-struct build_order
+class BuildOrder
 {
-	std::vector<build_step> steps;
+public:
+	BWAPI::UnitType steps[200];
+	BuildOrder()
+	{
+		for (auto step : steps)
+		{
+			step = BWAPI::UnitTypes::Protoss_Probe;
+		}
+	}
 };
 
 class BuildOrderData
@@ -24,5 +23,5 @@ class BuildOrderData
 public:
 
 	BuildOrderData();
-	build_order SimpleBuildOrder();
+	BuildOrder SimpleBuildOrder();
 };
