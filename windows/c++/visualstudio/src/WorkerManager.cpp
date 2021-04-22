@@ -34,7 +34,18 @@ void WorkerManager::sendIdleWorkersToMinerals()
 		{
 			//unit->gather(unit->getClosestUnit(BWAPI::Filter::IsMineralField));
 			BWAPI::Unitset minerals_near_base = MiraBot::mainBase->getUnitsInRadius(1024, BWAPI::Filter::IsMineralField);
-			unit->gather(Tools::GetClosestUnitTo(MiraBot::mainBase->getPosition(), minerals_near_base)); // TODO gather could fail if to many workers are on it
+
+			auto sorted_minerals = Tools::SortUnitsByClosest(unit, minerals_near_base);
+			for (auto m : sorted_minerals)
+			{
+				if (!m->isBeingGathered())
+				{
+					unit->gather(m);
+					return;
+				}
+			}
+			//unit->gather(Tools::GetClosestUnitTo(MiraBot::mainBase->getPosition(), minerals_near_base)); // TODO gather could fail if to many workers are on it
+			unit->gather(sorted_minerals[0]);
 		}
 	}
 }

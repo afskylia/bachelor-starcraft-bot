@@ -1,6 +1,30 @@
 #include "Tools.h"
 #include "MiraBot.h"
 
+// Return vector of units in ascending order from distance to given unit
+std::vector<BWAPI::Unit> Tools::SortUnitsByClosest(BWAPI::Unit unit, const BWAPI::Unitset& unitSet)
+{
+	std::vector<BWAPI::Unit> units(unitSet.size());
+	std::copy(unitSet.begin(), unitSet.end(), units.begin());
+
+	// Bubble sort by closest position to unit
+	for (auto i = 0; i < units.size() - 1; i++)
+	{
+		for (auto j = 0; j < units.size() - i - 1; j++)
+		{
+			if (units.at(j)->getDistance(unit) > units.at(i)->getDistance(unit))
+			{
+				// Swap elements
+				auto* temp = units.at(j);
+				units.at(j) = units.at(i);
+				units.at(i) = temp;
+			}
+		}
+	}
+
+	return units;
+}
+
 BWAPI::Unit Tools::GetClosestUnitTo(BWAPI::Position p, const BWAPI::Unitset& units)
 {
 	BWAPI::Unit closestUnit = nullptr;
@@ -133,12 +157,12 @@ bool Tools::BuildBuilding(BWAPI::UnitType type)
 	int maxBuildRange = 64;
 	bool buildingOnCreep = type.requiresCreep();
 	BWAPI::TilePosition buildPos = BWAPI::Broodwar->getBuildLocation(type, desiredPos, maxBuildRange, buildingOnCreep);
-	
+
 	// Get a unit that we own that is of the given type so it can build
 	// If we can't find a valid builder unit, then we have to cancel the building
 	BWAPI::Unit builder = GetWorker(builderType, BWAPI::Position(buildPos));
 	if (!builder) { return false; }
-	
+
 	return builder->build(type, buildPos);
 }
 
