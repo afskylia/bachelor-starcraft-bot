@@ -13,17 +13,50 @@ WorkerManager::WorkerManager()
 void WorkerManager::onFrame()
 {
 	// Send scout ASAP
-	sendScout();
-	
+
+	updateWorkerStatus();
+	//sendScout();
+
 	// Train more workers so we can gather more income
 	trainAdditionalWorkers();
+
 
 	// Send our idle workers to mine minerals so they don't just stand there
 	sendIdleWorkersToMinerals();
 }
 
+void WorkerManager::updateWorkerStatus()
+{
+	for (auto& worker : m_workerData.getWorkers())
+	{
+		if (!worker->isCompleted())
+		{
+			continue;
+		}
+
+		// Set idle workers' job to Idle, unless job is Build, Move or Scout
+		if (worker->isIdle() &&
+			(m_workerData.getWorkerJob(worker) != WorkerData::Build) &&
+			(m_workerData.getWorkerJob(worker) != WorkerData::Move) &&
+			(m_workerData.getWorkerJob(worker) != WorkerData::Scout))
+		{
+			m_workerData.setWorkerJob(worker, WorkerData::Idle, nullptr);
+		}
+	}
+}
+
+
 void WorkerManager::sendIdleWorkersToMinerals()
 {
+	for (auto& worker : m_workerData.getWorkers())
+	{
+		if (m_workerData.getWorkerJob(worker) == WorkerData::Idle)
+		{
+			setMineralWorker(worker);
+		}
+	}
+
+
 	// Let's send all of our starting workers to the closest mineral to them
 	// First we need to loop over all of the units that we (BWAPI::Broodwar->self()) own
 	const BWAPI::Unitset& myUnits = BWAPI::Broodwar->self()->getUnits();
@@ -49,6 +82,36 @@ void WorkerManager::sendIdleWorkersToMinerals()
 		}
 	}
 }
+
+void WorkerManager::setMineralWorker(BWAPI::Unit unit)
+{
+	BWAPI::Unit closestDepot = getClosestDepot(unit);
+	if (closestDepot)
+	{
+		m_workerData.setWorkerJob(unit, WorkerData::Minerals, closestDepot);
+	}
+}
+
+BWAPI::Unit WorkerManager::getClosestDepot(BWAPI::Unit worker)
+{
+	BWAPI::Unit closestDepot = nullptr;
+	double closestDistance = 0;
+	for (auto& unit : BWAPI::Broodwar->self()->getUnits())
+	{
+		// TODO: && !m_workerData.depotIsFull(unit)
+		if (unit->getType().isResourceDepot() && unit->isCompleted())
+		{
+			const double distance = unit->getDistance(worker);
+			if (!closestDepot || distance < closestDistance)
+			{
+				closestDepot = unit;
+				closestDistance = distance;
+			}
+		}
+	}
+	return closestDepot;
+}
+
 
 void WorkerManager::trainAdditionalWorkers()
 {
@@ -95,3 +158,13 @@ void WorkerManager::sendScout()
 	//m_scout->move(BWAPI::Position(BWAPI::Broodwar->self()->getStartLocation()));
 }
 
+void WorkerManager::onUnitCreate(BWAPI::Unit unit)
+{
+	// TODO: Decide which job is needed right now
+	m_workerData.addWorker(unit, WorkerData::Idle, MiraBot::mainBase);
+}
+
+void WorkerManager::onUnitDestroy(BWAPI::Unit unit)
+{
+	m_workerData.workerDestroyed(unit);
+}

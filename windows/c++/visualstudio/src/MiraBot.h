@@ -7,7 +7,7 @@
 
 #include "ProductionManager.h"
 #include "WorkerManager.h"
-#include "../CombatManager.h"
+#include "CombatManager.h"
 
 class MiraBot
 {
