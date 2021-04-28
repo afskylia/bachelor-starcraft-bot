@@ -4,6 +4,7 @@
 
 namespace Tools
 {
+	std::vector<BWAPI::Unit> SortUnitsByClosest(BWAPI::Unit unit, const BWAPI::Unitset& units);
 	BWAPI::Unit GetClosestUnitTo(BWAPI::Position p, const BWAPI::Unitset& units);
 	BWAPI::Unit GetClosestUnitTo(BWAPI::Unit unit, const BWAPI::Unitset& units);
 

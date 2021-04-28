@@ -62,6 +62,7 @@ void MiraBot::drawDebugInformation()
 // Called whenever a unit is destroyed, with a pointer to the unit
 void MiraBot::onUnitDestroy(BWAPI::Unit unit)
 {
+	if (unit->getType().isWorker()) m_worker_manager.onUnitDestroy(unit);
 }
 
 // Called whenever a unit is morphed, with a pointer to the unit
@@ -79,11 +80,14 @@ void MiraBot::onSendText(std::string text)
 	}
 }
 
-// Called whenever a unit is created, with a pointer to the destroyed unit
+// Called whenever a unit is created, with a pointer to the unit
 // Units are created in buildings like barracks before they are visible, 
 // so this will trigger when you issue the build command for most units
 void MiraBot::onUnitCreate(BWAPI::Unit unit)
 {
+	// TODO: Worker manager and combat manager have to decide which job to assign new units
+	if (unit->getType().isWorker()) m_worker_manager.onUnitCreate(unit);
+	// TODO: else combatmanager.onunitcreate()
 }
 
 // Called whenever a unit finished construction, with a pointer to the unit
@@ -123,8 +127,6 @@ void MiraBot::onUnitShow(BWAPI::Unit unit)
 				enemyStartLocation = position;
 			}
 		}
-
-
 		std::cout << "Enemy starting location: " << enemyStartLocation << "\n";
 	}
 }
