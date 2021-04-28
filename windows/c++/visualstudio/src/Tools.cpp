@@ -8,9 +8,9 @@ std::vector<BWAPI::Unit> Tools::SortUnitsByClosest(BWAPI::Unit unit, const BWAPI
 	std::copy(unitSet.begin(), unitSet.end(), units.begin());
 
 	// Bubble sort by closest position to unit
-	for (auto i = 0; i < units.size() - 1; i++)
+	for (unsigned int i = 0; i < units.size() - 1; i++)
 	{
-		for (auto j = 0; j < units.size() - i - 1; j++)
+		for (unsigned int j = 0; j < units.size() - i - 1; j++)
 		{
 			if (units.at(j)->getDistance(unit) > units.at(i)->getDistance(unit))
 			{

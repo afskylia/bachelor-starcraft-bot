@@ -1,6 +1,6 @@
 #include "CombatManager.h"
 
-#include "src/MiraBot.h"
+#include "MiraBot.h"
 
 CombatManager::CombatManager() {
 }
