@@ -19,24 +19,27 @@ public:
 	void addWorker(BWAPI::Unit unit);
 	void addWorker(BWAPI::Unit unit, WorkerJob job, BWAPI::Unit jobUnit);
 	void addWorker(BWAPI::Unit unit, enum WorkerJob job, struct MoveData moveData);
-
-	void workerDestroyed(BWAPI::Unit unit);
-	
-	//void addDepot(BWAPI::Unit unit);
-	//void removeDepot(BWAPI::Unit unit);
-	
 	void setWorkerJob(BWAPI::Unit unit, enum WorkerJob job, BWAPI::Unit jobUnit);
 	void setWorkerJob(BWAPI::Unit unit, enum WorkerJob job, struct MoveData moveData);
-	
-	const BWAPI::Unitset& getWorkers() const;
-	const BWAPI::Unitset& getWorkers(WorkerJob job) const;
-	enum WorkerJob getWorkerJob(BWAPI::Unit unit);
+	void workerDestroyed(BWAPI::Unit unit);
+	void addDepot(BWAPI::Unit unit);
+	void removeDepot(BWAPI::Unit unit);
+
+	const BWAPI::Unitset&	getWorkers() const;
+	const BWAPI::Unitset&	getWorkers(WorkerJob job) const;
+
+	bool depotIsFull(BWAPI::Unit depot);
+	int  getMineralsNearDepot(BWAPI::Unit depot);
+
+	WorkerJob		getWorkerJob(BWAPI::Unit unit);
+	MoveData		getWorkerMoveData(BWAPI::Unit unit);
+	BWAPI::UnitType getWorkerBuildingType(BWAPI::Unit unit);
+	BWAPI::Unit		getWorkerDepot(BWAPI::Unit unit);
+	BWAPI::Unit		getMineralToMine(BWAPI::Unit unit);
 
 private:
 	BWAPI::Unitset m_workers;
 	BWAPI::Unitset m_depots;
-
-	BWAPI::Unit getMineralToMine(BWAPI::Unit unit);
 
 	std::map<BWAPI::Unit, enum WorkerJob>   m_workerJobMap;
 	std::map<BWAPI::Unit, BWAPI::Unit>      m_workerDepotMap;

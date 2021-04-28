@@ -8,10 +8,6 @@ class WorkerManager
 {
 public:
 	WorkerManager();
-	// handleidleworkers
-	// handlerepairworkers
-	// handle combatworkers
-	// etc
 
 	void updateWorkerStatus();
 	void sendIdleWorkersToMinerals();

@@ -3,7 +3,6 @@
 #include <BWAPI/Client/Client.h>
 
 
-#include "MiraBot.h"
 #include "Tools.h"
 
 WorkerManager::WorkerManager()
@@ -12,10 +11,8 @@ WorkerManager::WorkerManager()
 
 void WorkerManager::onFrame()
 {
-	// Send scout ASAP
 
 	updateWorkerStatus();
-	//sendScout();
 
 	// Train more workers so we can gather more income
 	trainAdditionalWorkers();
@@ -33,15 +30,6 @@ void WorkerManager::updateWorkerStatus()
 		{
 			continue;
 		}
-
-		// Set idle workers' job to Idle, unless job is Build, Move or Scout
-		/*if (worker->isIdle() &&
-			(m_workerData.getWorkerJob(worker) != WorkerData::Build) &&
-			(m_workerData.getWorkerJob(worker) != WorkerData::Move) &&
-			(m_workerData.getWorkerJob(worker) != WorkerData::Scout))
-		{
-			m_workerData.setWorkerJob(worker, WorkerData::Idle, nullptr);
-		}*/
 
 		if (worker->isIdle())
 		{
@@ -94,32 +82,6 @@ void WorkerManager::sendIdleWorkersToMinerals()
 			else setMineralWorker(worker);
 		}
 	}
-
-
-	// Let's send all of our starting workers to the closest mineral to them
-	// First we need to loop over all of the units that we (BWAPI::Broodwar->self()) own
-	const BWAPI::Unitset& myUnits = BWAPI::Broodwar->self()->getUnits();
-	for (auto& unit : myUnits)
-	{
-		// Check the unit type, if it is an idle worker, then we want to send it somewhere
-		if (unit->getType().isWorker() && unit->isIdle())
-		{
-			//unit->gather(unit->getClosestUnit(BWAPI::Filter::IsMineralField));
-			BWAPI::Unitset minerals_near_base = MiraBot::mainBase->getUnitsInRadius(1024, BWAPI::Filter::IsMineralField);
-
-			auto sorted_minerals = Tools::SortUnitsByClosest(unit, minerals_near_base);
-			for (auto m : sorted_minerals)
-			{
-				if (!m->isBeingGathered())
-				{
-					unit->gather(m);
-					return;
-				}
-			}
-			//unit->gather(Tools::GetClosestUnitTo(MiraBot::mainBase->getPosition(), minerals_near_base)); // TODO gather could fail if to many workers are on it
-			unit->gather(sorted_minerals[0]);
-		}
-	}
 }
 
 void WorkerManager::setMineralWorker(BWAPI::Unit unit)
@@ -147,39 +109,10 @@ void WorkerManager::trainAdditionalWorkers()
 	}
 }
 
-/**
- * \brief Sends one Scout to figure out enemy location and race
- */
-void WorkerManager::sendScout()
-{
-	// Get a scout
-	if (!MiraBot::m_scout) {
-		MiraBot::m_scout = Tools::GetUnitOfType(BWAPI::Broodwar->self()->getRace().getWorker());
-	}
-
-	auto& startLocations = BWAPI::Broodwar->getStartLocations();
-
-	// Loop through all starting positions
-	for (BWAPI::TilePosition position : startLocations)
-	{
-		if (!BWAPI::Broodwar->isExplored(position)) {
-			const BWAPI::Position pos(position);
-
-			auto command = MiraBot::m_scout->getLastCommand();
-			if (command.getTargetPosition() == pos) { return; }
-
-			MiraBot::m_scout->move(pos);
-			return;
-		}
-	}
-	// Return to home
-	//m_scout->move(BWAPI::Position(BWAPI::Broodwar->self()->getStartLocation()));
-}
-
 void WorkerManager::onUnitCreate(BWAPI::Unit unit)
 {
 	// TODO: Decide which job is needed right now
-	m_workerData.addWorker(unit, WorkerData::Idle, MiraBot::mainBase);
+	m_workerData.addWorker(unit, WorkerData::Idle, nullptr);
 }
 
 void WorkerManager::onUnitDestroy(BWAPI::Unit unit)

@@ -1,5 +1,6 @@
 #include "Tools.h"
 #include "MiraBot.h"
+#include "WorkerManager.h"
 
 // Return vector of units in ascending order from distance to given unit
 std::vector<BWAPI::Unit> Tools::SortUnitsByClosest(BWAPI::Unit unit, const BWAPI::Unitset& unitSet)
@@ -149,7 +150,6 @@ bool Tools::BuildBuilding(BWAPI::UnitType type)
 
 	if (BWAPI::Broodwar->self()->minerals() < type.mineralPrice()) { return false; }
 
-
 	// Get a location that we want to build the building next to
 	BWAPI::TilePosition desiredPos = BWAPI::Broodwar->self()->getStartLocation();
 
@@ -162,6 +162,8 @@ bool Tools::BuildBuilding(BWAPI::UnitType type)
 	// If we can't find a valid builder unit, then we have to cancel the building
 	BWAPI::Unit builder = GetWorker(builderType, BWAPI::Position(buildPos));
 	if (!builder) { return false; }
+	
+	// TODO: set builder job and position etc
 
 	return builder->build(type, buildPos);
 }

@@ -36,8 +36,8 @@ void MiraBot::onFrame()
 {
 	// Managers on frame functions
 	m_worker_manager.onFrame();
-	//m_production_manager.onFrame();
-	//m_combat_manager.onFrame();
+	m_production_manager.onFrame();
+	m_combat_manager.onFrame();
 	// Update our MapTools information
 	m_mapTools.onFrame();
 
@@ -127,8 +127,6 @@ void MiraBot::onUnitShow(BWAPI::Unit unit)
 				enemyStartLocation = position;
 			}
 		}
-
-
 		std::cout << "Enemy starting location: " << enemyStartLocation << "\n";
 	}
 }
