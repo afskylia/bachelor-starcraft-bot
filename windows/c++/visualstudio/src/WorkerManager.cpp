@@ -35,12 +35,46 @@ void WorkerManager::updateWorkerStatus()
 		}
 
 		// Set idle workers' job to Idle, unless job is Build, Move or Scout
-		if (worker->isIdle() &&
+		/*if (worker->isIdle() &&
 			(m_workerData.getWorkerJob(worker) != WorkerData::Build) &&
 			(m_workerData.getWorkerJob(worker) != WorkerData::Move) &&
 			(m_workerData.getWorkerJob(worker) != WorkerData::Scout))
 		{
 			m_workerData.setWorkerJob(worker, WorkerData::Idle, nullptr);
+		}*/
+
+		if (worker->isIdle())
+		{
+			switch (m_workerData.getWorkerJob(worker))
+			{
+			case WorkerData::Build:
+			{
+				// TODO: build if we are in the building position
+				break;
+			}
+			case WorkerData::Move:
+			{
+				// TODO
+				break;
+			}
+			case WorkerData::Scout:
+			{
+				auto scoutPosition = getScoutPosition(worker);
+				if (!scoutPosition) {
+					// All starting positions have been explored
+					m_workerData.setWorkerJob(worker, WorkerData::Idle, nullptr);
+				}
+				else {
+					// Set scout's new target position
+					m_workerData.setWorkerJob(worker, WorkerData::Scout, WorkerData::MoveData{ scoutPosition });
+				}
+				break;
+			}
+			default:
+			{
+				m_workerData.setWorkerJob(worker, WorkerData::Idle, nullptr);
+			}
+			}
 		}
 	}
 }
@@ -52,7 +86,12 @@ void WorkerManager::sendIdleWorkersToMinerals()
 	{
 		if (m_workerData.getWorkerJob(worker) == WorkerData::Idle)
 		{
-			setMineralWorker(worker);
+			if (!getWorkerScout() && getScoutPosition(worker))
+			{
+				WorkerData::MoveData move{ getScoutPosition(worker) };
+				m_workerData.setWorkerJob(worker, WorkerData::Scout, move);
+			}
+			else setMineralWorker(worker);
 		}
 	}
 
@@ -91,27 +130,6 @@ void WorkerManager::setMineralWorker(BWAPI::Unit unit)
 		m_workerData.setWorkerJob(unit, WorkerData::Minerals, closestDepot);
 	}
 }
-
-BWAPI::Unit WorkerManager::getClosestDepot(BWAPI::Unit worker)
-{
-	BWAPI::Unit closestDepot = nullptr;
-	double closestDistance = 0;
-	for (auto& unit : BWAPI::Broodwar->self()->getUnits())
-	{
-		// TODO: && !m_workerData.depotIsFull(unit)
-		if (unit->getType().isResourceDepot() && unit->isCompleted())
-		{
-			const double distance = unit->getDistance(worker);
-			if (!closestDepot || distance < closestDistance)
-			{
-				closestDepot = unit;
-				closestDistance = distance;
-			}
-		}
-	}
-	return closestDepot;
-}
-
 
 void WorkerManager::trainAdditionalWorkers()
 {
@@ -167,4 +185,65 @@ void WorkerManager::onUnitCreate(BWAPI::Unit unit)
 void WorkerManager::onUnitDestroy(BWAPI::Unit unit)
 {
 	m_workerData.workerDestroyed(unit);
+}
+
+BWAPI::Unit WorkerManager::getClosestDepot(BWAPI::Unit worker)
+{
+	BWAPI::Unit closestDepot = nullptr;
+	double closestDistance = 0;
+	for (auto& unit : BWAPI::Broodwar->self()->getUnits())
+	{
+		// TODO: && !m_workerData.depotIsFull(unit)
+		if (unit->getType().isResourceDepot() && unit->isCompleted())
+		{
+			const double distance = unit->getDistance(worker);
+			if (!closestDepot || distance < closestDistance)
+			{
+				closestDepot = unit;
+				closestDistance = distance;
+			}
+		}
+	}
+	return closestDepot;
+}
+
+
+// Returns next scouting location for scout, favoring closest locations
+BWAPI::Position WorkerManager::getScoutPosition(BWAPI::Unit scout)
+{
+	auto& startLocations = BWAPI::Broodwar->getStartLocations();
+
+	BWAPI::Position closestPosition = BWAPI::Positions::None;
+	double closestDistance = 0;
+
+	for (BWAPI::TilePosition position : startLocations)
+	{
+		if (!BWAPI::Broodwar->isExplored(position))
+		{
+			const BWAPI::Position pos(position);
+			const double distance = scout->getDistance(pos);
+
+			if (!closestPosition || distance < closestDistance)
+			{
+				closestPosition = pos;
+				closestDistance = distance;
+			}
+		}
+	}
+	return closestPosition;
+}
+
+BWAPI::Unit WorkerManager::getWorkerScout()
+{
+	// for each of our workers
+	for (auto& worker : m_workerData.getWorkers())
+	{
+		if (!worker) continue;
+		if (m_workerData.getWorkerJob(worker) == WorkerData::Scout)
+		{
+			return worker;
+		}
+	}
+
+	return nullptr;
 }

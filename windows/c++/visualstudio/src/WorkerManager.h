@@ -29,7 +29,8 @@ public:
 	//BWAPI::Unit getGasWorker(BWAPI::Unit refinery);
 	//BWAPI::Unit getClosestEnemyUnit(BWAPI::Unit worker);
 	//BWAPI::Unit getClosestMineralWorkerTo(BWAPI::Unit enemyUnit);
-	//BWAPI::Unit getWorkerScout();
+	BWAPI::Unit getWorkerScout();
+	BWAPI::Position getScoutPosition(BWAPI::Unit scout);
 
 private:
 	WorkerData m_workerData;

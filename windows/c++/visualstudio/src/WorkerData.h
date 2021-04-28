@@ -29,6 +29,7 @@ public:
 	void setWorkerJob(BWAPI::Unit unit, enum WorkerJob job, struct MoveData moveData);
 	
 	const BWAPI::Unitset& getWorkers() const;
+	const BWAPI::Unitset& getWorkers(WorkerJob job) const;
 	enum WorkerJob getWorkerJob(BWAPI::Unit unit);
 
 private:

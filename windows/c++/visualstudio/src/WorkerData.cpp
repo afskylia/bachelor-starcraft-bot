@@ -107,3 +107,16 @@ const BWAPI::Unitset& WorkerData::getWorkers() const
 {
 	return m_workers;
 }
+
+const BWAPI::Unitset& WorkerData::getWorkers(WorkerJob job) const
+{
+	BWAPI::Unitset workers = {};
+	for (auto& unit : m_workers)
+	{
+		if (m_workerJobMap.at(unit) == job)
+		{
+			workers.insert(unit);
+		}
+	}
+	return workers;
+}
