@@ -1,4 +1,5 @@
 #include "ProductionManager.h"
+#include "BuildOrderData.h"
 
 #include "Tools.h"
 
@@ -8,22 +9,55 @@
  */
 ProductionManager::ProductionManager()
 {
+	
 }
 
 void ProductionManager::onFrame()
 {
 	// Build more supply if we are going to run out soon
-	buildAdditionalSupply();
+	/*buildAdditionalSupply();
 	buildGateway();
-	buildAttackUnits();
+	buildAttackUnits();*/
+	// buildFromBuildOrder();
+}
+
+void ProductionManager::onStart()
+{
+	buildFromBuildOrder();
+}
+
+void ProductionManager::onUnitComplete(BWAPI::Unit unit)
+{
+	buildFromBuildOrder();
+}
+
+void ProductionManager::buildFromBuildOrder()
+{
+	BWAPI::UnitType unit = BWAPI::UnitTypes::None;
+	const int supply = BWAPI::Broodwar->self()->supplyUsed() / 2;
+	//for (auto itr = build.steps.begin(); itr != build.steps.end(); ++itr) {
+	//	std::cout << itr->first
+	//		<< '\t' << itr->second << '\n';
+	//}
+	std::cout << unit;
+	std::map<int, BWAPI::UnitType>::iterator it = build.steps.find(supply);
+	if (it == build.steps.end())
+		return;
+	unit = it->second;
+
+	std::cout << unit;
+	if (unit.isBuilding())
+	{
+		if (Tools::BuildBuilding(unit)) build.steps.erase(it);
+		
+	} else
+	{
+		if (trainUnit(unit)) build.steps.erase(it);
+	}
 }
 
 void ProductionManager::buildGateway()
 {
-	// Get the amount of supply supply we currently have unused
-	//const int unusedSupply = Tools::GetTotalSupply(true) - BWAPI::Broodwar->self()->supplyUsed();
-	//if (unusedSupply > 7) { return; }
-
 	const BWAPI::UnitType unitType = BWAPI::UnitTypes::Protoss_Gateway;
 	if (BWAPI::Broodwar->self()->minerals() < unitType.mineralPrice()) { return; }
 
@@ -70,4 +104,24 @@ void ProductionManager::buildAdditionalSupply()
 			BWAPI::Broodwar->printf("Started Building %s", supplyProviderType.getName().c_str());
 		}
 	}
+}
+
+bool ProductionManager::trainUnit(const BWAPI::UnitType& unit)
+{
+	// If we cannot afford unit
+	if (unit.mineralPrice() > BWAPI::Broodwar->self()->minerals()) { return false; }
+	switch (unit)
+	{
+	case BWAPI::UnitTypes::Protoss_Probe:
+		{
+		// get the unit pointer to my depot
+		const BWAPI::Unit myDepot = Tools::GetDepot();
+
+		// if we have a valid depot unit and it's currently not training something, train a worker
+		// there is no reason for a bot to ever use the unit queueing system, it just wastes resources
+		if (myDepot && !myDepot->isTraining()) { myDepot->train(unit); }
+		}
+	default: std::cout << "unit not supported \n";
+	}
+	return true;
 }

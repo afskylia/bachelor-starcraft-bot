@@ -11,8 +11,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BuildOrderData.h" />
-    <ClInclude Include="CombatManager.h" />
+    <ClInclude Include="src\BuildOrderData.h" />
+    <ClInclude Include="src\CombatManager.h" />
     <ClInclude Include="src\Grid.hpp" />
     <ClInclude Include="src\MapTools.h" />
     <ClInclude Include="src\MiraBot.h" />
@@ -21,8 +21,8 @@
     <ClInclude Include="src\WorkerManager.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="BuildOrderData.cpp" />
-    <ClCompile Include="CombatManager.cpp" />
+    <ClCompile Include="src\BuildOrderData.cpp" />
+    <ClCompile Include="src\CombatManager.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\MapTools.cpp" />
     <ClCompile Include="src\MiraBot.cpp" />

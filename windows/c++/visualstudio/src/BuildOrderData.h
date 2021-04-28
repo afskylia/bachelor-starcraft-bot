@@ -8,12 +8,12 @@
 class BuildOrder
 {
 public:
-	BWAPI::UnitType steps[200];
+	std::map<int, BWAPI::UnitType> steps;
 	BuildOrder()
 	{
-		for (auto step : steps)
+		for (int i = 0; i < 200; ++i)
 		{
-			step = BWAPI::UnitTypes::Protoss_Probe;
+			steps.insert(std::pair<int,BWAPI::UnitType>(i, BWAPI::UnitTypes::Protoss_Probe));
 		}
 	}
 };

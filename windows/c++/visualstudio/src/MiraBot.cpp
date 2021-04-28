@@ -23,6 +23,8 @@ void MiraBot::onStart()
 
 	// Call MapTools OnStart
 	m_mapTools.onStart();
+
+	m_production_manager.onStart();
 }
 
 // Called whenever the game ends and tells you if you won or not
@@ -89,13 +91,7 @@ void MiraBot::onUnitCreate(BWAPI::Unit unit)
 // Called whenever a unit finished construction, with a pointer to the unit
 void MiraBot::onUnitComplete(BWAPI::Unit unit)
 {
-	switch (unit->getType())
-	{
-	case BWAPI::UnitTypes::Protoss_Zealot:
-		m_zealot.push_back(unit);
-		break;
-	default: break;
-	}
+	m_production_manager.onUnitComplete(unit);
 }
 
 // Called whenever a unit appears, with a pointer to the destroyed unit
