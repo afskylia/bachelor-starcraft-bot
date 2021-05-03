@@ -86,6 +86,7 @@ void MiraBot::onSendText(std::string text)
 // so this will trigger when you issue the build command for most units
 void MiraBot::onUnitCreate(BWAPI::Unit unit)
 {
+	m_production_manager.onUnitCreate(unit);
 }
 
 // Called whenever a unit finished construction, with a pointer to the unit

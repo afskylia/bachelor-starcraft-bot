@@ -9,38 +9,55 @@
  */
 ProductionManager::ProductionManager()
 {
-	
+
 }
 
 void ProductionManager::onFrame()
 {
-	// Build more supply if we are going to run out soon
-	/*buildAdditionalSupply();
-	buildGateway();
-	buildAttackUnits();*/
-	// buildFromBuildOrder();
+	if (BWAPI::Broodwar->getFrameCount() % 10 == 0)
+	{
+		buildFromBuildOrder(BWAPI::UnitTypes::None);
+	}
 }
 
 void ProductionManager::onStart()
 {
-	buildFromBuildOrder();
+	//buildFromBuildOrder();
+}
+
+void ProductionManager::onUnitCreate(BWAPI::Unit unit)
+{
+	removeFromBuildOrder(unit->getType());
+}
+
+void ProductionManager::removeFromBuildOrder(const BWAPI::UnitType& unit)
+{
+	
 }
 
 void ProductionManager::onUnitComplete(BWAPI::Unit unit)
 {
-	buildFromBuildOrder();
+	buildFromBuildOrder(unit->getType());
 }
 
-void ProductionManager::buildFromBuildOrder()
+void ProductionManager::buildFromBuildOrder(BWAPI::UnitType unitCompleted)
 {
+	for (auto &last_unit : lastUnit)
+	{
+		if (last_unit == unitCompleted && it != build.steps.end())
+		{
+			build.steps.erase(it);
+			auto it_vec = std::find(lastUnit.begin(), lastUnit.end(), last_unit);
+			if (it_vec != lastUnit.end()) { lastUnit.erase(it_vec); }
+			break;
+		}
+	}
 	BWAPI::UnitType unit = BWAPI::UnitTypes::None;
+	// get current supply
 	const int supply = BWAPI::Broodwar->self()->supplyUsed() / 2;
-	//for (auto itr = build.steps.begin(); itr != build.steps.end(); ++itr) {
-	//	std::cout << itr->first
-	//		<< '\t' << itr->second << '\n';
-	//}
-	std::cout << unit;
-	std::map<int, BWAPI::UnitType>::iterator it = build.steps.find(supply);
+	
+	// get a map iterator and make sure we are not at the end
+	it = build.steps.find(supply);
 	if (it == build.steps.end())
 		return;
 	unit = it->second;
@@ -48,12 +65,13 @@ void ProductionManager::buildFromBuildOrder()
 	std::cout << unit;
 	if (unit.isBuilding())
 	{
-		if (Tools::BuildBuilding(unit)) build.steps.erase(it);
-		
-	} else
-	{
-		if (trainUnit(unit)) build.steps.erase(it);
+		Tools::BuildBuilding(unit);
 	}
+	else
+	{
+		trainUnit(unit);
+	}
+	lastUnit.push_back(unit);
 }
 
 void ProductionManager::buildGateway()
@@ -106,6 +124,10 @@ void ProductionManager::buildAdditionalSupply()
 	}
 }
 
+/**
+ * Train a unit, does not support all units
+ * \returns true if unit has started training, false if it cannot be trained
+ */
 bool ProductionManager::trainUnit(const BWAPI::UnitType& unit)
 {
 	// If we cannot afford unit
@@ -113,15 +135,21 @@ bool ProductionManager::trainUnit(const BWAPI::UnitType& unit)
 	switch (unit)
 	{
 	case BWAPI::UnitTypes::Protoss_Probe:
-		{
+	{
 		// get the unit pointer to my depot
 		const BWAPI::Unit myDepot = Tools::GetDepot();
 
 		// if we have a valid depot unit and it's currently not training something, train a worker
 		// there is no reason for a bot to ever use the unit queueing system, it just wastes resources
-		if (myDepot && !myDepot->isTraining()) { myDepot->train(unit); }
+		if (myDepot && !myDepot->isTraining())
+		{
+			return myDepot->train(unit);
 		}
-	default: std::cout << "unit not supported \n";
 	}
-	return true;
+	default:
+	{
+		std::cout << unit << " not supported \n";
+		return false;
+	}
+	}
 }
