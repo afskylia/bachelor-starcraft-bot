@@ -37,7 +37,8 @@ void WorkerManager::updateWorkerStatus()
 			{
 			case WorkerData::Build:
 			{
-				// TODO: build if we are in the building position
+				// TODO: build if we are in the building position and have enough money
+				// otherwise make sure we are moving to the position
 				break;
 			}
 			case WorkerData::Move:
@@ -179,4 +180,18 @@ BWAPI::Unit WorkerManager::getWorkerScout()
 	}
 
 	return nullptr;
+}
+
+BWAPI::UnitType WorkerData::getWorkerBuildingType(BWAPI::Unit unit)
+{
+	if (!unit) { return BWAPI::UnitTypes::None; }
+
+	std::map<BWAPI::Unit, BWAPI::UnitType>::iterator it = m_workerBuildingTypeMap.find(unit);
+
+	if (it != m_workerBuildingTypeMap.end())
+	{
+		return it->second;
+	}
+
+	return BWAPI::UnitTypes::None;
 }

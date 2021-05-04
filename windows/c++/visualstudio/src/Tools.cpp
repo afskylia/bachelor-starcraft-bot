@@ -145,10 +145,12 @@ BWAPI::Unit Tools::GetDepot()
 // Attempt tp construct a building of a given type 
 bool Tools::BuildBuilding(BWAPI::UnitType type)
 {
+	// If we have much less minerals than required, it's not worth to wait for it
+	if (BWAPI::Broodwar->self()->minerals() < type.mineralPrice() / 3)
+		return false; // TODO: queue building?
+
 	// Get the type of unit that is required to build the desired building
 	BWAPI::UnitType builderType = type.whatBuilds().first;
-
-	if (BWAPI::Broodwar->self()->minerals() < type.mineralPrice()) { return false; }
 
 	// Get a location that we want to build the building next to
 	BWAPI::TilePosition desiredPos = BWAPI::Broodwar->self()->getStartLocation();
@@ -162,9 +164,9 @@ bool Tools::BuildBuilding(BWAPI::UnitType type)
 	// If we can't find a valid builder unit, then we have to cancel the building
 	BWAPI::Unit builder = GetWorker(builderType, BWAPI::Position(buildPos));
 	if (!builder) { return false; }
-	
-	// TODO: set builder job and position etc
 
+	// TODO: set builder job and position etc
+	// TODO: if not enough money yet, send builder over there to wait
 	return builder->build(type, buildPos);
 }
 
