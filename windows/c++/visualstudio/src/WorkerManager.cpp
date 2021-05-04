@@ -15,7 +15,7 @@ void WorkerManager::onFrame()
 	updateWorkerStatus();
 
 	// Train more workers so we can gather more income
-	trainAdditionalWorkers();
+	// trainAdditionalWorkers();
 
 
 	// Send our idle workers to mine minerals so they don't just stand there
