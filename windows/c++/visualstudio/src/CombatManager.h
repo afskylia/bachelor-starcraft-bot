@@ -1,10 +1,19 @@
 ﻿#pragma once
+#include <iostream>
 
-class CombatManager
+namespace MiraBot
 {
-public:
+	class CombatManager
+	{
+		friend class Global;
+	public:
 
-	CombatManager();
-	void onFrame();
-	void rushEnemyBase();
-};
+		CombatManager();
+		void onFrame();
+		void rushEnemyBase();
+		void test()
+		{
+			std::cout << "CombatManager!\n";
+		}
+	};
+}

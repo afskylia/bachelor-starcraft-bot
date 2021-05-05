@@ -1,6 +1,9 @@
 #include "CombatManager.h"
 
-#include "MiraBot.h"
+#include "MiraBotMain.h"
+#include "Global.h"
+
+using namespace MiraBot;
 
 CombatManager::CombatManager() {
 }
@@ -10,12 +13,12 @@ void CombatManager::onFrame() {
 }
 
 void CombatManager::rushEnemyBase() {
-	if (MiraBot::enemyStartLocation != BWAPI::TilePositions::None && MiraBot::m_zealot.size() > 10)
+	if (MiraBotMain::enemyStartLocation != BWAPI::TilePositions::None && MiraBotMain::m_zealot.size() > 10)
 	{
-		for (auto* zealot : MiraBot::m_zealot)
+		for (auto* zealot : MiraBotMain::m_zealot)
 		{
-			zealot->attack(BWAPI::Position(MiraBot::enemyStartLocation));
+			zealot->attack(BWAPI::Position(MiraBotMain::enemyStartLocation));
 		}
-		MiraBot::m_zealot.empty();
+		MiraBotMain::m_zealot.empty();
 	}
 }

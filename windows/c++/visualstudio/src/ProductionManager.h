@@ -1,15 +1,24 @@
 #pragma once
+#include <iostream>
 
-
-#include <BWAPI.h>
-
-class ProductionManager
+namespace MiraBot
 {
-public:
 
-	ProductionManager();
-	void onFrame();
-	void buildGateway();
-	void buildAttackUnits();
-	void buildAdditionalSupply();
-};
+
+	class ProductionManager
+	{
+		friend class Global;
+		
+	public:
+
+		ProductionManager();
+		void onFrame();
+		void buildGateway();
+		void buildAttackUnits();
+		void buildAdditionalSupply();
+		void test()
+		{
+			std::cout << "ProductionManager!\n";
+		}
+	};
+}

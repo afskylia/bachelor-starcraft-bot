@@ -1,10 +1,13 @@
 #include <BWAPI.h>
 #include <BWAPI/Client.h>
-#include "MiraBot.h"
+#include "MiraBotMain.h"
 #include <iostream>
 #include <thread>
 #include <chrono>
+#include "Global.h"
+#include "WorkerManager.h"
 
+using namespace MiraBot;
 void PlayGame();
 
 int main(int argc, char * argv[])
@@ -46,7 +49,7 @@ int main(int argc, char * argv[])
 
 void PlayGame()
 {
-    MiraBot bot;
+    MiraBotMain bot;
 
     // The main game loop, which continues while we are connected to BWAPI and in a game
     while (BWAPI::BWAPIClient.isConnected() && BWAPI::Broodwar->isInGame())

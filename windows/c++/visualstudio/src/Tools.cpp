@@ -1,5 +1,5 @@
 #include "Tools.h"
-#include "MiraBot.h"
+#include "MiraBotMain.h"
 #include "WorkerManager.h"
 
 // Return vector of units in ascending order from distance to given unit
@@ -61,47 +61,46 @@ int Tools::CountUnitsOfType(BWAPI::UnitType type, const BWAPI::Unitset& units)
 	return sum;
 }
 
-BWAPI::Unit Tools::GetWorker(BWAPI::UnitType unitType)
-{
-	return GetWorker(unitType, BWAPI::Positions::None);
-}
+//BWAPI::Unit Tools::GetWorker(BWAPI::UnitType unitType)
+//{
+//	return GetWorker(unitType, BWAPI::Positions::None);
+//}
 
-BWAPI::Unit Tools::GetWorker(BWAPI::UnitType unitType, BWAPI::Position building_position)
-{
-	// TODO: Make sure only resource-gathering units are selected
-	//&& unit->getLastCommand().getType() == BWAPI::UnitCommandTypes::Gather
-
-	BWAPI::Unit closestUnit = nullptr;
-
-	for (auto& unit : BWAPI::Broodwar->self()->getUnits())
-	{
-		if (!closestUnit)
-		{
-			closestUnit = unit;
-		}
-		if (unit->isCompleted() && unit->getType() == unitType && unit != MiraBot::m_scout)
-		{
-			// if the unit is of the correct type, and it actually has been constructed, return it
-			if (building_position == BWAPI::Positions::None)
-			{
-				return unit;
-			}
-			// if the distance should be accounted for
-			if (closestUnit->getDistance(building_position) > unit->getDistance(building_position))
-			{
-				closestUnit = unit;
-			}
-		}
-	}
-
-	if (closestUnit)
-	{
-		return closestUnit;
-	}
-
-	// If we didn't find a valid unit to return, make sure we return nullptr
-	return nullptr;
-}
+//BWAPI::Unit Tools::GetWorker(BWAPI::UnitType unitType, BWAPI::Position building_position)
+//{
+//	//&& unit->getLastCommand().getType() == BWAPI::UnitCommandTypes::Gather
+//
+//	BWAPI::Unit closestUnit = nullptr;
+//
+//	for (auto& unit : BWAPI::Broodwar->self()->getUnits())
+//	{
+//		if (!closestUnit)
+//		{
+//			closestUnit = unit;
+//		}
+//		if (unit->isCompleted() && unit->getType() == unitType && unit != MiraBotMain::m_scout)
+//		{
+//			// if the unit is of the correct type, and it actually has been constructed, return it
+//			if (building_position == BWAPI::Positions::None)
+//			{
+//				return unit;
+//			}
+//			// if the distance should be accounted for
+//			if (closestUnit->getDistance(building_position) > unit->getDistance(building_position))
+//			{
+//				closestUnit = unit;
+//			}
+//		}
+//	}
+//
+//	if (closestUnit)
+//	{
+//		return closestUnit;
+//	}
+//
+//	// If we didn't find a valid unit to return, make sure we return nullptr
+//	return nullptr;
+//}
 
 BWAPI::Unit Tools::GetUnitOfType(BWAPI::UnitType type)
 {
@@ -143,32 +142,36 @@ BWAPI::Unit Tools::GetDepot()
 }
 
 // Attempt tp construct a building of a given type 
-bool Tools::BuildBuilding(BWAPI::UnitType type)
-{
-	// If we have much less minerals than required, it's not worth to wait for it
-	if (BWAPI::Broodwar->self()->minerals() < type.mineralPrice() / 3)
-		return false; // TODO: queue building?
-
-	// Get the type of unit that is required to build the desired building
-	BWAPI::UnitType builderType = type.whatBuilds().first;
-
-	// Get a location that we want to build the building next to
-	BWAPI::TilePosition desiredPos = BWAPI::Broodwar->self()->getStartLocation();
-
-	// Ask BWAPI for a building location near the desired position for the type
-	int maxBuildRange = 64;
-	bool buildingOnCreep = type.requiresCreep();
-	BWAPI::TilePosition buildPos = BWAPI::Broodwar->getBuildLocation(type, desiredPos, maxBuildRange, buildingOnCreep);
-
-	// Get a unit that we own that is of the given type so it can build
-	// If we can't find a valid builder unit, then we have to cancel the building
-	BWAPI::Unit builder = GetWorker(builderType, BWAPI::Position(buildPos));
-	if (!builder) { return false; }
-
-	// TODO: set builder job and position etc
-	// TODO: if not enough money yet, send builder over there to wait
-	return builder->build(type, buildPos);
-}
+//bool Tools::BuildBuilding(BWAPI::UnitType type)
+//{
+//	// If we have much less minerals than required, it's not worth to wait for it
+//	if (BWAPI::Broodwar->self()->minerals() < type.mineralPrice() / 3)
+//		return false;
+//
+//	// Get the type of unit that is required to build the desired building
+//	BWAPI::UnitType builderType = type.whatBuilds().first;
+//
+//	// Get a location that we want to build the building next to
+//	BWAPI::TilePosition desiredPos = BWAPI::Broodwar->self()->getStartLocation();
+//
+//	// Ask BWAPI for a building location near the desired position for the type
+//	int maxBuildRange = 64;
+//	bool buildingOnCreep = type.requiresCreep();
+//	BWAPI::TilePosition buildPos = BWAPI::Broodwar->getBuildLocation(type, desiredPos, maxBuildRange, buildingOnCreep);
+//
+//	// Get a unit that we own that is of the given type so it can build
+//	// If we can't find a valid builder unit, then we have to cancel the building
+//	//BWAPI::Unit builder = GetWorker(builderType, BWAPI::Position(buildPos));
+//	auto* builder = getBuilder(builderType, BWAPI::Position(buildPos));
+//	if (!builder) { return false; }
+//
+//	// TODO: set builder job and position etc
+//	// TODO: if not enough money yet, send builder over there to wait
+//
+//	m_workerData.setWorkerJob(builder, WorkerData::Build, WorkerData::BuildJob{ buildPos,type });
+//	return true;
+//	//return builder->build(type, buildPos);
+//}
 
 void Tools::DrawUnitCommands()
 {

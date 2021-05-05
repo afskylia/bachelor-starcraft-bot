@@ -1,14 +1,17 @@
 #include "ProductionManager.h"
 
+#include "Global.h"
 #include "Tools.h"
 #include "WorkerManager.h"
 
-
+using namespace MiraBot;
 /*
  * Everything production related
  */
 ProductionManager::ProductionManager()
 {
+	Global::Workers().test();
+	//Global::Map().
 }
 
 void ProductionManager::onFrame()
@@ -30,7 +33,7 @@ void ProductionManager::buildGateway()
 
 	if (Tools::CountUnitsOfType(unitType) < 4)
 	{
-		const bool startedBuilding = Tools::BuildBuilding(unitType);
+		bool startedBuilding = Global::Workers().buildBuilding(unitType);
 		if (startedBuilding)
 		{
 			BWAPI::Broodwar->printf("Started Building %s", unitType.getName().c_str());
@@ -65,7 +68,8 @@ void ProductionManager::buildAdditionalSupply()
 
 		//std::cout << BWAPI::Broodwar->self()->mine
 		if (BWAPI::Broodwar->self()->minerals() < supplyProviderType.mineralPrice()) { return; }
-		const bool startedBuilding = Tools::BuildBuilding(supplyProviderType);
+		Global::Workers().test();
+		const bool startedBuilding = Global::Workers().buildBuilding(supplyProviderType);
 		if (startedBuilding)
 		{
 			BWAPI::Broodwar->printf("Started Building %s", supplyProviderType.getName().c_str());

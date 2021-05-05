@@ -1,16 +1,19 @@
-#include "MiraBot.h"
+#include "MiraBotMain.h"
 
 #include <BWAPI/Client/Client.h>
 
 #include "Tools.h"
 #include "MapTools.h"
+#include "Global.h"
 
-MiraBot::MiraBot()
+using namespace MiraBot;
+
+MiraBotMain::MiraBotMain()
 {
 }
 
 // Called when the bot starts!
-void MiraBot::onStart()
+void MiraBotMain::onStart()
 {
 	// Set our BWAPI options here    
 	BWAPI::Broodwar->setLocalSpeed(10);
@@ -22,24 +25,26 @@ void MiraBot::onStart()
 	BWAPI::Broodwar->enableFlag(BWAPI::Flag::UserInput);
 
 	// Call MapTools OnStart
-	m_mapTools.onStart();
+	Global::Map().onStart();
 }
 
 // Called whenever the game ends and tells you if you won or not
-void MiraBot::onEnd(bool isWinner)
+void MiraBotMain::onEnd(bool isWinner)
 {
 	std::cout << "We " << (isWinner ? "won!" : "lost!") << "\n";
 }
 
 // Called on each frame of the game
-void MiraBot::onFrame()
+void MiraBotMain::onFrame()
 {
 	// Managers on frame functions
-	m_worker_manager.onFrame();
-	m_production_manager.onFrame();
-	m_combat_manager.onFrame();
+	Global::Workers().onFrame();
+	Global::Production().onFrame();
+	Global::Combat().onFrame();
+	
 	// Update our MapTools information
-	m_mapTools.onFrame();
+	Global::Map().onFrame();
+	
 
 	// Draw unit health bars, which brood war unfortunately does not do
 	Tools::DrawUnitHealthBars();
@@ -50,7 +55,7 @@ void MiraBot::onFrame()
 
 
 // Draw some relevant information to the screen to help us debug the bot
-void MiraBot::drawDebugInformation()
+void MiraBotMain::drawDebugInformation()
 {
 	BWAPI::Broodwar->drawTextScreen(BWAPI::Position(10, 10), "Hello, World!\n");
 	Tools::DrawUnitCommands();
@@ -60,38 +65,38 @@ void MiraBot::drawDebugInformation()
 }
 
 // Called whenever a unit is destroyed, with a pointer to the unit
-void MiraBot::onUnitDestroy(BWAPI::Unit unit)
+void MiraBotMain::onUnitDestroy(BWAPI::Unit unit)
 {
-	if (unit->getType().isWorker()) m_worker_manager.onUnitDestroy(unit);
+	if (unit->getType().isWorker()) Global::Workers().onUnitDestroy(unit);
 }
 
 // Called whenever a unit is morphed, with a pointer to the unit
 // Zerg units morph when they turn into other units
-void MiraBot::onUnitMorph(BWAPI::Unit unit)
+void MiraBotMain::onUnitMorph(BWAPI::Unit unit)
 {
 }
 
 // Called whenever a text is sent to the game by a user
-void MiraBot::onSendText(std::string text)
+void MiraBotMain::onSendText(std::string text)
 {
 	if (text == "/map")
 	{
-		m_mapTools.toggleDraw();
+		Global::Map().toggleDraw();
 	}
 }
 
 // Called whenever a unit is created, with a pointer to the unit
 // Units are created in buildings like barracks before they are visible, 
 // so this will trigger when you issue the build command for most units
-void MiraBot::onUnitCreate(BWAPI::Unit unit)
+void MiraBotMain::onUnitCreate(BWAPI::Unit unit)
 {
 	// TODO: Worker manager and combat manager have to decide which job to assign new units
-	if (unit->getType().isWorker()) m_worker_manager.onUnitCreate(unit);
+	if (unit->getType().isWorker()) Global::Workers().onUnitCreate(unit);
 	// TODO: else combatmanager.onunitcreate()
 }
 
 // Called whenever a unit finished construction, with a pointer to the unit
-void MiraBot::onUnitComplete(BWAPI::Unit unit)
+void MiraBotMain::onUnitComplete(BWAPI::Unit unit)
 {
 	switch (unit->getType())
 	{
@@ -104,7 +109,7 @@ void MiraBot::onUnitComplete(BWAPI::Unit unit)
 
 // Called whenever a unit appears, with a pointer to the destroyed unit
 // This is usually triggered when units appear from fog of war and become visible
-void MiraBot::onUnitShow(BWAPI::Unit unit)
+void MiraBotMain::onUnitShow(BWAPI::Unit unit)
 {
 	auto* unitPlayer = unit->getPlayer();
 	if (!foundEnemy && unitPlayer->isEnemy(BWAPI::Broodwar->self()))
@@ -133,12 +138,12 @@ void MiraBot::onUnitShow(BWAPI::Unit unit)
 
 // Called whenever a unit gets hidden, with a pointer to the destroyed unit
 // This is usually triggered when units enter the fog of war and are no longer visible
-void MiraBot::onUnitHide(BWAPI::Unit unit)
+void MiraBotMain::onUnitHide(BWAPI::Unit unit)
 {
 }
 
 // Called whenever a unit switches player control
 // This usually happens when a dark archon takes control of a unit
-void MiraBot::onUnitRenegade(BWAPI::Unit unit)
+void MiraBotMain::onUnitRenegade(BWAPI::Unit unit)
 {
 }

@@ -1,10 +1,10 @@
 #include "WorkerManager.h"
 
 #include <BWAPI/Client/Client.h>
-
+#include "Global.h"
 
 #include "Tools.h"
-
+using namespace MiraBot;
 WorkerManager::WorkerManager()
 {
 }
@@ -55,7 +55,7 @@ void WorkerManager::updateWorkerStatus()
 				}
 				else {
 					// Set scout's new target position
-					m_workerData.setWorkerJob(worker, WorkerData::Scout, WorkerData::MoveData{ scoutPosition });
+					m_workerData.setWorkerJob(worker, WorkerData::Scout, scoutPosition);
 				}
 				break;
 			}
@@ -75,11 +75,14 @@ void WorkerManager::sendIdleWorkersToMinerals()
 	{
 		if (m_workerData.getWorkerJob(worker) == WorkerData::Idle)
 		{
+
+			// Send scout to unexplored scouting locations
 			if (!getWorkerScout() && getScoutPosition(worker))
 			{
-				WorkerData::MoveData move{ getScoutPosition(worker) };
-				m_workerData.setWorkerJob(worker, WorkerData::Scout, move);
+				m_workerData.setWorkerJob(worker, WorkerData::Scout, getScoutPosition(worker));
 			}
+
+			// Idle workers gather minerals by default
 			else setMineralWorker(worker);
 		}
 	}
@@ -182,16 +185,65 @@ BWAPI::Unit WorkerManager::getWorkerScout()
 	return nullptr;
 }
 
-BWAPI::UnitType WorkerData::getWorkerBuildingType(BWAPI::Unit unit)
+// Looks through mineral workers and returns the closest candidate to given position
+BWAPI::Unit WorkerManager::getBuilder(BWAPI::UnitType type, BWAPI::Position pos)
 {
-	if (!unit) { return BWAPI::UnitTypes::None; }
-
-	std::map<BWAPI::Unit, BWAPI::UnitType>::iterator it = m_workerBuildingTypeMap.find(unit);
-
-	if (it != m_workerBuildingTypeMap.end())
+	BWAPI::Unit closestUnit = nullptr;
+	for (auto& unit : m_workerData.getWorkers(WorkerData::Minerals))
 	{
-		return it->second;
+
+		// If worker isn't of required type or hasn't been trained yet, continue
+		if (!(unit->getType() == type && unit->isCompleted())) continue;
+
+		// Set initially closest worker
+		if (!closestUnit) {
+			closestUnit = unit;
+			continue;
+		}
+
+		// If position doesn't matter, use the first found candidate
+		if (pos == BWAPI::Positions::None) break;
+
+		// Check if this unit is closer to the position than closestUnit
+		if (closestUnit->getDistance(pos) > unit->getDistance(pos))
+		{
+			closestUnit = unit;
+		}
 	}
 
-	return BWAPI::UnitTypes::None;
+	// Return the closest worker, or nullptr if none was found
+	return closestUnit;
+}
+
+bool WorkerManager::buildBuilding(BWAPI::UnitType type)
+{
+	std::cout << "buildBuilding\n";
+
+	// If we have much less minerals than required, it's not worth to wait for it
+	if (BWAPI::Broodwar->self()->minerals() < type.mineralPrice() / 3)
+		return false;
+
+	// Get the type of unit that is required to build the desired building
+	BWAPI::UnitType builderType = type.whatBuilds().first;
+
+	// Get a location that we want to build the building next to
+	BWAPI::TilePosition desiredPos = BWAPI::Broodwar->self()->getStartLocation();
+
+	// Ask BWAPI for a building location near the desired position for the type
+	int maxBuildRange = 64;
+	bool buildingOnCreep = type.requiresCreep();
+	BWAPI::TilePosition buildPos = BWAPI::Broodwar->getBuildLocation(type, desiredPos, maxBuildRange, buildingOnCreep);
+
+	// Get a unit that we own that is of the given type so it can build
+	// If we can't find a valid builder unit, then we have to cancel the building
+	//BWAPI::Unit builder = GetWorker(builderType, BWAPI::Position(buildPos));
+	auto* builder = getBuilder(builderType, BWAPI::Position(buildPos));
+	if (!builder) { return false; }
+
+	// TODO: set builder job and position etc
+	// TODO: if not enough money yet, send builder over there to wait
+
+	m_workerData.setWorkerJob(builder, WorkerData::Build, WorkerData::BuildJob{ buildPos,type });
+	return true;
+	//return builder->build(type, buildPos);
 }
