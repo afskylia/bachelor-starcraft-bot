@@ -107,14 +107,14 @@ bool MapTools::isExplored(int tileX, int tileY) const
 	return BWAPI::Broodwar->isExplored(tileX, tileY);
 }
 
-bool MapTools::isVisible(int tileX, int tileY) const
+bool MapTools::isVisible(int tile_x, int tile_y) const
 {
-	if (!isValidTile(tileX, tileY)) { return false; }
+	if (!isValidTile(tile_x, tile_y)) { return false; }
 
-	return BWAPI::Broodwar->isVisible(BWAPI::TilePosition(tileX, tileY));
+	return BWAPI::Broodwar->isVisible(BWAPI::TilePosition(tile_x, tile_y));
 }
 
-bool MapTools::isPowered(int tileX, int tileY) const
+bool MapTools::isPowered(int tileX, int tileY)
 {
 	return BWAPI::Broodwar->hasPower(BWAPI::TilePosition(tileX, tileY));
 }

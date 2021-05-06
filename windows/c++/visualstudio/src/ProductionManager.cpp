@@ -46,7 +46,8 @@ void ProductionManager::tryBuildOrTrainUnit()
 
 bool ProductionManager::addToBuildQueue(const BWAPI::UnitType& unit_type)
 {
-	if (std::find(m_build_queue.begin(), m_build_queue.end(), unit_type) == m_build_queue.end()) {
+	if (std::find(m_build_queue.begin(), m_build_queue.end(), unit_type) == m_build_queue.end())
+	{
 		// Add unit to build queue and remove from build order
 		m_build_queue.push_back(unit_type);
 
@@ -114,7 +115,8 @@ void ProductionManager::compareUnitsAndBuild()
 		// Try find in all units
 		auto it = all_units.find(required_unit.first);
 		// If not found or we need more units, build it
-		if (it == all_units.end()) {
+		if (it == all_units.end())
+		{
 			addToBuildQueue(required_unit.first);
 			break;
 		}
@@ -130,7 +132,8 @@ void ProductionManager::compareUnitsAndBuild()
 void ProductionManager::tryCompareUnitsAndBuild()
 {
 	const int frame_count = BWAPI::Broodwar->getFrameCount();
-	if (frame_count == m_last_build_frame + 20) {
+	if (frame_count == m_last_build_frame + 20)
+	{
 		compareUnitsAndBuild();
 	}
 }
@@ -169,21 +172,23 @@ bool ProductionManager::trainUnit(const BWAPI::UnitType& unit)
 	switch (unit)
 	{
 	case BWAPI::UnitTypes::Protoss_Probe:
-	{
-		// get the unit pointer to my depot
-		const BWAPI::Unit myDepot = Tools::GetDepot();
-
-		// if we have a valid depot unit and it's currently not training something, train a worker
-		// there is no reason for a bot to ever use the unit queueing system, it just wastes resources
-		if (myDepot && !myDepot->isTraining())
 		{
-			myDepot->train(unit);
+			// get the unit pointer to my depot
+			const BWAPI::Unit myDepot = Tools::GetDepot();
+
+			// if we have a valid depot unit and it's currently not training something, train a worker
+			// there is no reason for a bot to ever use the unit queueing system, it just wastes resources
+			if (myDepot && !myDepot->isTraining())
+			{
+				myDepot->train(unit);
+			}
+			break;
 		}
-		break;
-	}
-	default: {
-		std::cout << unit << " not supported \n";
-		return false;}
+	default:
+		{
+			std::cout << unit << " not supported \n";
+			return false;
+		}
 	}
 	return true;
 }
@@ -259,14 +264,14 @@ int ProductionManager::countBuildings(BWAPI::UnitType type, bool pending)
 // Returns number of pending buildings (build job assigned but not yet built)
 int ProductionManager::pendingBuildingsCount()
 {
-	auto buildJobs = Global::Workers().getActiveBuildJobs();
+	auto buildJobs = Global::workers().getActiveBuildJobs();
 	return std::size(buildJobs);
 }
 
 // Returns number of pending buildings of given type (build job assigned but not yet built)
 int ProductionManager::pendingBuildingsCount(BWAPI::UnitType type)
 {
-	auto buildJobs = Global::Workers().getActiveBuildJobs(type);
+	auto buildJobs = Global::workers().getActiveBuildJobs(type);
 	return std::size(buildJobs);
 }
 
@@ -275,7 +280,7 @@ int ProductionManager::getTotalMinerals()
 {
 	auto totalMinerals = BWAPI::Broodwar->self()->minerals();
 
-	for (auto& buildJob : Global::Workers().getActiveBuildJobs())
+	for (auto& buildJob : Global::workers().getActiveBuildJobs())
 	{
 		totalMinerals -= buildJob.unitType.mineralPrice();
 	}
@@ -296,7 +301,7 @@ bool ProductionManager::buildBuilding(BWAPI::UnitType type)
 
 	// If we have much less minerals than required, it's not worth to wait for it
 	// TODO: !!! Also look at pending mineral costs somehow
-	if (Global::Production().getTotalMinerals() < type.mineralPrice() * 0.7) return false;
+	if (Global::production().getTotalMinerals() < type.mineralPrice() * 0.7) return false;
 	//if (BWAPI::Broodwar->self()->minerals() < type.mineralPrice() * 0.7) return false;
 
 	// Get the type of unit that is required to build the desired building
@@ -311,10 +316,9 @@ bool ProductionManager::buildBuilding(BWAPI::UnitType type)
 	BWAPI::TilePosition buildPos = BWAPI::Broodwar->getBuildLocation(type, desiredPos, maxBuildRange, buildingOnCreep);
 
 	// Try to build the unit
-	auto* builder = Global::Workers().getBuilder(builderType, BWAPI::Position(buildPos));
+	auto* builder = Global::workers().getBuilder(builderType, BWAPI::Position(buildPos));
 	if (!builder) { return false; }
 
-	Global::Workers().setBuildingWorker(builder, WorkerData::BuildJob{ buildPos,type });
+	Global::workers().setBuildingWorker(builder, WorkerData::BuildJob{buildPos, type});
 	return true;
 }
-

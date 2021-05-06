@@ -11,9 +11,7 @@
 
 using namespace MiraBot;
 
-MiraBotMain::MiraBotMain()
-{
-}
+MiraBotMain::MiraBotMain() = default;
 
 // Called when the bot starts!
 void MiraBotMain::onStart()
@@ -29,15 +27,15 @@ void MiraBotMain::onStart()
 	BWAPI::Broodwar->enableFlag(BWAPI::Flag::UserInput);
 
 	// Call MapTools OnStart
-	Global::Map().onStart();
+	Global::map().onStart();
 }
 
 // Win/lose, Timestamp, Length of game(frames), Enemy race, Own race, Map, Number of units built, Supply, Total supply, git message and branch
-void MiraBotMain::log_result(bool isWinner)
+void MiraBotMain::logResult(bool is_winner)
 {
-	std::string WHITESPACE = " \n\r\t\f\v";
+	std::string whitespace = " \n\r\t\f\v";
 
-	auto win = isWinner ? "win" : "loss";
+	auto win = is_winner ? "win" : "loss";
 
 	auto t = std::time(nullptr);
 	auto tm = *std::localtime(&t);
@@ -56,10 +54,10 @@ void MiraBotMain::log_result(bool isWinner)
 	auto supply = std::to_string(BWAPI::Broodwar->self()->supplyUsed());
 	auto total_supply = std::to_string(BWAPI::Broodwar->self()->supplyTotal());
 	auto git = exec("git log -1 --pretty='%C(auto)%s'");
-	size_t end = git.find_last_not_of(WHITESPACE);
+	size_t end = git.find_last_not_of(whitespace);
 	git = git.substr(0, end + 1);
 	auto branch = exec("git branch --show-current");
-	end = branch.find_last_not_of(WHITESPACE);
+	end = branch.find_last_not_of(whitespace);
 	branch = branch.substr(0, end + 1);
 
 	std::ofstream file;
@@ -92,7 +90,7 @@ std::string MiraBotMain::exec(const char* cmd)
 // Called whenever the game ends and tells you if you won or not
 void MiraBotMain::onEnd(bool isWinner)
 {
-	log_result(isWinner);
+	logResult(isWinner);
 	std::cout << "We " << (isWinner ? "won!" : "lost!") << "\n";
 }
 
@@ -100,12 +98,12 @@ void MiraBotMain::onEnd(bool isWinner)
 void MiraBotMain::onFrame()
 {
 	// Managers on frame functions
-	Global::Workers().onFrame();
-	Global::Production().onFrame();
-	Global::Combat().onFrame();
+	Global::workers().onFrame();
+	Global::production().onFrame();
+	Global::combat().onFrame();
 
 	// Update our MapTools information
-	Global::Map().onFrame();
+	Global::map().onFrame();
 
 
 	// Draw unit health bars, which brood war unfortunately does not do
@@ -129,9 +127,9 @@ void MiraBotMain::drawDebugInformation()
 // Called whenever a unit is destroyed, with a pointer to the unit
 void MiraBotMain::onUnitDestroy(BWAPI::Unit unit)
 {
-	if (unit->getType().isWorker()) Global::Workers().onUnitDestroy(unit);
+	if (unit->getType().isWorker()) Global::workers().onUnitDestroy(unit);
 	// TODO maybe fix?
-	Global::Production().onUnitDestroy(unit);
+	Global::production().onUnitDestroy(unit);
 }
 
 // Called whenever a unit is morphed, with a pointer to the unit
@@ -145,7 +143,7 @@ void MiraBotMain::onSendText(std::string text)
 {
 	if (text == "/map")
 	{
-		Global::Map().toggleDraw();
+		Global::map().toggleDraw();
 	}
 }
 
@@ -155,10 +153,10 @@ void MiraBotMain::onSendText(std::string text)
 void MiraBotMain::onUnitCreate(BWAPI::Unit unit)
 {
 	// TODO: Worker manager and combat manager have to decide which job to assign new units
-	if (unit->getType().isWorker()) Global::Workers().onUnitCreate(unit);
+	if (unit->getType().isWorker()) Global::workers().onUnitCreate(unit);
 	// TODO: else combatmanager.onunitcreate()
 
-	Global::Production().onUnitComplete(unit);
+	Global::production().onUnitComplete(unit);
 }
 
 // Called whenever a unit finished construction, with a pointer to the unit
@@ -172,7 +170,7 @@ void MiraBotMain::onUnitComplete(BWAPI::Unit unit)
 	default: break;
 	}
 
-	Global::Production().onUnitComplete(unit);
+	Global::production().onUnitComplete(unit);
 }
 
 // Called whenever a unit appears, with a pointer to the destroyed unit
