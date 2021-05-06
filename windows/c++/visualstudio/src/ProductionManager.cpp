@@ -103,26 +103,23 @@ std::map<BWAPI::UnitType, int> ProductionManager::get_map_of_required_units()
  */
 void ProductionManager::compareUnitsAndBuild()
 {
-	//if (m_build_queue.empty())
-	//{
-		auto all_units = get_map_of_all_units();
-		auto required_units = get_map_of_required_units();
+	auto all_units = get_map_of_all_units();
+	auto required_units = get_map_of_required_units();
 
-		// TODO if maps are the same, return
+	// TODO if maps are the same, return
 
-		for (auto required_unit : required_units)
-		{
-			// Try find in all units
-			auto it = all_units.find(required_unit.first);
-			// If not found or we need more units, build it
-			if (it == all_units.end()) {
-				addToBuildQueue(required_unit.first);
-				break;
-			}
-			if (required_unit.second > it->second) 
-				addToBuildQueue(required_unit.first);
+	for (auto required_unit : required_units)
+	{
+		// Try find in all units
+		auto it = all_units.find(required_unit.first);
+		// If not found or we need more units, build it
+		if (it == all_units.end()) {
+			addToBuildQueue(required_unit.first);
+			break;
 		}
-	//}
+		if (required_unit.second > it->second)
+			addToBuildQueue(required_unit.first);
+	}
 	tryBuildOrTrainUnit();
 }
 
