@@ -24,7 +24,6 @@ void Global::init()
 	reset(m_productionManager);
 	reset(m_workerManager);
 	reset(m_combatManager);
-
 }
 
 void Global::GameStart()

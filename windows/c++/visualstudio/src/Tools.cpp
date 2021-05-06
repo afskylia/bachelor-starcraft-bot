@@ -190,7 +190,8 @@ void Tools::DrawUnitCommands()
 		// Example: build at given tile position location
 		if (command.getTargetTilePosition() != BWAPI::TilePositions::None)
 		{
-			BWAPI::Broodwar->drawLineMap(unit->getPosition(), BWAPI::Position(command.getTargetTilePosition()), BWAPI::Colors::Green);
+			BWAPI::Broodwar->drawLineMap(unit->getPosition(), BWAPI::Position(command.getTargetTilePosition()),
+			                             BWAPI::Colors::Green);
 		}
 
 		// If the previous command had a unit target, draw it in red
@@ -319,13 +320,15 @@ void Tools::DrawUnitHealthBars()
 		// if it's a resource, draw the resources remaining
 		if (unit->getType().isResourceContainer() && unit->getInitialResources() > 0)
 		{
-			double mineralRatio = (double)unit->getResources() / (double)unit->getInitialResources();
+			double mineralRatio = static_cast<double>(unit->getResources()) / static_cast<double>(unit->
+				getInitialResources());
 			DrawHealthBar(unit, mineralRatio, BWAPI::Colors::Cyan, 0);
 		}
-		// otherwise if it's a unit, draw the hp 
+			// otherwise if it's a unit, draw the hp 
 		else if (unit->getType().maxHitPoints() > 0)
 		{
-			double hpRatio = (double)unit->getHitPoints() / (double)unit->getType().maxHitPoints();
+			double hpRatio = static_cast<double>(unit->getHitPoints()) / static_cast<double>(unit->getType().
+				maxHitPoints());
 			BWAPI::Color hpColor = BWAPI::Colors::Green;
 			if (hpRatio < 0.66) hpColor = BWAPI::Colors::Orange;
 			if (hpRatio < 0.33) hpColor = BWAPI::Colors::Red;
@@ -334,7 +337,8 @@ void Tools::DrawUnitHealthBars()
 			// if it has shields, draw those too
 			if (unit->getType().maxShields() > 0)
 			{
-				double shieldRatio = (double)unit->getShields() / (double)unit->getType().maxShields();
+				double shieldRatio = static_cast<double>(unit->getShields()) / static_cast<double>(unit->getType().
+					maxShields());
 				DrawHealthBar(unit, shieldRatio, BWAPI::Colors::Blue, -3);
 			}
 		}
@@ -344,16 +348,16 @@ void Tools::DrawUnitHealthBars()
 void Tools::drawPoint(BWAPI::Position pos)
 {
 	BWAPI::Broodwar->drawCircle(BWAPI::CoordinateType::Map,
-		pos.x, pos.y,
-		100, BWAPI::Color(0, 255, 0));
+	                            pos.x, pos.y,
+	                            100, BWAPI::Color(0, 255, 0));
 }
 
 // TODO: Support multiple bases
 void Tools::DrawEnemyBases(BWAPI::TilePosition enemyStartLocation)
 {
 	BWAPI::Broodwar->drawCircle(BWAPI::CoordinateType::Map,
-		enemyStartLocation.x * 32, enemyStartLocation.y * 32,
-		200, BWAPI::Color(0, 255, 0));
+	                            enemyStartLocation.x * 32, enemyStartLocation.y * 32,
+	                            200, BWAPI::Color(0, 255, 0));
 }
 
 
@@ -367,13 +371,15 @@ void Tools::DrawHealthBar(BWAPI::Unit unit, double ratio, BWAPI::Color color, in
 	int top = pos.y - unit->getType().dimensionUp();
 	int bottom = pos.y + unit->getType().dimensionDown();
 
-	int ratioRight = left + (int)((right - left) * ratio);
+	int ratioRight = left + static_cast<int>((right - left) * ratio);
 	int hpTop = top + yOffset + verticalOffset;
 	int hpBottom = top + 4 + yOffset + verticalOffset;
 
-	BWAPI::Broodwar->drawBoxMap(BWAPI::Position(left, hpTop), BWAPI::Position(right, hpBottom), BWAPI::Colors::Grey, true);
+	BWAPI::Broodwar->drawBoxMap(BWAPI::Position(left, hpTop), BWAPI::Position(right, hpBottom), BWAPI::Colors::Grey,
+	                            true);
 	BWAPI::Broodwar->drawBoxMap(BWAPI::Position(left, hpTop), BWAPI::Position(ratioRight, hpBottom), color, true);
-	BWAPI::Broodwar->drawBoxMap(BWAPI::Position(left, hpTop), BWAPI::Position(right, hpBottom), BWAPI::Colors::Black, false);
+	BWAPI::Broodwar->drawBoxMap(BWAPI::Position(left, hpTop), BWAPI::Position(right, hpBottom), BWAPI::Colors::Black,
+	                            false);
 
 	int ticWidth = 3;
 

@@ -21,7 +21,6 @@ void WorkerData::addWorker(BWAPI::Unit unit, WorkerJob job, BWAPI::Unit jobUnit)
 	if (!unit) { return; }
 	m_workers.insert(unit);
 	setWorkerJob(unit, job, jobUnit);
-
 }
 
 // Add worker with job and move position (e.g. Build, Scout or Move)
@@ -43,13 +42,13 @@ void WorkerData::addWorker(BWAPI::Unit unit, WorkerJob job, struct BuildJob buil
 void WorkerData::workerDestroyed(BWAPI::Unit unit)
 {
 	// Try to re-assign build jobs
-	if (m_workerJobMap[unit] == WorkerJob::Build)
+	if (m_workerJobMap[unit] == Build)
 	{
 		auto type = m_workerBuildingTypeMap[unit];
 		auto move = m_workerMoveMap[unit];
 		auto pos = m_buildPosMap[unit];
 		auto newWorker = getBuilder(type, move);
-		if (newWorker) setWorkerJob(newWorker, Build, BuildJob{ pos,type });
+		if (newWorker) setWorkerJob(newWorker, Build, BuildJob{pos, type});
 	}
 
 	resetJob(unit);
@@ -63,30 +62,30 @@ void WorkerData::resetJob(BWAPI::Unit unit)
 	switch (previousJob)
 	{
 	case Minerals:
-	{
-		//m_depotWorkerCount[m_workerDepotMap[unit]] -= 1; // TODO depots??
-		m_workerDepotMap.erase(unit);
-		m_workerMineralMap.erase(unit);
-		break;
-	}
+		{
+			//m_depotWorkerCount[m_workerDepotMap[unit]] -= 1; // TODO depots??
+			m_workerDepotMap.erase(unit);
+			m_workerMineralMap.erase(unit);
+			break;
+		}
 	case Gas: break; // TODO: Gas!
 	case Build:
-	{
-		m_workerBuildingTypeMap.erase(unit);
-		m_workerMoveMap.erase(unit);
-		m_buildPosMap.erase(unit);
-		break;
-	}
+		{
+			m_workerBuildingTypeMap.erase(unit);
+			m_workerMoveMap.erase(unit);
+			m_buildPosMap.erase(unit);
+			break;
+		}
 	case Move:
-	{
-		m_workerMoveMap.erase(unit);
-		break;
-	}
+		{
+			m_workerMoveMap.erase(unit);
+			break;
+		}
 	case Scout:
-	{
-		m_workerMoveMap.erase(unit);
-		break;
-	}
+		{
+			m_workerMoveMap.erase(unit);
+			break;
+		}
 	default: break;
 	}
 
@@ -106,11 +105,11 @@ void WorkerData::setWorkerJob(BWAPI::Unit unit, enum WorkerJob job, BWAPI::Unit 
 	switch (job)
 	{
 	case Minerals:
-	{
-		BWAPI::Unit mineralToMine = getMineralToMine(unit);
-		m_workerMineralMap[unit] = mineralToMine;
-		unit->gather(mineralToMine);
-	}
+		{
+			BWAPI::Unit mineralToMine = getMineralToMine(unit);
+			m_workerMineralMap[unit] = mineralToMine;
+			unit->gather(mineralToMine);
+		}
 
 	case Gas: break;
 	case Combat: break;
@@ -213,12 +212,12 @@ BWAPI::Unit WorkerData::getBuilder(BWAPI::UnitType type, BWAPI::Position pos)
 	BWAPI::Unit closestUnit = nullptr;
 	for (auto& unit : getWorkers(Minerals))
 	{
-
 		// If worker isn't of required type or hasn't been trained yet, continue
 		if (!(unit->getType() == type && unit->isCompleted())) continue;
 
 		// Set initially closest worker
-		if (!closestUnit) {
+		if (!closestUnit)
+		{
 			closestUnit = unit;
 			continue;
 		}

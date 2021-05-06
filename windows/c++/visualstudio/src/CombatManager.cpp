@@ -5,14 +5,17 @@
 
 using namespace MiraBot;
 
-CombatManager::CombatManager() {
+CombatManager::CombatManager()
+{
 }
 
-void CombatManager::onFrame() {
+void CombatManager::onFrame()
+{
 	rushEnemyBase();
 }
 
-void CombatManager::rushEnemyBase() {
+void CombatManager::rushEnemyBase()
+{
 	if (MiraBotMain::enemyStartLocation != BWAPI::TilePositions::None && MiraBotMain::m_zealot.size() > 10)
 	{
 		for (auto* zealot : MiraBotMain::m_zealot)

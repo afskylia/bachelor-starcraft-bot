@@ -1,7 +1,6 @@
 #include "MiraBotMain.h"
 
 
-
 #include <fstream>
 #include <iomanip>
 #include <BWAPI/Client/Client.h>
@@ -23,7 +22,8 @@ void MiraBotMain::onStart()
 	BWAPI::Broodwar->setLocalSpeed(0); // 10
 	BWAPI::Broodwar->setFrameSkip(0);
 
-	mainBase = BWAPI::Broodwar->getClosestUnit(BWAPI::Position(BWAPI::Broodwar->self()->getStartLocation()), BWAPI::Filter::IsResourceDepot);
+	mainBase = BWAPI::Broodwar->getClosestUnit(BWAPI::Position(BWAPI::Broodwar->self()->getStartLocation()),
+	                                           BWAPI::Filter::IsResourceDepot);
 
 	// Enable the flag that tells BWAPI top let users enter input while bot plays
 	BWAPI::Broodwar->enableFlag(BWAPI::Flag::UserInput);
@@ -64,7 +64,8 @@ void MiraBotMain::log_result(bool isWinner)
 
 	std::ofstream file;
 	file.open("log.csv", std::ios::in | std::ios::out | std::ios::ate);
-	file << win << ';' << date << ';' << time << ';' << frames << ';' << enemyRace.toString() << ';' << race << ';' << map << ';' << number_of_units << ';' << supply << ';' << total_supply << ';' << git << ';' << branch << "\n";
+	file << win << ';' << date << ';' << time << ';' << frames << ';' << enemyRace.toString() << ';' << race << ';' <<
+		map << ';' << number_of_units << ';' << supply << ';' << total_supply << ';' << git << ';' << branch << "\n";
 	file.close();
 }
 
@@ -72,14 +73,17 @@ void MiraBotMain::log_result(bool isWinner)
  * Borrowed from https://stackoverflow.com/questions/478898/how-do-i-execute-a-command-and-get-the-output-of-the-command-within-c-using-po
  * execute cmd-commands and get result
  */
-std::string MiraBotMain::exec(const char* cmd) {
+std::string MiraBotMain::exec(const char* cmd)
+{
 	std::array<char, 128> buffer;
 	std::string result;
 	std::unique_ptr<FILE, decltype(&_pclose)> pipe(_popen(cmd, "r"), _pclose);
-	if (!pipe) {
+	if (!pipe)
+	{
 		throw std::runtime_error("popen() failed!");
 	}
-	while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+	while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr)
+	{
 		result += buffer.data();
 	}
 	return result;
@@ -99,10 +103,10 @@ void MiraBotMain::onFrame()
 	Global::Workers().onFrame();
 	Global::Production().onFrame();
 	Global::Combat().onFrame();
-	
+
 	// Update our MapTools information
 	Global::Map().onFrame();
-	
+
 
 	// Draw unit health bars, which brood war unfortunately does not do
 	Tools::DrawUnitHealthBars();

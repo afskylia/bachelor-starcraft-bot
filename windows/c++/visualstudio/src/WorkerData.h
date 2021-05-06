@@ -36,30 +36,32 @@ namespace MiraBot
 		BWAPI::Unitset getWorkers(WorkerJob job);
 
 		bool depotIsFull(BWAPI::Unit depot);
-		int  getMineralsNearDepot(BWAPI::Unit depot);
+		int getMineralsNearDepot(BWAPI::Unit depot);
 
-		WorkerJob		getWorkerJob(BWAPI::Unit unit);
+		WorkerJob getWorkerJob(BWAPI::Unit unit);
 		//MoveData		getWorkerMoveData(BWAPI::Unit unit);
 		BWAPI::UnitType getWorkerBuildingType(BWAPI::Unit unit);
-		BWAPI::Unit		getWorkerDepot(BWAPI::Unit unit);
-		BWAPI::Unit		getMineralToMine(BWAPI::Unit unit);
-		BWAPI::Unit		getBuilder(BWAPI::UnitType buildingType, BWAPI::Position position);
+		BWAPI::Unit getWorkerDepot(BWAPI::Unit unit);
+		BWAPI::Unit getMineralToMine(BWAPI::Unit unit);
+		BWAPI::Unit getBuilder(BWAPI::UnitType buildingType, BWAPI::Position position);
 
 		BWAPI::Unitset m_workers;
 		BWAPI::Unitset m_depots;
 
-		std::map<BWAPI::Unit, enum WorkerJob>		m_workerJobMap;
-		std::map<BWAPI::Unit, BWAPI::Unit>			m_workerDepotMap;
-		std::map<BWAPI::Unit, BWAPI::Unit>			m_workerMineralMap; // Mineral to be collected from by worker
-		std::map<BWAPI::Unit, BWAPI::Unit>			m_workerRefineryMap; // Vespene gas geyser to be collected from by worker
-		std::map<BWAPI::Unit, BWAPI::Unit>			m_workerRepairMap; // Unit that repairworker has to repair
-		std::map<BWAPI::Unit, BWAPI::Position>		m_workerMoveMap; // Target position of e.g. a scout, or position where a builder has to build something
-		std::map<BWAPI::Unit, BWAPI::TilePosition>  m_buildPosMap; // Tile position where the unit should place a building
-		std::map<BWAPI::Unit, BWAPI::UnitType>		m_workerBuildingTypeMap; // Type of building to be built by builder
+		std::map<BWAPI::Unit, enum WorkerJob> m_workerJobMap;
+		std::map<BWAPI::Unit, BWAPI::Unit> m_workerDepotMap;
+		std::map<BWAPI::Unit, BWAPI::Unit> m_workerMineralMap; // Mineral to be collected from by worker
+		std::map<BWAPI::Unit, BWAPI::Unit> m_workerRefineryMap; // Vespene gas geyser to be collected from by worker
+		std::map<BWAPI::Unit, BWAPI::Unit> m_workerRepairMap; // Unit that repairworker has to repair
+		std::map<BWAPI::Unit, BWAPI::Position> m_workerMoveMap;
+		// Target position of e.g. a scout, or position where a builder has to build something
+		std::map<BWAPI::Unit, BWAPI::TilePosition> m_buildPosMap;
+		// Tile position where the unit should place a building
+		std::map<BWAPI::Unit, BWAPI::UnitType> m_workerBuildingTypeMap; // Type of building to be built by builder
 
-		std::map<BWAPI::Unit, int>              m_depotWorkerCount;
-		std::map<BWAPI::Unit, int>              m_refineryWorkerCount;
-		std::map<BWAPI::Unit, int>              m_workersOnMineralPatch;
-		std::map<BWAPI::Unit, BWAPI::Unit>      m_workerMineralAssignment;
+		std::map<BWAPI::Unit, int> m_depotWorkerCount;
+		std::map<BWAPI::Unit, int> m_refineryWorkerCount;
+		std::map<BWAPI::Unit, int> m_workersOnMineralPatch;
+		std::map<BWAPI::Unit, BWAPI::Unit> m_workerMineralAssignment;
 	};
 }

@@ -9,6 +9,7 @@ class BuildOrder
 {
 public:
 	BWAPI::UnitType steps[200];
+
 	BuildOrder()
 	{
 		for (auto step : steps)

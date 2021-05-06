@@ -8,7 +8,7 @@ namespace MiraBot
 	class WorkerManager
 	{
 		friend class Global;
-	
+
 	public:
 		WorkerData m_workerData;
 		WorkerManager();

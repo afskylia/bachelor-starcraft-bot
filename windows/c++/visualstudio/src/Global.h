@@ -2,8 +2,6 @@
 
 namespace MiraBot
 {
-
-
 	class MapTools;
 	class WorkerManager;
 	class ProductionManager;
@@ -41,6 +39,5 @@ namespace MiraBot
 		static ProductionManager& Production();
 		static MapTools& Map();
 		static CombatManager& Combat();
-
 	};
 }

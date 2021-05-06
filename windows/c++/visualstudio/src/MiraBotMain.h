@@ -11,8 +11,6 @@
 
 namespace MiraBot
 {
-
-
 	class MiraBotMain
 	{
 		// Non-global managers can go here, e.g. a TimerManager
