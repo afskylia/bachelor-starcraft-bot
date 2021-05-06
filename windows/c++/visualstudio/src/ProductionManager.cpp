@@ -53,9 +53,9 @@ bool ProductionManager::addToBuildQueue(const BWAPI::UnitType& unit_type)
 		// TODO debug
 		for (auto build_queue : m_build_queue)
 		{
-			std::cout << build_queue;
+			//std::cout << build_queue;
 		}
-		std::cout << "\n";
+		//std::cout << "\n";
 		return true;
 	}
 	return false;
@@ -198,8 +198,6 @@ void ProductionManager::buildGateway()
 	if (countBuildings(unitType, true) < 4)
 	{
 		auto startedBuilding = buildBuilding(unitType);
-		if (startedBuilding)std::cout << "Assigned build job: " << unitType.getName() << "\n";
-
 	}
 }
 
@@ -234,8 +232,6 @@ void ProductionManager::buildAdditionalSupply()
 	{
 		// Otherwise, we are going to build a supply provider
 		const auto startedBuilding = buildBuilding(supplyProviderType);
-		if (startedBuilding) std::cout << "Assigned build job: " << supplyProviderType.getName() << "\n";
-
 	}
 }
 

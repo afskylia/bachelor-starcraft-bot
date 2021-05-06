@@ -37,11 +37,5 @@ namespace MiraBot
 
 		std::vector<WorkerData::BuildJob> getActiveBuildJobs();
 		std::vector<WorkerData::BuildJob> getActiveBuildJobs(BWAPI::UnitType unitType);
-
-		void test()
-		{
-			std::cout << "WorkerManager!\n";
-		}
-		
 	};
 }
