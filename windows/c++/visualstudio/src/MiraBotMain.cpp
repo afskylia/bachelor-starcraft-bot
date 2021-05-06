@@ -50,7 +50,6 @@ void MiraBotMain::log_result(bool isWinner)
 
 
 	auto frames = std::to_string(BWAPI::Broodwar->getFrameCount());
-	auto enemyRace = BWAPI::Broodwar->enemy() ? BWAPI::Broodwar->enemy()->getRace().c_str() : "unknown";
 	auto race = BWAPI::Broodwar->self()->getRace().c_str();
 	auto map = BWAPI::Broodwar->mapFileName();
 	auto number_of_units = std::to_string(BWAPI::Broodwar->self()->allUnitCount());
@@ -65,7 +64,7 @@ void MiraBotMain::log_result(bool isWinner)
 
 	std::ofstream file;
 	file.open("log.csv", std::ios::in | std::ios::out | std::ios::ate);
-	file << win << ';' << date << ';' << time << ';' << frames << ';' << enemyRace << ';' << race << ';' << map << ';' << number_of_units << ';' << supply << ';' << total_supply << ';' << git << ';' << branch << "\n";
+	file << win << ';' << date << ';' << time << ';' << frames << ';' << enemyRace.toString() << ';' << race << ';' << map << ';' << number_of_units << ';' << supply << ';' << total_supply << ';' << git << ';' << branch << "\n";
 	file.close();
 }
 
