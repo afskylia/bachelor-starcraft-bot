@@ -35,3 +35,5 @@ windows/starcraft/*.mpq
 *.pdb
 *.ilk
 *.exe
+
+windows/bin/log.csv

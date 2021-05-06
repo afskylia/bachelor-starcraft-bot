@@ -1,5 +1,9 @@
 #include "MiraBotMain.h"
 
+
+
+#include <fstream>
+#include <iomanip>
 #include <BWAPI/Client/Client.h>
 
 #include "Tools.h"
@@ -28,9 +32,63 @@ void MiraBotMain::onStart()
 	Global::Map().onStart();
 }
 
+// Win/lose, Timestamp, Length of game(frames), Enemy race, Own race, Map, Number of units built, Supply, Total supply, git message and branch
+void MiraBotMain::log_result(bool isWinner)
+{
+	std::string WHITESPACE = " \n\r\t\f\v";
+
+	auto win = isWinner ? "win" : "loss";
+
+	auto t = std::time(nullptr);
+	auto tm = *std::localtime(&t);
+	std::ostringstream oss;
+	oss << std::put_time(&tm, "%d/%m/%Y");
+	auto date = oss.str();
+	oss.str("");
+	oss << std::put_time(&tm, "%H.%M.%S");
+	auto time = oss.str();
+
+
+	auto frames = std::to_string(BWAPI::Broodwar->getFrameCount());
+	auto race = BWAPI::Broodwar->self()->getRace().c_str();
+	auto map = BWAPI::Broodwar->mapFileName();
+	auto number_of_units = std::to_string(BWAPI::Broodwar->self()->allUnitCount());
+	auto supply = std::to_string(BWAPI::Broodwar->self()->supplyUsed());
+	auto total_supply = std::to_string(BWAPI::Broodwar->self()->supplyTotal());
+	auto git = exec("git log -1 --pretty='%C(auto)%s'");
+	size_t end = git.find_last_not_of(WHITESPACE);
+	git = git.substr(0, end + 1);
+	auto branch = exec("git branch --show-current");
+	end = branch.find_last_not_of(WHITESPACE);
+	branch = branch.substr(0, end + 1);
+
+	std::ofstream file;
+	file.open("log.csv", std::ios::in | std::ios::out | std::ios::ate);
+	file << win << ';' << date << ';' << time << ';' << frames << ';' << enemyRace.toString() << ';' << race << ';' << map << ';' << number_of_units << ';' << supply << ';' << total_supply << ';' << git << ';' << branch << "\n";
+	file.close();
+}
+
+/**
+ * Borrowed from https://stackoverflow.com/questions/478898/how-do-i-execute-a-command-and-get-the-output-of-the-command-within-c-using-po
+ * execute cmd-commands and get result
+ */
+std::string MiraBotMain::exec(const char* cmd) {
+	std::array<char, 128> buffer;
+	std::string result;
+	std::unique_ptr<FILE, decltype(&_pclose)> pipe(_popen(cmd, "r"), _pclose);
+	if (!pipe) {
+		throw std::runtime_error("popen() failed!");
+	}
+	while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+		result += buffer.data();
+	}
+	return result;
+}
+
 // Called whenever the game ends and tells you if you won or not
 void MiraBotMain::onEnd(bool isWinner)
 {
+	log_result(isWinner);
 	std::cout << "We " << (isWinner ? "won!" : "lost!") << "\n";
 }
 
