@@ -257,6 +257,45 @@ int Tools::GetTotalSupply(bool inProgress)
 	return totalSupply;
 }
 
+int Tools::GetTotalUsedSupply(bool in_progress_and_building_supply)
+{
+	// start the calculation by looking at our current completed supplyt
+	int totalSupply = BWAPI::Broodwar->self()->supplyUsed();
+
+	// if we don't want to calculate the supply in progress, just return that value
+	if (!in_progress_and_building_supply) { return totalSupply; }
+
+	// if we do care about supply in progress, check all the currently constructing units if they will add supply
+	for (auto& unit : BWAPI::Broodwar->self()->getUnits())
+	{
+		// ignore units that are fully completed
+		if (unit->isCompleted()) { continue; }
+
+		// if they are not completed, then add their supply provided to the total supply
+		totalSupply += unit->getType().supplyProvided();
+	}
+
+	// one last tricky case: if a unit is currently on its way to build a supply provider, add it
+	for (auto& unit : BWAPI::Broodwar->self()->getUnits())
+	{
+		// get the last command given to the unit
+		const BWAPI::UnitCommand& command = unit->getLastCommand();
+
+		// if it's not a build command we can ignore it
+		if (command.getType() != BWAPI::UnitCommandTypes::Build) { continue; }
+
+		// add the supply amount of the unit that it's trying to build
+		totalSupply += command.getUnitType().supplyProvided();
+	}
+
+	for (auto& unit : BWAPI::Broodwar->self()->getUnits())
+	{
+		if (unit->getType().isBuilding()) totalSupply = 2 + totalSupply;
+	}
+
+	return totalSupply;
+}
+
 void Tools::DrawUnitHealthBars()
 {
 	// how far up from the unit to draw the health bar

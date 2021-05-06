@@ -26,6 +26,7 @@ namespace Tools
 	void SmartRightClick(BWAPI::Unit unit, BWAPI::Unit target);
 
 	int GetTotalSupply(bool inProgress = false);
+	int GetTotalUsedSupply(bool in_progress_and_building_supply = false);
 
 	void DrawUnitHealthBars();
 	void DrawHealthBar(BWAPI::Unit unit, double ratio, BWAPI::Color color, int yOffset);
