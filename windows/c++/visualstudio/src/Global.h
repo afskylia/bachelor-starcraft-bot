@@ -9,13 +9,13 @@ namespace MiraBot
 
 	class Global
 	{
-		MapTools* m_mapTools = nullptr;
-		WorkerManager* m_workerManager = nullptr;
-		ProductionManager* m_productionManager = nullptr;
-		CombatManager* m_combatManager = nullptr;
+		MapTools* m_map_tools_ = nullptr;
+		WorkerManager* m_worker_manager_ = nullptr;
+		ProductionManager* m_production_manager_ = nullptr;
+		CombatManager* m_combat_manager_ = nullptr;
 
 		template <class T>
-		void reset(T*& ptr)
+		static void reset(T*& ptr)
 		{
 			delete ptr;
 			ptr = nullptr;
@@ -29,15 +29,15 @@ namespace MiraBot
 		}
 
 		Global();
-		static Global& Instance();
+		static Global& instance();
 		void init();
 
 
 	public:
-		static void GameStart();
-		static WorkerManager& Workers();
-		static ProductionManager& Production();
-		static MapTools& Map();
-		static CombatManager& Combat();
+		static void gameStart();
+		static WorkerManager& workers();
+		static ProductionManager& production();
+		static MapTools& map();
+		static CombatManager& combat();
 	};
 }

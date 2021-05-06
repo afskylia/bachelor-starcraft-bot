@@ -24,5 +24,5 @@ class BuildOrderData
 public:
 
 	BuildOrderData();
-	BuildOrder SimpleBuildOrder();
+	static BuildOrder SimpleBuildOrder();
 };

@@ -39,11 +39,11 @@ namespace MiraBot
 		bool isValidTile(int tileX, int tileY) const;
 		bool isValidTile(const BWAPI::TilePosition& tile) const;
 		bool isValidPosition(const BWAPI::Position& pos) const;
-		bool isPowered(int tileX, int tileY) const;
+		static bool isPowered(int tileX, int tileY);
 		bool isExplored(int tileX, int tileY) const;
 		bool isExplored(const BWAPI::Position& pos) const;
 		bool isExplored(const BWAPI::TilePosition& pos) const;
-		bool isVisible(int tileX, int tileY) const;
+		bool isVisible(int tile_x, int tile_y) const;
 		bool isWalkable(int tileX, int tileY) const;
 		bool isWalkable(const BWAPI::TilePosition& tile) const;
 		bool isBuildable(int tileX, int tileY) const;

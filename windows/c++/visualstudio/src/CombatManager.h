@@ -10,6 +10,6 @@ namespace MiraBot
 
 		CombatManager();
 		void onFrame();
-		void rushEnemyBase();
+		static void rushEnemyBase();
 	};
 }

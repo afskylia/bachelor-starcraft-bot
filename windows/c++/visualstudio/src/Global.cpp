@@ -12,7 +12,7 @@ Global::Global()
 	init();
 }
 
-Global& Global::Instance()
+Global& Global::instance()
 {
 	static Global instance;
 	return instance;
@@ -20,18 +20,18 @@ Global& Global::Instance()
 
 void Global::init()
 {
-	reset(m_mapTools);
-	reset(m_productionManager);
-	reset(m_workerManager);
-	reset(m_combatManager);
+	reset(m_map_tools_);
+	reset(m_production_manager_);
+	reset(m_worker_manager_);
+	reset(m_combat_manager_);
 }
 
-void Global::GameStart()
+void Global::gameStart()
 {
-	Instance().init();
+	instance().init();
 }
 
-MapTools& Global::Map() { return *get(Instance().m_mapTools); }
-WorkerManager& Global::Workers() { return *get(Instance().m_workerManager); }
-ProductionManager& Global::Production() { return *get(Instance().m_productionManager); }
-CombatManager& Global::Combat() { return *get(Instance().m_combatManager); }
+MapTools& Global::map() { return *get(instance().m_map_tools_); }
+WorkerManager& Global::workers() { return *get(instance().m_worker_manager_); }
+ProductionManager& Global::production() { return *get(instance().m_production_manager_); }
+CombatManager& Global::combat() { return *get(instance().m_combat_manager_); }
