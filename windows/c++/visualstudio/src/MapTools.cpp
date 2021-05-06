@@ -4,7 +4,8 @@
 #include <sstream>
 #include <fstream>
 #include <array>
-
+#include "Global.h"
+using namespace MiraBot;
 // constructor for MapTools
 MapTools::MapTools()
 {

@@ -2,6 +2,9 @@
 
 #include <BWAPI.h>
 
+#include "WorkerManager.h"
+#include "MiraBotMain.h"
+
 namespace Tools
 {
 	std::vector<BWAPI::Unit> SortUnitsByClosest(BWAPI::Unit unit, const BWAPI::Unitset& units);
@@ -17,7 +20,7 @@ namespace Tools
 	BWAPI::Unit GetDepot();
 	BWAPI::Unit GetWorker(BWAPI::UnitType unitType);
 
-	bool BuildBuilding(BWAPI::UnitType type);
+	//bool BuildBuilding(BWAPI::UnitType type);
 
 	void DrawUnitBoundingBoxes();
 	void DrawUnitCommands();
@@ -30,4 +33,5 @@ namespace Tools
 
 	void DrawUnitHealthBars();
 	void DrawHealthBar(BWAPI::Unit unit, double ratio, BWAPI::Color color, int yOffset);
+	void drawPoint(BWAPI::Position);
 }

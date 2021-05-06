@@ -3,31 +3,45 @@
 
 #include "WorkerData.h"
 
-
-class WorkerManager
+namespace MiraBot
 {
-public:
-	WorkerManager();
-
-	void updateWorkerStatus();
-	void sendIdleWorkersToMinerals();
-	void trainAdditionalWorkers();
-	void sendScout();
-	void onFrame();
-	void onUnitCreate(BWAPI::Unit unit);
-	void onUnitDestroy(BWAPI::Unit unit);
-
-	void setMineralWorker(BWAPI::Unit unit);
+	class WorkerManager
+	{
+		friend class Global;
 	
-	//BWAPI::Unit getBuilder(Building& b, bool setJobAsBuilder = true);
-	//BWAPI::Unit getMoveWorker(BWAPI::Position p);
-	BWAPI::Unit getClosestDepot(BWAPI::Unit worker);
-	//BWAPI::Unit getGasWorker(BWAPI::Unit refinery);
-	//BWAPI::Unit getClosestEnemyUnit(BWAPI::Unit worker);
-	//BWAPI::Unit getClosestMineralWorkerTo(BWAPI::Unit enemyUnit);
-	BWAPI::Unit getWorkerScout();
-	BWAPI::Position getScoutPosition(BWAPI::Unit scout);
+	public:
+		WorkerData m_workerData;
+		WorkerManager();
 
-private:
-	WorkerData m_workerData;
-};
+		void updateWorkerStatus();
+		void sendIdleWorkersToMinerals();
+		void trainAdditionalWorkers();
+		void sendScout();
+		void onFrame();
+		void onUnitCreate(BWAPI::Unit unit);
+		void onUnitDestroy(BWAPI::Unit unit);
+
+		void setMineralWorker(BWAPI::Unit unit);
+		void setBuildingWorker(BWAPI::Unit unit, WorkerData::BuildJob buildJob);
+
+		//BWAPI::Unit getBuilder(Building& b, bool setJobAsBuilder = true);
+		//BWAPI::Unit getMoveWorker(BWAPI::Position p);
+		BWAPI::Unit getClosestDepot(BWAPI::Unit worker);
+		//BWAPI::Unit getGasWorker(BWAPI::Unit refinery);
+		//BWAPI::Unit getClosestEnemyUnit(BWAPI::Unit worker);
+		//BWAPI::Unit getClosestMineralWorkerTo(BWAPI::Unit enemyUnit);
+		BWAPI::Unit getWorkerScout();
+		BWAPI::Position getScoutPosition(BWAPI::Unit scout);
+		BWAPI::Unit getBuilder(BWAPI::UnitType type, BWAPI::Position pos);
+		WorkerData getWorkerData();
+
+		std::vector<WorkerData::BuildJob> getActiveBuildJobs();
+		std::vector<WorkerData::BuildJob> getActiveBuildJobs(BWAPI::UnitType unitType);
+
+		void test()
+		{
+			std::cout << "WorkerManager!\n";
+		}
+		
+	};
+}
