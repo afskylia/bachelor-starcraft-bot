@@ -23,7 +23,11 @@ namespace MiraBot
 		
 		int pendingBuildingsCount();
 		int pendingBuildingsCount(BWAPI::UnitType type);
+
+		bool buildBuilding(BWAPI::UnitType type);
 		
+		int getTotalMinerals();
+		int getTotalGas();
 		void test()
 		{
 			std::cout << "ProductionManager!\n";

@@ -8,9 +8,9 @@ namespace MiraBot
 	class WorkerManager
 	{
 		friend class Global;
-		WorkerData m_workerData;
 	
 	public:
+		WorkerData m_workerData;
 		WorkerManager();
 
 		void updateWorkerStatus();
@@ -22,6 +22,7 @@ namespace MiraBot
 		void onUnitDestroy(BWAPI::Unit unit);
 
 		void setMineralWorker(BWAPI::Unit unit);
+		void setBuildingWorker(BWAPI::Unit unit, WorkerData::BuildJob buildJob);
 
 		//BWAPI::Unit getBuilder(Building& b, bool setJobAsBuilder = true);
 		//BWAPI::Unit getMoveWorker(BWAPI::Position p);
@@ -37,7 +38,6 @@ namespace MiraBot
 		std::vector<WorkerData::BuildJob> getActiveBuildJobs();
 		std::vector<WorkerData::BuildJob> getActiveBuildJobs(BWAPI::UnitType unitType);
 
-		bool buildBuilding(BWAPI::UnitType type);
 		void test()
 		{
 			std::cout << "WorkerManager!\n";

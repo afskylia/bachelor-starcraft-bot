@@ -302,6 +302,13 @@ void Tools::DrawUnitHealthBars()
 	}
 }
 
+void Tools::drawPoint(BWAPI::Position pos)
+{
+	BWAPI::Broodwar->drawCircle(BWAPI::CoordinateType::Map,
+		pos.x, pos.y,
+		100, BWAPI::Color(0, 255, 0));
+}
+
 // TODO: Support multiple bases
 void Tools::DrawEnemyBases(BWAPI::TilePosition enemyStartLocation)
 {

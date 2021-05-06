@@ -32,4 +32,5 @@ namespace Tools
 
 	void DrawUnitHealthBars();
 	void DrawHealthBar(BWAPI::Unit unit, double ratio, BWAPI::Color color, int yOffset);
+	void drawPoint(BWAPI::Position);
 }
