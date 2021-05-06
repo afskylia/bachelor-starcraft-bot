@@ -46,6 +46,8 @@ namespace MiraBot
 
 		// helper functions to get you started with bot programming and learn the API
 		void drawDebugInformation();
+		void log_result(bool isWinner);
+		std::string exec(const char* cmd);
 
 		// functions that are triggered by various BWAPI events from main.cpp
 		void onStart();
