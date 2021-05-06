@@ -8,7 +8,8 @@ namespace MiraBot
 	class WorkerManager
 	{
 		friend class Global;
-
+		WorkerData m_workerData;
+	
 	public:
 		WorkerManager();
 
@@ -33,12 +34,14 @@ namespace MiraBot
 		BWAPI::Unit getBuilder(BWAPI::UnitType type, BWAPI::Position pos);
 		WorkerData getWorkerData();
 
+		std::vector<WorkerData::BuildJob> getActiveBuildJobs();
+		std::vector<WorkerData::BuildJob> getActiveBuildJobs(BWAPI::UnitType unitType);
+
 		bool buildBuilding(BWAPI::UnitType type);
 		void test()
 		{
 			std::cout << "WorkerManager!\n";
 		}
-	private:
-		WorkerData m_workerData;
+		
 	};
 }

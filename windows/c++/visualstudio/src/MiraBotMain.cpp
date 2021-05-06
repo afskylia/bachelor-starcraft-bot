@@ -16,7 +16,7 @@ MiraBotMain::MiraBotMain()
 void MiraBotMain::onStart()
 {
 	// Set our BWAPI options here    
-	BWAPI::Broodwar->setLocalSpeed(10);
+	BWAPI::Broodwar->setLocalSpeed(0); // 10
 	BWAPI::Broodwar->setFrameSkip(0);
 
 	mainBase = BWAPI::Broodwar->getClosestUnit(BWAPI::Position(BWAPI::Broodwar->self()->getStartLocation()), BWAPI::Filter::IsResourceDepot);

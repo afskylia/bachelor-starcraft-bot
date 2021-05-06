@@ -28,12 +28,12 @@ void ProductionManager::buildGateway()
 	//const int unusedSupply = Tools::GetTotalSupply(true) - BWAPI::Broodwar->self()->supplyUsed();
 	//if (unusedSupply > 7) { return; }
 
-	const BWAPI::UnitType unitType = BWAPI::UnitTypes::Protoss_Gateway;
+	const auto unitType = BWAPI::UnitTypes::Protoss_Gateway;
 	if (BWAPI::Broodwar->self()->minerals() < unitType.mineralPrice()) { return; }
 
-	if (Tools::CountUnitsOfType(unitType) < 4)
+	if (countBuildings(unitType,true) < 4)
 	{
-		bool startedBuilding = Global::Workers().buildBuilding(unitType);
+		auto startedBuilding = Global::Workers().buildBuilding(unitType);
 		if (startedBuilding)
 		{
 			BWAPI::Broodwar->printf("Started Building %s", unitType.getName().c_str());
@@ -44,7 +44,7 @@ void ProductionManager::buildGateway()
 
 void ProductionManager::buildAttackUnits()
 {
-	const BWAPI::UnitType unitType = BWAPI::UnitTypes::Protoss_Zealot;
+	const auto unitType = BWAPI::UnitTypes::Protoss_Zealot;
 	auto gateways = Tools::GetUnitsOfType(BWAPI::UnitTypes::Protoss_Gateway);
 	for (auto* gateway : gateways)
 	{
@@ -56,23 +56,58 @@ void ProductionManager::buildAdditionalSupply()
 {
 	// Get the amount of supply supply we currently have unused
 //const int unusedSupply = Tools::GetTotalSupply(true) - BWAPI::Broodwar->self()->supplyUsed();
+	const auto supplyProviderType = BWAPI::Broodwar->self()->getRace().getSupplyProvider();
 
-// If we have a sufficient amount of supply, we don't need to do anything
+	// Only build one supply depot at a time
+	if (pendingBuildingsCount(supplyProviderType) > 0) return;
+
+	// If we have a sufficient amount of supply, we don't need to do anything
 	if (BWAPI::Broodwar->self()->supplyUsed() + 8 >= Tools::GetTotalSupply(true))
 	{
 		//if (unusedSupply >= 3) { return; }
 		//BWAPI::UnitTypes::Protoss_Zealot.supplyRequired()
 
 		// Otherwise, we are going to build a supply provider
-		const BWAPI::UnitType supplyProviderType = BWAPI::Broodwar->self()->getRace().getSupplyProvider();
-
-		//std::cout << BWAPI::Broodwar->self()->mine
-		if (BWAPI::Broodwar->self()->minerals() < supplyProviderType.mineralPrice()) { return; }
-		Global::Workers().test();
-		const bool startedBuilding = Global::Workers().buildBuilding(supplyProviderType);
+		//if (BWAPI::Broodwar->self()->minerals() < supplyProviderType.mineralPrice()) { return; }
+		const auto startedBuilding = Global::Workers().buildBuilding(supplyProviderType);
 		if (startedBuilding)
 		{
 			BWAPI::Broodwar->printf("Started Building %s", supplyProviderType.getName().c_str());
 		}
 	}
+}
+
+// Returns num. of owned buildings, optionally also pending ones
+int ProductionManager::countBuildings(bool pending)
+{
+	int sum = std::size(BWAPI::Broodwar->self()->getUnits());
+	if (pending) sum += pendingBuildingsCount();
+	return sum;
+}
+
+// Returns num. of owned buildings of given type, optionally also pending ones
+int ProductionManager::countBuildings(BWAPI::UnitType type, bool pending)
+{
+	auto sum = 0;
+	for (auto& unit : BWAPI::Broodwar->self()->getUnits())
+	{
+		if (unit->getType() == type)sum++;
+	}
+
+	if (pending) sum += pendingBuildingsCount(type);
+	return sum;
+}
+
+// Returns number of pending buildings (build job assigned but not yet built)
+int ProductionManager::pendingBuildingsCount()
+{
+	auto buildJobs = Global::Workers().getActiveBuildJobs();
+	return std::size(buildJobs);
+}
+
+// Returns number of pending buildings of given type (build job assigned but not yet built)
+int ProductionManager::pendingBuildingsCount(BWAPI::UnitType type)
+{
+	auto buildJobs = Global::Workers().getActiveBuildJobs(type);
+	return std::size(buildJobs);
 }

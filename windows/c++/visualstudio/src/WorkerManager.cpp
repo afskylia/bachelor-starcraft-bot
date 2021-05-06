@@ -37,8 +37,28 @@ void WorkerManager::updateWorkerStatus()
 			{
 			case WorkerData::Build:
 			{
+					auto buildingType = m_workerData.m_workerBuildingTypeMap[worker];
+					if (buildingType== BWAPI::UnitTypes::None)
+					{
+						m_workerData.setWorkerJob(worker, WorkerData::Idle, nullptr);
+						break;
+					}
+					
 				// TODO: build if we are in the building position and have enough money
 				// otherwise make sure we are moving to the position
+					// TODO: What if worker can't reach the position? check if is walkable
+				if (worker->getPosition() == m_workerData.m_workerMoveMap[worker])
+				{
+					auto buildingPos = m_workerData.m_buildPosMap[worker];
+					if (worker->build(buildingType, buildingPos))
+					{
+						m_workerData.m_workerBuildingTypeMap[worker] = BWAPI::UnitTypes::None;
+						std::cout << "Now building!\n";
+					} else
+					{
+						std::cout << "Failed to build\n";
+					}
+				}
 				break;
 			}
 			case WorkerData::Move:
@@ -189,7 +209,8 @@ BWAPI::Unit WorkerManager::getWorkerScout()
 BWAPI::Unit WorkerManager::getBuilder(BWAPI::UnitType type, BWAPI::Position pos)
 {
 	BWAPI::Unit closestUnit = nullptr;
-	for (auto& unit : m_workerData.getWorkers(WorkerData::Minerals))
+	auto unitSet = m_workerData.getWorkers(WorkerData::Minerals);
+	for (auto& unit : unitSet)
 	{
 
 		// If worker isn't of required type or hasn't been trained yet, continue
@@ -215,9 +236,47 @@ BWAPI::Unit WorkerManager::getBuilder(BWAPI::UnitType type, BWAPI::Position pos)
 	return closestUnit;
 }
 
+// Returns a vector of all active (=unfinished) build jobs
+std::vector<WorkerData::BuildJob> WorkerManager::getActiveBuildJobs()
+{
+	std::vector<WorkerData::BuildJob> buildJobs;
+
+	auto builders = m_workerData.getWorkers(WorkerData::Build);
+	for (auto& unit : builders)
+	{
+		auto unitBuildingType = m_workerData.m_workerBuildingTypeMap[unit];
+		// TODO: safer way to check map, this can cause exceptions - use find instead
+
+		auto buildJob = WorkerData::BuildJob{ m_workerData.m_buildPosMap[unit], unitBuildingType };
+		buildJobs.push_back(buildJob);
+	}
+	return buildJobs;
+}
+
+// Returns a vector of active (=unfinished) build jobs of given unit type
+std::vector<WorkerData::BuildJob> WorkerManager::getActiveBuildJobs(BWAPI::UnitType unitType)
+{
+	std::vector<WorkerData::BuildJob> buildJobs;
+	auto builders = m_workerData.getWorkers(WorkerData::Build);
+	for (auto& unit : builders)
+	{
+		auto unitBuildingType = m_workerData.m_workerBuildingTypeMap[unit];
+		// TODO: safer way to check map, this can cause exceptions - use find instead
+
+		if (unitBuildingType == unitType)
+		{
+			auto buildJob = WorkerData::BuildJob{ m_workerData.m_buildPosMap[unit], unitType };
+			buildJobs.push_back(buildJob);
+		}
+	}
+	return buildJobs;
+}
+
+
 bool WorkerManager::buildBuilding(BWAPI::UnitType type)
 {
-	std::cout << "buildBuilding\n";
+	// TODO: Account for both minerals and gas
+	// TODO: Does the unit type require multiple workers?
 
 	// If we have much less minerals than required, it's not worth to wait for it
 	if (BWAPI::Broodwar->self()->minerals() < type.mineralPrice() / 3)
@@ -240,10 +299,6 @@ bool WorkerManager::buildBuilding(BWAPI::UnitType type)
 	auto* builder = getBuilder(builderType, BWAPI::Position(buildPos));
 	if (!builder) { return false; }
 
-	// TODO: set builder job and position etc
-	// TODO: if not enough money yet, send builder over there to wait
-
 	m_workerData.setWorkerJob(builder, WorkerData::Build, WorkerData::BuildJob{ buildPos,type });
 	return true;
-	//return builder->build(type, buildPos);
 }

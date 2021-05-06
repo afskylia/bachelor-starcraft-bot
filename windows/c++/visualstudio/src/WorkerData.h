@@ -27,12 +27,13 @@ namespace MiraBot
 		void setWorkerJob(BWAPI::Unit unit, enum WorkerJob job, BWAPI::Position pos);
 		void setWorkerJob(BWAPI::Unit unit, enum WorkerJob job, struct BuildJob buildJob);
 
+		void resetJob(BWAPI::Unit unit);
 		void workerDestroyed(BWAPI::Unit unit);
 		void addDepot(BWAPI::Unit unit);
 		void removeDepot(BWAPI::Unit unit);
 
-		const BWAPI::Unitset& getWorkers() const;
-		const BWAPI::Unitset& getWorkers(WorkerJob job) const;
+		BWAPI::Unitset getWorkers();
+		BWAPI::Unitset getWorkers(WorkerJob job);
 
 		bool depotIsFull(BWAPI::Unit depot);
 		int  getMineralsNearDepot(BWAPI::Unit depot);
@@ -44,7 +45,6 @@ namespace MiraBot
 		BWAPI::Unit		getMineralToMine(BWAPI::Unit unit);
 		BWAPI::Unit		getBuilder(BWAPI::UnitType buildingType, BWAPI::Position position);
 
-	private:
 		BWAPI::Unitset m_workers;
 		BWAPI::Unitset m_depots;
 
