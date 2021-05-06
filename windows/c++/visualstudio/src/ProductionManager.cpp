@@ -34,10 +34,7 @@ void ProductionManager::buildGateway()
 	if (countBuildings(unitType,true) < 4)
 	{
 		auto startedBuilding = Global::Workers().buildBuilding(unitType);
-		if (startedBuilding)
-		{
-			BWAPI::Broodwar->printf("Started Building %s", unitType.getName().c_str());
-		}
+		if (startedBuilding)std::cout << "Assigned build job: " << unitType.getName() << "\n";
 
 	}
 }

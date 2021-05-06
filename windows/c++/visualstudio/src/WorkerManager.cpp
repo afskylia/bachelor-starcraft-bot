@@ -26,6 +26,7 @@ void WorkerManager::updateWorkerStatus()
 {
 	for (auto& worker : m_workerData.getWorkers())
 	{
+		auto job = m_workerData.getWorkerJob(worker);
 		if (!worker->isCompleted())
 		{
 			continue;
@@ -33,32 +34,46 @@ void WorkerManager::updateWorkerStatus()
 
 		if (worker->isIdle())
 		{
-			switch (m_workerData.getWorkerJob(worker))
+			switch (job)
 			{
 			case WorkerData::Build:
 			{
-					auto buildingType = m_workerData.m_workerBuildingTypeMap[worker];
-					if (buildingType== BWAPI::UnitTypes::None)
-					{
-						m_workerData.setWorkerJob(worker, WorkerData::Idle, nullptr);
-						break;
-					}
-					
-				// TODO: build if we are in the building position and have enough money
-				// otherwise make sure we are moving to the position
-					// TODO: What if worker can't reach the position? check if is walkable
+				auto buildingType = m_workerData.m_workerBuildingTypeMap[worker];
+				if (buildingType == BWAPI::UnitTypes::None)
+				{
+					m_workerData.setWorkerJob(worker, WorkerData::Idle, nullptr);
+					break;
+				}
+
+				// TODO: Make sure we didn't get trapped somewhere, if we're not at the target we should walk there
+				// TODO: What if worker can't reach the position? check if is walkable
+
+				// Check if worker reached the goal position // TODO: Or is close enough!
 				if (worker->getPosition() == m_workerData.m_workerMoveMap[worker])
 				{
+					if (buildingType.mineralPrice() > BWAPI::Broodwar->self()->minerals()) break;
+
 					auto buildingPos = m_workerData.m_buildPosMap[worker];
-					if (worker->build(buildingType, buildingPos))
+
+					// Try to place the building
+					while (!worker->build(buildingType, buildingPos))
 					{
-						m_workerData.m_workerBuildingTypeMap[worker] = BWAPI::UnitTypes::None;
-						std::cout << "Now building!\n";
-					} else
-					{
-						std::cout << "Failed to build\n";
+						// Ask BWAPI for a new building location
+						int maxBuildRange = 64;
+						bool buildingOnCreep = buildingType.requiresCreep();
+						buildingPos = BWAPI::Broodwar->getBuildLocation(buildingType, buildingPos, maxBuildRange, buildingOnCreep);
+						std::cout << "Failed to build " << buildingType.getName() << "\n";
 					}
+
+					m_workerData.m_workerBuildingTypeMap[worker] = BWAPI::UnitTypes::None;
+					std::cout << "Now building " << buildingType.getName() << "\n";
 				}
+
+				else
+				{
+					// TODO: Maybe the unit got stuck somewhere. Send it to the target position again.
+				}
+
 				break;
 			}
 			case WorkerData::Move:
@@ -82,6 +97,17 @@ void WorkerManager::updateWorkerStatus()
 			default:
 			{
 				m_workerData.setWorkerJob(worker, WorkerData::Idle, nullptr);
+			}
+			}
+		}
+
+		else
+		{
+			switch (job)
+			{
+			case WorkerData::Build:
+			{
+
 			}
 			}
 		}
@@ -245,6 +271,7 @@ std::vector<WorkerData::BuildJob> WorkerManager::getActiveBuildJobs()
 	for (auto& unit : builders)
 	{
 		auto unitBuildingType = m_workerData.m_workerBuildingTypeMap[unit];
+		if (unitBuildingType == BWAPI::UnitTypes::None) continue;
 		// TODO: safer way to check map, this can cause exceptions - use find instead
 
 		auto buildJob = WorkerData::BuildJob{ m_workerData.m_buildPosMap[unit], unitBuildingType };
@@ -261,6 +288,7 @@ std::vector<WorkerData::BuildJob> WorkerManager::getActiveBuildJobs(BWAPI::UnitT
 	for (auto& unit : builders)
 	{
 		auto unitBuildingType = m_workerData.m_workerBuildingTypeMap[unit];
+		if (unitBuildingType == BWAPI::UnitTypes::None) continue;
 		// TODO: safer way to check map, this can cause exceptions - use find instead
 
 		if (unitBuildingType == unitType)
@@ -273,13 +301,14 @@ std::vector<WorkerData::BuildJob> WorkerManager::getActiveBuildJobs(BWAPI::UnitT
 }
 
 
+// TODO: Move to ProductionManager
 bool WorkerManager::buildBuilding(BWAPI::UnitType type)
 {
 	// TODO: Account for both minerals and gas
 	// TODO: Does the unit type require multiple workers?
 
 	// If we have much less minerals than required, it's not worth to wait for it
-	if (BWAPI::Broodwar->self()->minerals() < type.mineralPrice() / 3)
+	if (BWAPI::Broodwar->self()->minerals() < type.mineralPrice() * 0.7)
 		return false;
 
 	// Get the type of unit that is required to build the desired building
@@ -293,9 +322,7 @@ bool WorkerManager::buildBuilding(BWAPI::UnitType type)
 	bool buildingOnCreep = type.requiresCreep();
 	BWAPI::TilePosition buildPos = BWAPI::Broodwar->getBuildLocation(type, desiredPos, maxBuildRange, buildingOnCreep);
 
-	// Get a unit that we own that is of the given type so it can build
-	// If we can't find a valid builder unit, then we have to cancel the building
-	//BWAPI::Unit builder = GetWorker(builderType, BWAPI::Position(buildPos));
+	// Try to build the unit
 	auto* builder = getBuilder(builderType, BWAPI::Position(buildPos));
 	if (!builder) { return false; }
 
