@@ -90,7 +90,7 @@ void MiraBot::onUnitCreate(BWAPI::Unit unit)
 	if (unit->getType().isWorker()) m_worker_manager.onUnitCreate(unit);
 	// TODO: else combatmanager.onunitcreate()
 
-	m_production_manager.onUnitComplete(unit);
+	//m_production_manager.onUnitComplete(unit);
 }
 
 // Called whenever a unit finished construction, with a pointer to the unit
@@ -104,7 +104,7 @@ void MiraBot::onUnitComplete(BWAPI::Unit unit)
 	default: break;
 	}
 
-	//m_production_manager.onUnitComplete(unit);
+	m_production_manager.onUnitComplete(unit);
 }
 
 // Called whenever a unit appears, with a pointer to the destroyed unit

@@ -9,10 +9,11 @@
  */
 ProductionManager::ProductionManager()
 {
-	for (int i = 5; i <= 200; ++i)
+	for (int i = 0; i <= 200; ++i)
 	{
 		m_build_order[i] = BWAPI::UnitTypes::Protoss_Probe;
 	}
+	m_build_order[4] = BWAPI::UnitTypes::Protoss_Nexus;
 	m_build_order[8] = BWAPI::UnitTypes::Protoss_Pylon;
 	m_build_order[10] = BWAPI::UnitTypes::Protoss_Gateway;
 	m_build_order[12] = BWAPI::UnitTypes::Protoss_Assimilator;
@@ -30,10 +31,16 @@ void ProductionManager::tryBuildOrTrainUnit()
 	m_build_queue.pop_front();
 
 	// Try to build unit type
-	unit_type.isBuilding() ? Tools::BuildBuilding(unit_type) : trainUnit(unit_type);
-
-	// Add to try built or trained vector
-	m_try_built_or_trained[BWAPI::Broodwar->getFrameCount()] = unit_type;
+	if (unit_type.isBuilding())
+	{
+		bool builded = Tools::BuildBuilding(unit_type);
+		if (!builded) m_last_build_frame = BWAPI::Broodwar->getFrameCount();
+	}
+	else
+	{
+		bool builded = trainUnit(unit_type);
+		if (!builded) m_last_build_frame = BWAPI::Broodwar->getFrameCount();
+	}
 }
 
 bool ProductionManager::addToBuildQueue(const BWAPI::UnitType& unit_type)
@@ -41,7 +48,6 @@ bool ProductionManager::addToBuildQueue(const BWAPI::UnitType& unit_type)
 	if (std::find(m_build_queue.begin(), m_build_queue.end(), unit_type) == m_build_queue.end()) {
 		// Add unit to build queue and remove from build order
 		m_build_queue.push_back(unit_type);
-		
 
 		// TODO debug
 		for (auto build_queue : m_build_queue)
@@ -70,35 +76,78 @@ void ProductionManager::addToBuildQueueFromBuildOrder()
 	if (addToBuildQueue(unit_type)) m_build_order.erase(it);
 }
 
-void ProductionManager::reQueue(int frame_delay = 150)
+std::map<BWAPI::UnitType, int> ProductionManager::get_map_of_all_units()
 {
-	for (auto &try_built_or_trained : m_try_built_or_trained)
+	std::map<BWAPI::UnitType, int> all_units;
+
+	auto units = BWAPI::Broodwar->self()->getUnits();
+	for (auto* unit : units)
 	{
-		if (try_built_or_trained.first + frame_delay <= BWAPI::Broodwar->getFrameCount())
+		all_units[unit->getType()]++;
+	}
+	return all_units;
+}
+
+std::map<BWAPI::UnitType, int> ProductionManager::get_map_of_required_units()
+{
+	std::map<BWAPI::UnitType, int> required_units;
+
+	// Get next supply
+	//const int supply = (BWAPI::Broodwar->self()->supplyUsed() / 2) + 1;
+	const int supply = (Tools::GetTotalUsedSupply(true) / 2);
+
+	// Iterate build order
+	for (auto build_order : m_build_order)
+	{
+		// If unit needed to be build, add it to required_units
+		if (build_order.first <= supply)
 		{
-			addToBuildQueue(try_built_or_trained.second);
-			m_try_built_or_trained.erase(try_built_or_trained.first);
+			required_units[build_order.second]++;
 		}
+	}
+
+	return required_units;
+}
+
+void ProductionManager::compareUnitsAndBuild()
+{
+	if (m_build_queue.empty())
+	{
+		auto all_units = get_map_of_all_units();
+		auto required_units = get_map_of_required_units();
+
+		// TODO if maps are the same, return
+
+		for (auto required_unit : required_units)
+		{
+			// Try find in all units
+			auto it = all_units.find(required_unit.first);
+			// If not found or we need more units, build it
+			if (it == all_units.end()) {
+				addToBuildQueue(required_unit.first);
+				break;
+			}
+			if (required_unit.second > it->second) 
+				addToBuildQueue(required_unit.first);
+		}
+	}
+	tryBuildOrTrainUnit();
+}
+
+void ProductionManager::tryCompareUnitsAndBuild()
+{
+	const int frame_count = BWAPI::Broodwar->getFrameCount();
+	if (frame_count == m_last_build_frame + 20 /*|| frame_count > m_last_compare_frame + 1000*/) {
+
+		compareUnitsAndBuild();
+		m_last_compare_frame = frame_count;
 	}
 }
 
 void ProductionManager::onFrame()
 {
-	addToBuildQueueFromBuildOrder();
-	if (BWAPI::Broodwar->getFrameCount() % 150 == 0)
-	{
-		//reQueue(150);
-	}
-	// Happens every 10 frames
-	if (BWAPI::Broodwar->getFrameCount() % 10 == 0)
-	{
-		tryBuildOrTrainUnit();
-	}
-
-	// Build more supply if we are going to run out soon
-	/*buildAdditionalSupply();
-	buildGateway();
-	buildAttackUnits();*/
+	//if (BWAPI::Broodwar->getFrameCount() % 1500 == 0) compareUnitsAndBuild();
+	tryCompareUnitsAndBuild();
 }
 
 /**
@@ -114,6 +163,8 @@ void ProductionManager::onUnitDestroy(BWAPI::Unit unit)
  */
 void ProductionManager::onUnitComplete(BWAPI::Unit unit)
 {
+	m_last_build_frame = BWAPI::Broodwar->getFrameCount();
+	m_last_compare_frame = m_last_build_frame;
 	/*if (m_try_built_or_trained.empty())
 	{
 		return;
