@@ -257,13 +257,13 @@ int Tools::GetTotalSupply(bool inProgress)
 	return totalSupply;
 }
 
-int Tools::GetTotalUsedSupply(bool inProgress)
+int Tools::GetTotalUsedSupply(bool in_progress_and_building_supply)
 {
 	// start the calculation by looking at our current completed supplyt
 	int totalSupply = BWAPI::Broodwar->self()->supplyUsed();
 
 	// if we don't want to calculate the supply in progress, just return that value
-	if (!inProgress) { return totalSupply; }
+	if (!in_progress_and_building_supply) { return totalSupply; }
 
 	// if we do care about supply in progress, check all the currently constructing units if they will add supply
 	for (auto& unit : BWAPI::Broodwar->self()->getUnits())

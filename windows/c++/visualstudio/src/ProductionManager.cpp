@@ -103,8 +103,8 @@ std::map<BWAPI::UnitType, int> ProductionManager::get_map_of_required_units()
  */
 void ProductionManager::compareUnitsAndBuild()
 {
-	if (m_build_queue.empty())
-	{
+	//if (m_build_queue.empty())
+	//{
 		auto all_units = get_map_of_all_units();
 		auto required_units = get_map_of_required_units();
 
@@ -122,7 +122,7 @@ void ProductionManager::compareUnitsAndBuild()
 			if (required_unit.second > it->second) 
 				addToBuildQueue(required_unit.first);
 		}
-	}
+	//}
 	tryBuildOrTrainUnit();
 }
 
@@ -174,10 +174,15 @@ bool ProductionManager::trainUnit(const BWAPI::UnitType& unit)
 
 		// if we have a valid depot unit and it's currently not training something, train a worker
 		// there is no reason for a bot to ever use the unit queueing system, it just wastes resources
-		if (myDepot && !myDepot->isTraining()) { myDepot->train(unit); }
+		if (myDepot && !myDepot->isTraining())
+		{
+			myDepot->train(unit);
+		}
 		break;
 	}
-	default: std::cout << unit << " not supported \n";
+	default: {
+		std::cout << unit << " not supported \n";
+		return false;}
 	}
 	return true;
 }
