@@ -68,6 +68,8 @@ void MiraBotMain::drawDebugInformation()
 void MiraBotMain::onUnitDestroy(BWAPI::Unit unit)
 {
 	if (unit->getType().isWorker()) Global::Workers().onUnitDestroy(unit);
+	// TODO maybe fix?
+	Global::Production().onUnitDestroy(unit);
 }
 
 // Called whenever a unit is morphed, with a pointer to the unit
@@ -93,6 +95,8 @@ void MiraBotMain::onUnitCreate(BWAPI::Unit unit)
 	// TODO: Worker manager and combat manager have to decide which job to assign new units
 	if (unit->getType().isWorker()) Global::Workers().onUnitCreate(unit);
 	// TODO: else combatmanager.onunitcreate()
+
+	Global::Production().onUnitComplete(unit);
 }
 
 // Called whenever a unit finished construction, with a pointer to the unit
@@ -105,6 +109,8 @@ void MiraBotMain::onUnitComplete(BWAPI::Unit unit)
 		break;
 	default: break;
 	}
+
+	Global::Production().onUnitComplete(unit);
 }
 
 // Called whenever a unit appears, with a pointer to the destroyed unit
