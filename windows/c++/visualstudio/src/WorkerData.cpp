@@ -39,17 +39,25 @@ void WorkerData::addWorker(BWAPI::Unit unit, WorkerJob job, struct BuildJob buil
 	setWorkerJob(unit, job, buildJob);
 }
 
+// Called when a worker dies, certain jobs should be re-assigned
 void WorkerData::workerDestroyed(BWAPI::Unit unit)
 {
-	// TODO assign job to another worker (important if job==BUILD)
-	if (!unit) { return; }
+	// Try to re-assign build jobs
+	if (m_workerJobMap[unit] == WorkerJob::Build)
+	{
+		auto type = m_workerBuildingTypeMap[unit];
+		auto move = m_workerMoveMap[unit];
+		auto pos = m_buildPosMap[unit];
+		auto newWorker = getBuilder(type, move);
+		if (newWorker) setWorkerJob(newWorker, Build, BuildJob{ pos,type });
+	}
+
 	resetJob(unit);
 	m_workers.erase(unit);
 }
 
 void WorkerData::resetJob(BWAPI::Unit unit)
 {
-	if (!unit) { return; }
 	WorkerJob previousJob = getWorkerJob(unit);
 
 	switch (previousJob)
@@ -119,7 +127,7 @@ void WorkerData::setWorkerJob(BWAPI::Unit unit, enum WorkerJob job, BWAPI::Posit
 {
 	if (!unit) { return; }
 	resetJob(unit);
-	
+
 	m_workerJobMap[unit] = job;
 	m_workerMoveMap[unit] = pos;
 
@@ -133,7 +141,7 @@ void WorkerData::setWorkerJob(BWAPI::Unit unit, enum WorkerJob job, struct Build
 {
 	if (!unit) { return; }
 	resetJob(unit);
-	
+
 	m_workerJobMap[unit] = job;
 	m_workerBuildingTypeMap[unit] = buildJob.unitType;
 	m_workerMoveMap[unit] = BWAPI::Position(buildJob.tilePos);

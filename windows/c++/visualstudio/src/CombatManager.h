@@ -11,9 +11,5 @@ namespace MiraBot
 		CombatManager();
 		void onFrame();
 		void rushEnemyBase();
-		void test()
-		{
-			std::cout << "CombatManager!\n";
-		}
 	};
 }

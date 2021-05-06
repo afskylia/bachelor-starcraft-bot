@@ -49,10 +49,5 @@ namespace MiraBot
 		bool    isBuildable(const BWAPI::TilePosition& tile) const;
 		bool    isDepotBuildableTile(int tileX, int tileY) const;
 		void    drawTile(int tileX, int tileY, const BWAPI::Color& color) const;
-
-		void test()
-		{
-			std::cout << "MapTools!\n";
-		}
 	};
 }
