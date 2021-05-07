@@ -20,25 +20,16 @@ namespace MiraBot
 		//ProductionManager m_production_manager;
 		//CombatManager m_combat_manager;
 		//WorkerManager m_worker_manager;
-		bool foundEnemy = false;
+		//bool found_enemy_ = false;
 
 		//BWAPI::Unitset workers = BWAPI::Unitset::none;
 		//BWAPI::Unitset attackUnits = BWAPI::Unitset::none;
 
-		int m_zealot_count = 0;
-
 	public:
 
-
-		static inline BWAPI::Unit m_scout = nullptr;
-		static inline BWAPI::Unit mainBase = nullptr;
-		static inline BWAPI::Race enemyRace = BWAPI::Races::None;
-		static inline BWAPI::TilePosition enemyStartLocation = BWAPI::TilePositions::None;
-
-		/**
-		* \brief rushing zealots
-		*/
-		static inline std::vector<BWAPI::Unit> m_zealot;
+		//static inline BWAPI::Unit main_base = nullptr;
+		//static inline BWAPI::Race enemy_race = BWAPI::Races::None;
+		//static inline BWAPI::TilePosition enemy_start_location = BWAPI::TilePositions::None;
 
 		MiraBotMain();
 

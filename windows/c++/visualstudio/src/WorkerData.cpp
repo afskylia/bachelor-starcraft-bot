@@ -1,6 +1,7 @@
 #include "WorkerData.h"
 
 
+#include "Global.h"
 #include "MiraBotMain.h"
 #include "Tools.h"
 
@@ -152,7 +153,7 @@ void WorkerData::setWorkerJob(BWAPI::Unit unit, enum WorkerJob job, struct Build
 
 BWAPI::Unit WorkerData::getMineralToMine(BWAPI::Unit unit)
 {
-	auto minerals_near_base = MiraBotMain::mainBase->getUnitsInRadius(1024, BWAPI::Filter::IsMineralField);
+	auto minerals_near_base = Global::information().main_base->getUnitsInRadius(1024, BWAPI::Filter::IsMineralField);
 	auto sorted_minerals = Tools::SortUnitsByClosest(unit, minerals_near_base);
 	for (auto m : sorted_minerals)
 	{
