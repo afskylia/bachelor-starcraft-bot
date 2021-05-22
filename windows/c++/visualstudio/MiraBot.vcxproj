@@ -19,6 +19,7 @@
     <ClInclude Include="src\MapTools.h" />
     <ClInclude Include="src\MiraBotMain.h" />
     <ClInclude Include="src\ProductionManager.h" />
+    <ClInclude Include="src\StrategyManager.h" />
     <ClInclude Include="src\Tools.h" />
     <ClInclude Include="src\WorkerManager.h" />
     <ClInclude Include="src\WorkerData.h" />
@@ -31,6 +32,7 @@
     <ClCompile Include="src\MapTools.cpp" />
     <ClCompile Include="src\MiraBotMain.cpp" />
     <ClCompile Include="src\ProductionManager.cpp" />
+    <ClCompile Include="src\StrategyManager.cpp" />
     <ClCompile Include="src\Tools.cpp" />
     <ClCompile Include="src\WorkerManager.cpp" />
     <ClCompile Include="src\WorkerData.cpp" />

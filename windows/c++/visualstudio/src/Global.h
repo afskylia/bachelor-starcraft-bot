@@ -6,6 +6,7 @@ namespace MiraBot
 	class WorkerManager;
 	class ProductionManager;
 	class CombatManager;
+	class StrategyManager;
 
 	class Global
 	{
@@ -13,6 +14,7 @@ namespace MiraBot
 		WorkerManager* m_worker_manager_ = nullptr;
 		ProductionManager* m_production_manager_ = nullptr;
 		CombatManager* m_combat_manager_ = nullptr;
+		StrategyManager* m_strategy_manager_ = nullptr;
 
 		template <class T>
 		static void reset(T*& ptr)
@@ -39,5 +41,6 @@ namespace MiraBot
 		static ProductionManager& production();
 		static MapTools& map();
 		static CombatManager& combat();
+		static StrategyManager& strategy();
 	};
 }
