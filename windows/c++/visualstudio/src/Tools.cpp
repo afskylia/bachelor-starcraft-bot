@@ -118,6 +118,7 @@ BWAPI::Unit Tools::GetUnitOfType(BWAPI::UnitType type)
 	return nullptr;
 }
 
+// Returns a vector of available, idle units of given type
 std::vector<BWAPI::Unit> Tools::GetUnitsOfType(BWAPI::UnitType type)
 {
 	std::vector<BWAPI::Unit> units = {};

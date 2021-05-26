@@ -17,13 +17,13 @@ MiraBotMain::MiraBotMain() = default;
 void MiraBotMain::onStart()
 {
 	// Set our BWAPI options here    
-	BWAPI::Broodwar->setLocalSpeed(0); // 10
+	BWAPI::Broodwar->setLocalSpeed(10); // 10
 	BWAPI::Broodwar->setFrameSkip(0);
 
 	mainBase = BWAPI::Broodwar->getClosestUnit(BWAPI::Position(BWAPI::Broodwar->self()->getStartLocation()),
 	                                           BWAPI::Filter::IsResourceDepot);
 
-	// Enable the flag that tells BWAPI top let users enter input while bot plays
+	// Enable the flag that tells BWAPI to let users enter input while bot plays
 	BWAPI::Broodwar->enableFlag(BWAPI::Flag::UserInput);
 
 	// Call MapTools OnStart
@@ -101,6 +101,7 @@ void MiraBotMain::onFrame()
 	Global::workers().onFrame();
 	Global::production().onFrame();
 	Global::combat().onFrame();
+	Global::strategy().onFrame();
 
 	// Update our MapTools information
 	Global::map().onFrame();

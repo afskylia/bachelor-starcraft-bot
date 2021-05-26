@@ -1,4 +1,13 @@
 #pragma once
-class StrategyManager
+
+namespace MiraBot
 {
-};
+	class StrategyManager
+	{
+		friend class Global;
+
+	public:
+		StrategyManager();
+		void onFrame();
+	};
+}

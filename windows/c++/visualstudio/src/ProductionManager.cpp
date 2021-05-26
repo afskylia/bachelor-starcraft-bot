@@ -12,6 +12,7 @@ ProductionManager::ProductionManager()
 {
 	for (int i = 0; i <= 200; ++i)
 	{
+		// TODO: Revamp of build order system so it doesn't have probes on empty levels
 		m_build_order[i] = BWAPI::UnitTypes::Protoss_Probe;
 	}
 	m_build_order[4] = BWAPI::UnitTypes::Protoss_Nexus;
@@ -19,6 +20,19 @@ ProductionManager::ProductionManager()
 	m_build_order[10] = BWAPI::UnitTypes::Protoss_Gateway;
 	m_build_order[12] = BWAPI::UnitTypes::Protoss_Assimilator;
 	m_build_order[13] = BWAPI::UnitTypes::Protoss_Cybernetics_Core;
+}
+
+
+void ProductionManager::onFrame()
+{
+	// Enforce build order
+	tryCompareUnitsAndBuild();
+
+	// Make idle buildings produce units if needed
+	activateIdleBuildings();
+
+	// TODO: Instead, automatically add supply depots to build order when about to run out
+	buildAdditionalSupply();
 }
 
 void ProductionManager::tryBuildOrTrainUnit()
@@ -34,13 +48,17 @@ void ProductionManager::tryBuildOrTrainUnit()
 	// Try to build unit type
 	if (unit_type.isBuilding())
 	{
-		bool builded = buildBuilding(unit_type);
-		if (!builded) m_last_build_frame = BWAPI::Broodwar->getFrameCount();
+		const auto built = buildBuilding(unit_type);
+		if (!built) m_last_build_frame = BWAPI::Broodwar->getFrameCount();
 	}
 	else
 	{
-		bool builded = trainUnit(unit_type);
-		if (!builded) m_last_build_frame = BWAPI::Broodwar->getFrameCount();
+		// TODO: revamp of build order system so it doesn't have probes on the empty spots?
+		// This is a hotfix until then - ignores all "probe" levels from the build order
+		if (unit_type == BWAPI::UnitTypes::Protoss_Probe) return;
+
+		const auto built = trainUnit(unit_type);
+		if (!built) m_last_build_frame = BWAPI::Broodwar->getFrameCount();
 	}
 }
 
@@ -127,7 +145,9 @@ void ProductionManager::compareUnitsAndBuild()
 }
 
 /**
- * Try to compare units with required units and build difference
+ * Try to compare units with required units and build difference.
+ * This is not enforced on every frame of the game, since that would
+ * lead to buildings being enqueued multiple times due to delays.
  */
 void ProductionManager::tryCompareUnitsAndBuild()
 {
@@ -138,13 +158,44 @@ void ProductionManager::tryCompareUnitsAndBuild()
 	}
 }
 
-void ProductionManager::onFrame()
+
+void ProductionManager::activateIdleBuildings()
 {
-	tryCompareUnitsAndBuild();
-	// TODO: train workers in idle buildings
-	// TODO: late game, train attack units in idle buildings
-	// TODO: build supply depots when about to run out
+	/**
+	 * TODO: Make this better and less hardcoded
+	 * Should count number of units w. certain job, not just all units.
+	 * E.g. "we need 30 mineral workers, 20 gas workers" and so on.
+	 * Also the number of units we need should dynamically be adjusted if needed.
+	 *
+	 * TODO: Maybe make a class (InformationManager?) that stores relevant information
+	 * Such as all the races and their unit types, how many of each type/job we want etc.
+	 * Then this function can iterate the list of needed units in a smart way.
+	 *
+	 * TODO: Only train units if we can afford it
+	 * (I.e. it won't make us too poor to afford higher priority units/upgrades.)
+	 */
+
+	const auto worker_type = BWAPI::Broodwar->self()->getRace().getWorker();
+	auto workers_owned = Tools::CountUnitsOfType(worker_type, BWAPI::Broodwar->self()->getUnits());
+	const auto workers_wanted = 30;
+	auto idle_nexuses = Tools::GetUnitsOfType(BWAPI::UnitTypes::Protoss_Nexus);
+	while (workers_owned <= workers_wanted && !idle_nexuses.empty())
+	{
+		//if (unit->getType() == type && unit->isCompleted() && unit->isIdle())
+		auto nexus = idle_nexuses.back();
+		if (!nexus) return;
+		nexus->train(worker_type);
+		idle_nexuses.pop_back();
+		workers_owned++;
+	}
+
+	// TODO: Find a way to efficiently do this for other types as well, e.g. zealots:
+	/*auto zealot_type = BWAPI::UnitTypes::Protoss_Zealot;
+	auto zealots_owned = Tools::CountUnitsOfType(zealot_type, BWAPI::Broodwar->self()->getUnits());
+	auto zealots_wanted = 50;
+	auto idle_gateways = Tools::GetUnitsOfType(BWAPI::UnitTypes::Protoss_Gateway);*/
 }
+
 
 /**
  * Update build queue with destroyed units
@@ -193,6 +244,17 @@ bool ProductionManager::trainUnit(const BWAPI::UnitType& unit)
 	return true;
 }
 
+bool ProductionManager::trainUnit(const BWAPI::UnitType& unit, BWAPI::Unit depot)
+{
+	if (unit.mineralPrice() > BWAPI::Broodwar->self()->minerals()) { return false; }
+	if (depot && !depot->isTraining())
+	{
+		depot->train(unit);
+		return true;
+	}
+	return false;
+}
+
 /**
  *@deprecated use build order
  */
@@ -239,6 +301,11 @@ void ProductionManager::buildAdditionalSupply()
 		const auto startedBuilding = buildBuilding(supplyProviderType);
 	}
 }
+
+int ProductionManager::countIdleBuildings(BWAPI::UnitType type, bool pending)
+{
+}
+
 
 // Returns num. of owned buildings, optionally also pending ones
 int ProductionManager::countBuildings(bool pending)

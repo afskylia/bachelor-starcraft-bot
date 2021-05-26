@@ -8,6 +8,7 @@
 #include "ProductionManager.h"
 #include "WorkerManager.h"
 #include "CombatManager.h"
+#include "StrategyManager.h"
 
 namespace MiraBot
 {

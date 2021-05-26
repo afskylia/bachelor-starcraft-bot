@@ -23,6 +23,8 @@ namespace MiraBot
 		std::map<BWAPI::UnitType, int> get_map_of_required_units();
 		void compareUnitsAndBuild();
 		void tryCompareUnitsAndBuild();
+		void activateIdleBuildings();
+
 		void onFrame();
 		void onUnitDestroy(BWAPI::Unit unit);
 		void onUnitComplete(BWAPI::Unit unit);
@@ -32,6 +34,7 @@ namespace MiraBot
 
 		int countBuildings(bool pending = true);
 		int countBuildings(BWAPI::UnitType type, bool pending = true);
+		int countIdleBuildings(BWAPI::UnitType type, bool pending = true);
 
 		int pendingBuildingsCount();
 		int pendingBuildingsCount(BWAPI::UnitType type);
@@ -42,5 +45,6 @@ namespace MiraBot
 		bool buildBuilding(BWAPI::UnitType type);
 
 		bool trainUnit(const BWAPI::UnitType& unit);
+		bool trainUnit(const BWAPI::UnitType& unit, BWAPI::Unit depot);
 	};
 }
