@@ -20,14 +20,12 @@ void MiraBotMain::onStart()
 	BWAPI::Broodwar->setLocalSpeed(10); // 10
 	BWAPI::Broodwar->setFrameSkip(0);
 
-	mainBase = BWAPI::Broodwar->getClosestUnit(BWAPI::Position(BWAPI::Broodwar->self()->getStartLocation()),
-	                                           BWAPI::Filter::IsResourceDepot);
-
 	// Enable the flag that tells BWAPI to let users enter input while bot plays
 	BWAPI::Broodwar->enableFlag(BWAPI::Flag::UserInput);
 
 	// Call MapTools OnStart
 	Global::map().onStart();
+	Global::information().onStart();
 }
 
 // Win/lose, Timestamp, Length of game(frames), Enemy race, Own race, Map, Number of units built, Supply, Total supply, git message and branch
@@ -62,7 +60,8 @@ void MiraBotMain::logResult(bool is_winner)
 
 	std::ofstream file;
 	file.open("log.csv", std::ios::in | std::ios::out | std::ios::ate);
-	file << win << ';' << date << ';' << time << ';' << frames << ';' << enemyRace.toString() << ';' << race << ';' <<
+	file << win << ';' << date << ';' << time << ';' << frames << ';' << InformationManager::enemy_race.toString() <<
+		';' << race << ';' <<
 		map << ';' << number_of_units << ';' << supply << ';' << total_supply << ';' << git << ';' << branch << "\n";
 	file.close();
 }
@@ -122,7 +121,7 @@ void MiraBotMain::drawDebugInformation()
 	Tools::DrawUnitCommands();
 	Tools::DrawUnitBoundingBoxes();
 
-	if (foundEnemy) Tools::DrawEnemyBases(enemyStartLocation);
+	if (InformationManager::found_enemy) Tools::DrawEnemyBases(InformationManager::enemy_start_location);
 }
 
 // Called whenever a unit is destroyed, with a pointer to the unit
@@ -131,6 +130,7 @@ void MiraBotMain::onUnitDestroy(BWAPI::Unit unit)
 	if (unit->getType().isWorker()) Global::workers().onUnitDestroy(unit);
 	// TODO maybe fix?
 	Global::production().onUnitDestroy(unit);
+	Global::information().onUnitDestroy(unit);
 }
 
 // Called whenever a unit is morphed, with a pointer to the unit
@@ -163,14 +163,6 @@ void MiraBotMain::onUnitCreate(BWAPI::Unit unit)
 // Called whenever a unit finished construction, with a pointer to the unit
 void MiraBotMain::onUnitComplete(BWAPI::Unit unit)
 {
-	switch (unit->getType())
-	{
-	case BWAPI::UnitTypes::Protoss_Zealot:
-		m_zealot.push_back(unit);
-		break;
-	default: break;
-	}
-
 	Global::production().onUnitComplete(unit);
 }
 
@@ -178,29 +170,7 @@ void MiraBotMain::onUnitComplete(BWAPI::Unit unit)
 // This is usually triggered when units appear from fog of war and become visible
 void MiraBotMain::onUnitShow(BWAPI::Unit unit)
 {
-	auto* unitPlayer = unit->getPlayer();
-	if (!foundEnemy && unitPlayer->isEnemy(BWAPI::Broodwar->self()))
-	{
-		enemyRace = unit->getType().getRace();
-		foundEnemy = true;
-		std::cout << "Enemy is " << enemyRace << "\n";
-
-		auto& startLocations = BWAPI::Broodwar->getStartLocations();
-
-		// Find closest starting location to enemy unit
-		// TODO: Also save locations of other enemy bases they might build later in the game
-		double shortestDistance = INT_MAX;
-		for (BWAPI::TilePosition position : startLocations)
-		{
-			const auto distance = position.getDistance(unit->getTilePosition());
-			if (distance < shortestDistance)
-			{
-				shortestDistance = distance;
-				enemyStartLocation = position;
-			}
-		}
-		std::cout << "Enemy starting location: " << enemyStartLocation << "\n";
-	}
+	Global::information().onUnitShow(unit);
 }
 
 // Called whenever a unit gets hidden, with a pointer to the destroyed unit
