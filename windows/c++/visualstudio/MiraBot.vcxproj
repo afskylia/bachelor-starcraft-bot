@@ -16,6 +16,7 @@
     <ClInclude Include="src\CombatManager.h" />
     <ClInclude Include="src\Global.h" />
     <ClInclude Include="src\Grid.hpp" />
+    <ClInclude Include="src\InformationManager.h" />
     <ClInclude Include="src\MapTools.h" />
     <ClInclude Include="src\MiraBotMain.h" />
     <ClInclude Include="src\ProductionManager.h" />
@@ -28,6 +29,7 @@
     <ClCompile Include="src\BuildOrderData.cpp" />
     <ClCompile Include="src\CombatManager.cpp" />
     <ClCompile Include="src\Global.cpp" />
+    <ClCompile Include="src\InformationManager.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\MapTools.cpp" />
     <ClCompile Include="src\MiraBotMain.cpp" />
