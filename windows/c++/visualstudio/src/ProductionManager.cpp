@@ -189,11 +189,20 @@ void ProductionManager::activateIdleBuildings()
 		workers_owned++;
 	}
 
-	// TODO: Find a way to efficiently do this for other types as well, e.g. zealots:
-	/*auto zealot_type = BWAPI::UnitTypes::Protoss_Zealot;
+	// TODO: Find a way to efficiently do this for all types (instead of repetitive code):
+	auto zealot_type = BWAPI::UnitTypes::Protoss_Zealot;
 	auto zealots_owned = Tools::CountUnitsOfType(zealot_type, BWAPI::Broodwar->self()->getUnits());
-	auto zealots_wanted = 50;
-	auto idle_gateways = Tools::GetUnitsOfType(BWAPI::UnitTypes::Protoss_Gateway);*/
+	auto zealots_wanted = 30;
+	auto idle_gateways = Tools::GetUnitsOfType(BWAPI::UnitTypes::Protoss_Gateway);
+	while (zealots_owned <= zealots_wanted && !idle_gateways.empty())
+	{
+		//if (unit->getType() == type && unit->isCompleted() && unit->isIdle())
+		auto gateway = idle_gateways.back();
+		if (!gateway) return;
+		gateway->train(zealot_type);
+		idle_gateways.pop_back();
+		zealots_owned++;
+	}
 }
 
 
