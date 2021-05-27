@@ -4,6 +4,7 @@
 #include "WorkerManager.h"
 #include "CombatManager.h"
 #include "MapTools.h"
+#include "InformationManager.h"
 #include "StrategyManager.h"
 
 using namespace MiraBot;

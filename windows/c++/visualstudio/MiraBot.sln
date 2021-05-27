@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.31005.135
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MiraBot", "MiraBot.vcxproj", "{B2D2AD6C-D98B-42D0-8E4B-3C79D9DB27B7}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test", "..\Test\Test.vcxproj", "{313C89EA-5F47-425A-82B0-7703C964C652}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Itanium = Debug|Itanium
@@ -23,6 +25,16 @@ Global
 		{B2D2AD6C-D98B-42D0-8E4B-3C79D9DB27B7}.Release|Win32.ActiveCfg = Release|Win32
 		{B2D2AD6C-D98B-42D0-8E4B-3C79D9DB27B7}.Release|Win32.Build.0 = Release|Win32
 		{B2D2AD6C-D98B-42D0-8E4B-3C79D9DB27B7}.Release|x64.ActiveCfg = Release|Win32
+		{313C89EA-5F47-425A-82B0-7703C964C652}.Debug|Itanium.ActiveCfg = Debug|Win32
+		{313C89EA-5F47-425A-82B0-7703C964C652}.Debug|Win32.ActiveCfg = Debug|Win32
+		{313C89EA-5F47-425A-82B0-7703C964C652}.Debug|Win32.Build.0 = Debug|Win32
+		{313C89EA-5F47-425A-82B0-7703C964C652}.Debug|x64.ActiveCfg = Debug|x64
+		{313C89EA-5F47-425A-82B0-7703C964C652}.Debug|x64.Build.0 = Debug|x64
+		{313C89EA-5F47-425A-82B0-7703C964C652}.Release|Itanium.ActiveCfg = Release|Win32
+		{313C89EA-5F47-425A-82B0-7703C964C652}.Release|Win32.ActiveCfg = Release|Win32
+		{313C89EA-5F47-425A-82B0-7703C964C652}.Release|Win32.Build.0 = Release|Win32
+		{313C89EA-5F47-425A-82B0-7703C964C652}.Release|x64.ActiveCfg = Release|x64
+		{313C89EA-5F47-425A-82B0-7703C964C652}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

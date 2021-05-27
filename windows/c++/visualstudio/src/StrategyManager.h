@@ -1,4 +1,9 @@
 #pragma once
-class StrategyManager
+namespace MiraBot
 {
-};
+	class StrategyManager
+	{
+	public:
+		StrategyManager();
+	};
+}
