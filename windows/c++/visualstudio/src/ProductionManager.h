@@ -12,7 +12,7 @@ namespace MiraBot
 
 		std::deque<BWAPI::UnitType> m_build_queue_;
 		std::map<int, BWAPI::UnitType> m_try_built_or_trained_;
-		std::map<int, BWAPI::UnitType> m_build_order_;
+		/*std::map<int, BWAPI::UnitType> m_build_order_;*/
 		int m_last_build_frame_ = 0;
 	public:
 

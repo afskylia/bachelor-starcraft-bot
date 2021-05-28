@@ -1,6 +1,8 @@
 ﻿#pragma once
 #include <BWAPI/Unit.h>
 
+#include "StrategyManager.h"
+
 namespace MiraBot
 {
 	class InformationManager
@@ -25,5 +27,6 @@ namespace MiraBot
 		void onUnitShow(BWAPI::Unit unit);
 		void onStart();
 		void onUnitDestroy(BWAPI::Unit unit);
+		StrategyManager::strategy_type getEnemyStrategy();
 	};
 }

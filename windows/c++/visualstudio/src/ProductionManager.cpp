@@ -10,16 +10,6 @@ using namespace MiraBot;
  */
 ProductionManager::ProductionManager()
 {
-	for (int i = 0; i <= 200; ++i)
-	{
-		// TODO: Revamp of build order system so it doesn't have probes on empty levels
-		m_build_order_[i] = BWAPI::UnitTypes::Protoss_Probe;
-	}
-	m_build_order_[4] = BWAPI::UnitTypes::Protoss_Nexus;
-	m_build_order_[8] = BWAPI::UnitTypes::Protoss_Pylon;
-	m_build_order_[10] = BWAPI::UnitTypes::Protoss_Gateway;
-	m_build_order_[12] = BWAPI::UnitTypes::Protoss_Assimilator;
-	m_build_order_[13] = BWAPI::UnitTypes::Protoss_Cybernetics_Core;
 }
 
 
@@ -106,7 +96,7 @@ std::map<BWAPI::UnitType, int> ProductionManager::getMapOfRequiredUnits()
 	const int supply = (Tools::GetTotalUsedSupply(true) / 2);
 
 	// Iterate build order
-	for (auto build_order : m_build_order_)
+	for (auto build_order : StrategyManager::m_build_order_)
 	{
 		// If unit needed to be build, add it to required_units
 		if (build_order.first <= supply)

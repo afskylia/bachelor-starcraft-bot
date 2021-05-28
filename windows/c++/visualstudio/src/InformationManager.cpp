@@ -119,3 +119,13 @@ void InformationManager::onUnitDestroy(BWAPI::Unit unit)
 		informationUpdateShouldHappen();
 	}
 }
+
+
+/// <summary>
+/// TODO not implemented yet
+/// </summary>
+/// <returns></returns>
+StrategyManager::strategy_type InformationManager::getEnemyStrategy()
+{
+	return StrategyManager::offensive;
+}

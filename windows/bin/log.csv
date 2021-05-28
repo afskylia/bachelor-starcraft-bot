@@ -2,3 +2,5 @@ Win/loss; Date; Time; Game length; Enemy race; Own race; Map; Number of units bu
 loss;27/05/2021;16.02.11;4165;Zerg;Protoss;(4)Fortress.scx;23;36;50;'Idle gateways will now produce zealots';Strategy
 loss;28/05/2021;11.24.22;172;None;Protoss;(2)Destination.scx;6;10;18;'log added and refactor';Strategy
 loss;28/05/2021;11.29.37;3127;Protoss;Protoss;(3)Tau Cross.scx;17;26;34;'log added and refactor';Strategy
+loss;28/05/2021;11.35.24;4625;Zerg;Protoss;(4)Python.scx;27;44;50;'Information trigger is implemented';Strategy
+loss;28/05/2021;12.05.19;4029;Zerg;Protoss;(4)Andromeda.scx;19;32;50;'Information trigger is implemented';Strategy

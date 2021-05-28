@@ -1,19 +1,16 @@
 ﻿#include "BuildOrderData.h"
 
+
 BuildOrderData::BuildOrderData()
 {
-}
-
-//8 - Pylon
-//10 - Gateway
-//12 - Assimilator
-//13 - Cybernetics Core
-BuildOrder BuildOrderData::SimpleBuildOrder()
-{
-	BuildOrder order;
-	order.steps[8] = BWAPI::UnitTypes::Protoss_Pylon;
-	order.steps[10] = BWAPI::UnitTypes::Protoss_Gateway;
-	order.steps[12] = BWAPI::UnitTypes::Protoss_Assimilator;
-	order.steps[13] = BWAPI::UnitTypes::Protoss_Cybernetics_Core;
-	return {};
+	for (int i = 0; i <= 200; ++i)
+	{
+		// TODO: Revamp of build order system so it doesn't have probes on empty levels
+		starter_build_order[i] = BWAPI::UnitTypes::Protoss_Probe;
+	}
+	starter_build_order[4] = BWAPI::UnitTypes::Protoss_Nexus;
+	starter_build_order[8] = BWAPI::UnitTypes::Protoss_Pylon;
+	starter_build_order[10] = BWAPI::UnitTypes::Protoss_Gateway;
+	starter_build_order[12] = BWAPI::UnitTypes::Protoss_Assimilator;
+	starter_build_order[13] = BWAPI::UnitTypes::Protoss_Cybernetics_Core;
 }
