@@ -101,6 +101,8 @@ void MiraBotMain::onFrame()
 	Global::production().onFrame();
 	Global::combat().onFrame();
 	Global::strategy().onFrame();
+	Global::information().onFrame();
+
 
 	// Update our MapTools information
 	Global::map().onFrame();

@@ -1,2 +1,4 @@
 Win/loss; Date; Time; Game length; Enemy race; Own race; Map; Number of units built; Supply; Total supply; Git message; Git branch
 loss;27/05/2021;16.02.11;4165;Zerg;Protoss;(4)Fortress.scx;23;36;50;'Idle gateways will now produce zealots';Strategy
+loss;28/05/2021;11.24.22;172;None;Protoss;(2)Destination.scx;6;10;18;'log added and refactor';Strategy
+loss;28/05/2021;11.29.37;3127;Protoss;Protoss;(3)Tau Cross.scx;17;26;34;'log added and refactor';Strategy

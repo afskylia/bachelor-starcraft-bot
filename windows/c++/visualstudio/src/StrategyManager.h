@@ -9,5 +9,6 @@ namespace MiraBot
 	public:
 		StrategyManager();
 		void onFrame();
+		void informationUpdate();
 	};
 }

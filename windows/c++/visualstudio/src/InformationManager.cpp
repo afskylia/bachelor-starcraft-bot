@@ -10,6 +10,32 @@ using namespace MiraBot;
 /// </summary>
 InformationManager::InformationManager() = default;
 
+
+void InformationManager::onFrame()
+{
+	if (m_should_update_ && BWAPI::Broodwar->getFrameCount() % 50 == 0)
+	{
+		informationIsUpdated();
+		m_should_update_ = false;
+	}
+}
+
+/// <summary>
+/// Call this when information is updated, e.g. enemy is found
+/// </summary>
+void InformationManager::informationUpdateShouldHappen()
+{
+	if (!m_should_update_) m_should_update_ = true;
+}
+
+/// <summary>
+/// information in the manager is send to e.g. strategy manager to update strategy.
+/// </summary>
+void InformationManager::informationIsUpdated()
+{
+	Global::strategy().informationUpdate();
+}
+
 /// <summary>
 /// log the enemy race and starting location
 /// </summary>
@@ -38,6 +64,8 @@ void InformationManager::logEnemyRaceAndStartLocation(BWAPI::Unit unit)
 			}
 		}
 		std::cout << "Enemy starting location: " << enemy_start_location << "\n";
+
+		informationUpdateShouldHappen();
 	}
 }
 
@@ -55,10 +83,12 @@ void InformationManager::addOrRemoveEnemyUnit(BWAPI::Unit unit, bool remove_unit
 	if (it == enemy_units.end())
 	{
 		enemy_units.insert(unit);
+		informationUpdateShouldHappen();
 	}
 	else if (remove_unit)
 	{
 		enemy_units.erase(it);
+		informationUpdateShouldHappen();
 	}
 }
 
@@ -69,6 +99,7 @@ void InformationManager::onUnitShow(BWAPI::Unit unit)
 	{
 		logEnemyRaceAndStartLocation(unit);
 		addOrRemoveEnemyUnit(unit);
+		informationUpdateShouldHappen();
 	}
 }
 
@@ -76,6 +107,7 @@ void InformationManager::onStart()
 {
 	main_base = BWAPI::Broodwar->getClosestUnit(BWAPI::Position(BWAPI::Broodwar->self()->getStartLocation()),
 	                                            BWAPI::Filter::IsResourceDepot);
+	informationUpdateShouldHappen();
 }
 
 void InformationManager::onUnitDestroy(BWAPI::Unit unit)
@@ -84,5 +116,6 @@ void InformationManager::onUnitDestroy(BWAPI::Unit unit)
 	if (unit->getPlayer()->isEnemy(BWAPI::Broodwar->self()))
 	{
 		addOrRemoveEnemyUnit(unit, true);
+		informationUpdateShouldHappen();
 	}
 }

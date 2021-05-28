@@ -9,3 +9,8 @@ StrategyManager::StrategyManager() = default;
 void StrategyManager::onFrame()
 {
 }
+
+void StrategyManager::informationUpdate()
+{
+	std::cout << "Information is updated \n";
+}

@@ -7,6 +7,7 @@ namespace MiraBot
 	{
 		friend class Global;
 
+		bool m_should_update_ = false;
 
 	public:
 		static inline bool found_enemy = false;
@@ -16,6 +17,9 @@ namespace MiraBot
 		static inline std::unordered_set<BWAPI::Unit> enemy_units = {};
 
 		InformationManager();
+		void informationIsUpdated();
+		void onFrame();
+		void informationUpdateShouldHappen();
 		void logEnemyRaceAndStartLocation(BWAPI::Unit unit);
 		void addOrRemoveEnemyUnit(BWAPI::Unit unit, bool remove_unit = false);
 		void onUnitShow(BWAPI::Unit unit);
