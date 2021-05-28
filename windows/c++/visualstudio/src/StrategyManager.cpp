@@ -4,9 +4,7 @@
 
 using namespace MiraBot;
 
-StrategyManager::StrategyManager()
-{
-}
+StrategyManager::StrategyManager() = default;
 
 void StrategyManager::onFrame()
 {
