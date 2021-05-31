@@ -13,6 +13,26 @@
   <ItemGroup>
     <ClInclude Include="resource.h" />
     <ClInclude Include="src\BuildOrderData.h" />
+    <ClInclude Include="src\BWEM\EasyBMP_1.06\EasyBMP.h" />
+    <ClInclude Include="src\BWEM\EasyBMP_1.06\EasyBMP_BMP.h" />
+    <ClInclude Include="src\BWEM\src\area.h" />
+    <ClInclude Include="src\BWEM\src\base.h" />
+    <ClInclude Include="src\BWEM\src\bwapiExt.h" />
+    <ClInclude Include="src\BWEM\src\bwem.h" />
+    <ClInclude Include="src\BWEM\src\cp.h" />
+    <ClInclude Include="src\BWEM\src\defs.h" />
+    <ClInclude Include="src\BWEM\src\examples.h" />
+    <ClInclude Include="src\BWEM\src\exampleWall.h" />
+    <ClInclude Include="src\BWEM\src\graph.h" />
+    <ClInclude Include="src\BWEM\src\gridMap.h" />
+    <ClInclude Include="src\BWEM\src\map.h" />
+    <ClInclude Include="src\BWEM\src\mapDrawer.h" />
+    <ClInclude Include="src\BWEM\src\mapImpl.h" />
+    <ClInclude Include="src\BWEM\src\mapPrinter.h" />
+    <ClInclude Include="src\BWEM\src\neutral.h" />
+    <ClInclude Include="src\BWEM\src\tiles.h" />
+    <ClInclude Include="src\BWEM\src\utils.h" />
+    <ClInclude Include="src\BWEM\src\winutils.h" />
     <ClInclude Include="src\CombatManager.h" />
     <ClInclude Include="src\Global.h" />
     <ClInclude Include="src\Grid.hpp" />
@@ -27,6 +47,24 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\BuildOrderData.cpp" />
+    <ClCompile Include="src\BWEM\EasyBMP_1.06\EasyBMP.cpp" />
+    <ClCompile Include="src\BWEM\src\area.cpp" />
+    <ClCompile Include="src\BWEM\src\base.cpp" />
+    <ClCompile Include="src\BWEM\src\bwapiExt.cpp" />
+    <ClCompile Include="src\BWEM\src\bwem.cpp" />
+    <ClCompile Include="src\BWEM\src\cp.cpp" />
+    <ClCompile Include="src\BWEM\src\examples.cpp" />
+    <ClCompile Include="src\BWEM\src\exampleWall.cpp" />
+    <ClCompile Include="src\BWEM\src\graph.cpp" />
+    <ClCompile Include="src\BWEM\src\gridMap.cpp" />
+    <ClCompile Include="src\BWEM\src\map.cpp" />
+    <ClCompile Include="src\BWEM\src\mapDrawer.cpp" />
+    <ClCompile Include="src\BWEM\src\mapImpl.cpp" />
+    <ClCompile Include="src\BWEM\src\mapPrinter.cpp" />
+    <ClCompile Include="src\BWEM\src\neutral.cpp" />
+    <ClCompile Include="src\BWEM\src\tiles.cpp" />
+    <ClCompile Include="src\BWEM\src\utils.cpp" />
+    <ClCompile Include="src\BWEM\src\winutils.cpp" />
     <ClCompile Include="src\CombatManager.cpp" />
     <ClCompile Include="src\Global.cpp" />
     <ClCompile Include="src\InformationManager.cpp" />
