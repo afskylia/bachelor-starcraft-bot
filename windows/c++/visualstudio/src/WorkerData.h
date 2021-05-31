@@ -43,6 +43,7 @@ namespace MiraBot
 		BWAPI::UnitType getWorkerBuildingType(BWAPI::Unit unit);
 		BWAPI::Unit getWorkerDepot(BWAPI::Unit unit);
 		BWAPI::Unit getMineralToMine(BWAPI::Unit unit);
+		BWAPI::Unit getClosestRefinery(BWAPI::Unit unit);
 		BWAPI::Unit getBuilder(BWAPI::UnitType buildingType, BWAPI::Position position);
 
 		BWAPI::Unitset m_workers;
