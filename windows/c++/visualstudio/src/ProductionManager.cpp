@@ -75,6 +75,7 @@ bool ProductionManager::addToBuildQueue(const BWAPI::UnitType& unit_type)
 			//std::cout << build_queue;
 		}
 		//std::cout << "\n";
+		//std::cout << "Adding " << unit_type << " to build queue\n";
 		return true;
 	}
 	return false;
@@ -177,7 +178,7 @@ void ProductionManager::activateIdleBuildings()
 
 	const auto worker_type = BWAPI::Broodwar->self()->getRace().getWorker();
 	auto workers_owned = Tools::CountUnitsOfType(worker_type, BWAPI::Broodwar->self()->getUnits());
-	const auto workers_wanted = 30;
+	const auto workers_wanted = 50;
 	auto idle_nexuses = Tools::GetUnitsOfType(BWAPI::UnitTypes::Protoss_Nexus);
 	while (workers_owned <= workers_wanted && !idle_nexuses.empty())
 	{
@@ -228,7 +229,9 @@ void ProductionManager::onUnitComplete(BWAPI::Unit unit)
 bool ProductionManager::trainUnit(const BWAPI::UnitType& unit)
 {
 	// If we cannot afford unit
-	if (unit.mineralPrice() > BWAPI::Broodwar->self()->minerals()) { return false; }
+	if (unit.mineralPrice() > getTotalMinerals()) { return false; }
+	if (unit.gasPrice() > getTotalGas()) { return false; }
+
 	switch (unit)
 	{
 	case BWAPI::UnitTypes::Protoss_Probe:
@@ -313,6 +316,7 @@ void ProductionManager::buildAdditionalSupply()
 
 int ProductionManager::countIdleBuildings(BWAPI::UnitType type, bool pending)
 {
+	return 0;
 }
 
 
@@ -372,13 +376,14 @@ int ProductionManager::getTotalGas()
 
 bool ProductionManager::buildBuilding(BWAPI::UnitType type)
 {
-	// TODO: Account for both minerals and gas
 	// TODO: Does the unit type require multiple workers?
 
-	// If we have much less minerals than required, it's not worth to wait for it
-	// TODO: !!! Also look at pending mineral costs somehow
+	// TODO: Make a global variable with total minerals and total gas, subtract how much is spent?
+	// ^That way we know how much we actually can spend
+
+	// If we have much less gas and minerals than required, it's not worth the wait
 	if (Global::production().getTotalMinerals() < type.mineralPrice() * 0.7) return false;
-	//if (BWAPI::Broodwar->self()->minerals() < type.mineralPrice() * 0.7) return false;
+	if (Global::production().getTotalGas() < type.gasPrice() * 0.7) return false;
 
 	// Get the type of unit that is required to build the desired building
 	BWAPI::UnitType builderType = type.whatBuilds().first;

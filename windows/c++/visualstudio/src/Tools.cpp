@@ -47,11 +47,12 @@ BWAPI::Unit Tools::GetClosestUnitTo(BWAPI::Unit unit, const BWAPI::Unitset& unit
 	return GetClosestUnitTo(unit->getPosition(), units);
 }
 
-int Tools::CountUnitsOfType(BWAPI::UnitType type, const BWAPI::Unitset& units)
+int Tools::CountUnitsOfType(BWAPI::UnitType type, const BWAPI::Unitset& units, bool completed)
 {
 	int sum = 0;
 	for (auto& unit : units)
 	{
+		if (completed && !unit->isCompleted()) continue;
 		if (unit->getType() == type && unit->getPlayer() == BWAPI::Broodwar->self())
 		{
 			sum++;
