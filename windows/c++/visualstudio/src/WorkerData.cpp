@@ -1,6 +1,5 @@
 #include "WorkerData.h"
 
-
 #include "Global.h"
 #include "MiraBotMain.h"
 #include "Tools.h"
@@ -69,7 +68,12 @@ void WorkerData::resetJob(BWAPI::Unit unit)
 			m_workerMineralMap.erase(unit);
 			break;
 		}
-	case Gas: break; // TODO: Gas!
+	case Gas:
+		{
+			m_workerDepotMap.erase(unit);
+			m_workerRefineryMap.erase(unit);
+			break;
+		}
 	case Build:
 		{
 			m_workerBuildingTypeMap.erase(unit);
@@ -93,7 +97,6 @@ void WorkerData::resetJob(BWAPI::Unit unit)
 	m_workerJobMap.erase(unit);
 }
 
-
 // Set worker job with associated job unit (depot)
 void WorkerData::setWorkerJob(BWAPI::Unit unit, enum WorkerJob job, BWAPI::Unit jobUnit)
 {
@@ -110,9 +113,17 @@ void WorkerData::setWorkerJob(BWAPI::Unit unit, enum WorkerJob job, BWAPI::Unit 
 			BWAPI::Unit mineralToMine = getMineralToMine(unit);
 			m_workerMineralMap[unit] = mineralToMine;
 			unit->gather(mineralToMine);
+			break;
 		}
 
-	case Gas: break;
+	case Gas:
+		{
+			std::cout << "Sending unit to refinery\n";
+			BWAPI::Unit refinery = getClosestRefinery(unit);
+			m_workerRefineryMap[unit] = refinery;
+			unit->gather(refinery);
+			break;
+		}
 	case Combat: break;
 	case Idle: break;
 	case Repair: break;
@@ -134,7 +145,6 @@ void WorkerData::setWorkerJob(BWAPI::Unit unit, enum WorkerJob job, BWAPI::Posit
 	// Send unit to position
 	unit->move(pos);
 }
-
 
 // Set builder job
 void WorkerData::setWorkerJob(BWAPI::Unit unit, enum WorkerJob job, struct BuildJob buildJob)
@@ -163,6 +173,20 @@ BWAPI::Unit WorkerData::getMineralToMine(BWAPI::Unit unit)
 		}
 	}
 	return sorted_minerals[0];
+}
+
+BWAPI::Unit WorkerData::getClosestRefinery(BWAPI::Unit unit)
+{
+	auto all_units = BWAPI::Broodwar->self()->getUnits();
+	auto sorted_units = Tools::SortUnitsByClosest(unit, all_units);
+	for (auto u : sorted_units)
+	{
+		if (u->getType().isRefinery()) // TODO: Check number of workers on the refinery?
+		{
+			return u;
+		}
+	}
+	return nullptr;
 }
 
 WorkerData::WorkerJob WorkerData::getWorkerJob(BWAPI::Unit unit)
