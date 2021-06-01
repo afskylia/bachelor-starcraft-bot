@@ -12,25 +12,11 @@ WorkerManager::WorkerManager()
 
 void WorkerManager::onFrame()
 {
+	// Update workers, e.g. set job as 'Idle' when job completed
 	updateWorkerStatus();
 
-	// Send our idle workers to mine minerals so they don't just stand there
-	sendIdleWorkersToMinerals();
-
-	// Assign more gas workers if needed
-	if (Tools::CountUnitsOfType(BWAPI::Broodwar->self()->getRace().getRefinery(), BWAPI::Broodwar->self()->getUnits(),
-	                            true) > 0)
-	{
-		auto gas_workers = m_workerData.getWorkers(WorkerData::Gas);
-		auto minerals_workers = m_workerData.getWorkers(WorkerData::Minerals);
-
-		//if (gas_workers.size() < 5)
-		if (gas_workers.size() < minerals_workers.size() / 5 && gas_workers.size() < 5)
-		{
-			// Assign new gas worker
-			setGasWorker(getWorker());
-		}
-	}
+	// Send idle workers to gather resources
+	activateIdleWorkers();
 }
 
 void WorkerManager::updateWorkerStatus()
@@ -66,27 +52,39 @@ void WorkerManager::updateWorkerStatus()
 				}
 			default:
 				{
-					m_workerData.setWorkerJob(worker, WorkerData::Idle, nullptr);
+					if (!getWorkerScout() && getScoutPosition(worker)) setScout(worker);
+					else m_workerData.setWorkerJob(worker, WorkerData::Idle, nullptr);
 				}
 			}
 		}
 	}
 }
 
-
-void WorkerManager::sendIdleWorkersToMinerals()
+void WorkerManager::setScout(BWAPI::Unit unit)
 {
+	m_workerData.setWorkerJob(unit, WorkerData::Scout, getScoutPosition(unit));
+}
+
+
+// Assign jobs to idle workers
+// TODO: 2 workers per mineral patch is optimal
+// TODO: Look at total minerals and gas - e.g. maybe we have plenty of gas but no minerals
+void WorkerManager::activateIdleWorkers()
+{
+	const auto mineral_worker_count = m_workerData.getWorkers(WorkerData::Minerals).size();
+	const auto gas_worker_count = m_workerData.getWorkers(WorkerData::Gas).size();
+
 	for (auto& worker : m_workerData.getWorkers())
 	{
 		if (m_workerData.getWorkerJob(worker) == WorkerData::Idle)
 		{
-			// Send scout to unexplored scouting locations
-			if (!getWorkerScout() && getScoutPosition(worker))
-			{
-				m_workerData.setWorkerJob(worker, WorkerData::Scout, getScoutPosition(worker));
-			}
+			const auto refinery_type = BWAPI::Broodwar->self()->getRace().getRefinery();
+			const auto refinery_count = Tools::countUnitsOfType(refinery_type);
 
-				// Idle workers gather minerals by default
+			// We don't want more than 3 gas workers per refinery
+			if (refinery_count > 0 && gas_worker_count < mineral_worker_count / 4
+				&& gas_worker_count < refinery_count * 3)
+				setGasWorker(worker);
 			else setMineralWorker(worker);
 		}
 	}
@@ -115,21 +113,6 @@ void WorkerManager::setBuildingWorker(BWAPI::Unit unit, WorkerData::BuildJob bui
 	m_workerData.setWorkerJob(unit, WorkerData::Build, buildJob);
 }
 
-void WorkerManager::trainAdditionalWorkers()
-{
-	const BWAPI::UnitType workerType = BWAPI::Broodwar->self()->getRace().getWorker();
-	const int workersWanted = 30;
-	const int workersOwned = Tools::CountUnitsOfType(workerType, BWAPI::Broodwar->self()->getUnits());
-	if (workersOwned < workersWanted)
-	{
-		// get the unit pointer to my depot
-		const BWAPI::Unit myDepot = Tools::GetDepot();
-
-		// if we have a valid depot unit and it's currently not training something, train a worker
-		// there is no reason for a bot to ever use the unit queueing system, it just wastes resources
-		if (myDepot && !myDepot->isTraining()) { myDepot->train(workerType); }
-	}
-}
 
 void WorkerManager::onUnitCreate(BWAPI::Unit unit)
 {

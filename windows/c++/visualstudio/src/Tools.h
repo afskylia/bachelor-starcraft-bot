@@ -7,32 +7,30 @@
 
 namespace Tools
 {
-	std::vector<BWAPI::Unit> SortUnitsByClosest(BWAPI::Unit unit, const BWAPI::Unitset& units);
-	BWAPI::Unit GetClosestUnitTo(BWAPI::Position p, const BWAPI::Unitset& units);
-	BWAPI::Unit GetClosestUnitTo(BWAPI::Unit unit, const BWAPI::Unitset& units);
+	std::vector<BWAPI::Unit> sortUnitsByClosest(BWAPI::Unit unit, const BWAPI::Unitset& units);
+	BWAPI::Unit getClosestUnitTo(BWAPI::Position p, const BWAPI::Unitset& units);
+	BWAPI::Unit getClosestUnitTo(BWAPI::Unit unit, const BWAPI::Unitset& units);
 
-	int CountUnitsOfType(BWAPI::UnitType type, const BWAPI::Unitset& units = BWAPI::Broodwar->self()->getUnits(),
-	                     bool completed = false);
+	int countUnitsOfType(BWAPI::UnitType type, bool completed = true, bool idle = false,
+	                     BWAPI::Unitset units = BWAPI::Broodwar->self()->getUnits());
 
 	BWAPI::Unit GetWorker(BWAPI::UnitType unitType, BWAPI::Position building_position);
 
-	BWAPI::Unit GetUnitOfType(BWAPI::UnitType type);
-	std::vector<BWAPI::Unit> GetUnitsOfType(BWAPI::UnitType type);
-	BWAPI::Unit GetDepot();
+	BWAPI::Unit getUnitOfType(BWAPI::UnitType type);
+	std::vector<BWAPI::Unit> getUnitsOfType(BWAPI::UnitType type);
+	BWAPI::Unit getDepot();
 	BWAPI::Unit GetWorker(BWAPI::UnitType unitType);
 
-	//bool BuildBuilding(BWAPI::UnitType type);
+	void drawUnitBoundingBoxes();
+	void drawUnitCommands();
+	void drawEnemyBases(BWAPI::TilePosition);
 
-	void DrawUnitBoundingBoxes();
-	void DrawUnitCommands();
-	void DrawEnemyBases(BWAPI::TilePosition);
+	void smartRightClick(BWAPI::Unit unit, BWAPI::Unit target);
 
-	void SmartRightClick(BWAPI::Unit unit, BWAPI::Unit target);
+	int getTotalSupply(bool in_progress = false);
+	int getTotalUsedSupply(bool in_progress_and_building_supply = false);
 
-	int GetTotalSupply(bool inProgress = false);
-	int GetTotalUsedSupply(bool in_progress_and_building_supply = false);
-
-	void DrawUnitHealthBars();
-	void DrawHealthBar(BWAPI::Unit unit, double ratio, BWAPI::Color color, int yOffset);
+	void drawUnitHealthBars();
+	void drawHealthBar(BWAPI::Unit unit, double ratio, BWAPI::Color color, int yOffset);
 	void drawPoint(BWAPI::Position);
 }

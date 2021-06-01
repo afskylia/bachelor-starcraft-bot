@@ -107,7 +107,7 @@ std::map<BWAPI::UnitType, int> ProductionManager::get_map_of_required_units()
 	std::map<BWAPI::UnitType, int> required_units;
 
 	// Get next supply
-	const int supply = (Tools::GetTotalUsedSupply(true) / 2);
+	const int supply = (Tools::getTotalUsedSupply(true) / 2);
 
 	// Iterate build order
 	for (auto build_order : m_build_order)
@@ -180,9 +180,9 @@ void ProductionManager::activateIdleBuildings()
 	 */
 
 	const auto worker_type = BWAPI::Broodwar->self()->getRace().getWorker();
-	auto workers_owned = Tools::CountUnitsOfType(worker_type, BWAPI::Broodwar->self()->getUnits());
+	auto workers_owned = Tools::countUnitsOfType(worker_type);
 	const auto workers_wanted = 50;
-	auto idle_nexuses = Tools::GetUnitsOfType(BWAPI::UnitTypes::Protoss_Nexus);
+	auto idle_nexuses = Tools::getUnitsOfType(BWAPI::UnitTypes::Protoss_Nexus);
 	while (workers_owned <= workers_wanted && !idle_nexuses.empty())
 	{
 		//if (unit->getType() == type && unit->isCompleted() && unit->isIdle())
@@ -195,9 +195,9 @@ void ProductionManager::activateIdleBuildings()
 
 	// TODO: Find a way to efficiently do this for all types (instead of repetitive code):
 	auto zealot_type = BWAPI::UnitTypes::Protoss_Zealot;
-	auto zealots_owned = Tools::CountUnitsOfType(zealot_type, BWAPI::Broodwar->self()->getUnits());
+	auto zealots_owned = Tools::countUnitsOfType(zealot_type);
 	auto zealots_wanted = 30;
-	auto idle_gateways = Tools::GetUnitsOfType(BWAPI::UnitTypes::Protoss_Gateway);
+	auto idle_gateways = Tools::getUnitsOfType(BWAPI::UnitTypes::Protoss_Gateway);
 	while (zealots_owned <= zealots_wanted && !idle_gateways.empty())
 	{
 		//if (unit->getType() == type && unit->isCompleted() && unit->isIdle())
@@ -240,7 +240,7 @@ bool ProductionManager::trainUnit(const BWAPI::UnitType& unit)
 	case BWAPI::UnitTypes::Protoss_Probe:
 		{
 			// get the unit pointer to my depot
-			const BWAPI::Unit myDepot = Tools::GetDepot();
+			const BWAPI::Unit myDepot = Tools::getDepot();
 
 			// if we have a valid depot unit and it's currently not training something, train a worker
 			// there is no reason for a bot to ever use the unit queueing system, it just wastes resources
@@ -290,7 +290,7 @@ void ProductionManager::buildGateway()
 void ProductionManager::buildAttackUnits()
 {
 	const auto unitType = BWAPI::UnitTypes::Protoss_Zealot;
-	auto gateways = Tools::GetUnitsOfType(BWAPI::UnitTypes::Protoss_Gateway);
+	auto gateways = Tools::getUnitsOfType(BWAPI::UnitTypes::Protoss_Gateway);
 	for (auto* gateway : gateways)
 	{
 		if (gateway && !gateway->isTraining()) { gateway->train(unitType); }
@@ -310,7 +310,7 @@ void ProductionManager::buildAdditionalSupply()
 	if (pendingBuildingsCount(supplyProviderType) > 0) return;
 
 	// If we have a sufficient amount of supply, we don't need to do anything
-	if (BWAPI::Broodwar->self()->supplyUsed() + 8 >= Tools::GetTotalSupply(true))
+	if (BWAPI::Broodwar->self()->supplyUsed() + 8 >= Tools::getTotalSupply(true))
 	{
 		// Otherwise, we are going to build a supply provider
 		const auto startedBuilding = buildBuilding(supplyProviderType);

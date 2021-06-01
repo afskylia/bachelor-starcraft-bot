@@ -14,13 +14,13 @@ namespace MiraBot
 		WorkerManager();
 
 		void updateWorkerStatus();
-		void sendIdleWorkersToMinerals();
+		void activateIdleWorkers();
 		void trainAdditionalWorkers();
-		void sendScout();
 		void onFrame();
 		void onUnitCreate(BWAPI::Unit unit);
 		void onUnitDestroy(BWAPI::Unit unit);
 
+		void setScout(BWAPI::Unit unit);
 		void setMineralWorker(BWAPI::Unit unit);
 		void setGasWorker(BWAPI::Unit unit);
 		void setBuildingWorker(BWAPI::Unit unit, WorkerData::BuildJob buildJob);

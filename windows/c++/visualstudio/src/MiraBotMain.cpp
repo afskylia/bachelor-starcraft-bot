@@ -144,7 +144,7 @@ void MiraBotMain::onFrame()
 
 
 	// Draw unit health bars, which brood war unfortunately does not do
-	Tools::DrawUnitHealthBars();
+	Tools::drawUnitHealthBars();
 
 	// Draw some relevent information to the screen to help us debug the bot
 	drawDebugInformation();
@@ -155,10 +155,10 @@ void MiraBotMain::onFrame()
 void MiraBotMain::drawDebugInformation()
 {
 	Broodwar->drawTextScreen(Position(10, 10), "Hello, World!\n");
-	Tools::DrawUnitCommands();
-	Tools::DrawUnitBoundingBoxes();
+	Tools::drawUnitCommands();
+	Tools::drawUnitBoundingBoxes();
 
-	if (InformationManager::found_enemy) Tools::DrawEnemyBases(InformationManager::enemy_start_location);
+	if (InformationManager::found_enemy) Tools::drawEnemyBases(InformationManager::enemy_start_location);
 }
 
 // Called whenever a unit is destroyed, with a pointer to the unit

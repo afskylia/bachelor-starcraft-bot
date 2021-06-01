@@ -164,7 +164,7 @@ void WorkerData::setWorkerJob(BWAPI::Unit unit, enum WorkerJob job, struct Build
 BWAPI::Unit WorkerData::getMineralToMine(BWAPI::Unit unit)
 {
 	auto minerals_near_base = Global::information().main_base->getUnitsInRadius(1024, BWAPI::Filter::IsMineralField);
-	auto sorted_minerals = Tools::SortUnitsByClosest(unit, minerals_near_base);
+	auto sorted_minerals = Tools::sortUnitsByClosest(unit, minerals_near_base);
 	for (auto m : sorted_minerals)
 	{
 		if (!m->isBeingGathered())
@@ -178,7 +178,7 @@ BWAPI::Unit WorkerData::getMineralToMine(BWAPI::Unit unit)
 BWAPI::Unit WorkerData::getClosestRefinery(BWAPI::Unit unit)
 {
 	auto all_units = BWAPI::Broodwar->self()->getUnits();
-	auto sorted_units = Tools::SortUnitsByClosest(unit, all_units);
+	auto sorted_units = Tools::sortUnitsByClosest(unit, all_units);
 	for (auto u : sorted_units)
 	{
 		if (u->getType().isRefinery()) // TODO: Check number of workers on the refinery?
