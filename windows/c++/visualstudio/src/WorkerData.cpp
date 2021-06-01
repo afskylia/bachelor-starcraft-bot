@@ -203,6 +203,7 @@ BWAPI::Unitset WorkerData::getWorkers()
 	return m_workers;
 }
 
+// Returns workers with a certain job
 BWAPI::Unitset WorkerData::getWorkers(WorkerJob job)
 {
 	BWAPI::Unitset workers = {};

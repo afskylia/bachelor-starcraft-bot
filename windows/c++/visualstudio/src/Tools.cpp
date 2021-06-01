@@ -5,6 +5,12 @@
 // Return vector of units in ascending order from distance to given unit
 std::vector<BWAPI::Unit> Tools::sortUnitsByClosest(BWAPI::Unit unit, const BWAPI::Unitset& unitSet)
 {
+	return sortUnitsByClosest(unit->getPosition(), unitSet);
+}
+
+// Return vector of units in ascending order from distance to given position
+std::vector<BWAPI::Unit> Tools::sortUnitsByClosest(BWAPI::Position pos, const BWAPI::Unitset& unitSet)
+{
 	std::vector<BWAPI::Unit> units(unitSet.size());
 	std::copy(unitSet.begin(), unitSet.end(), units.begin());
 
@@ -13,7 +19,7 @@ std::vector<BWAPI::Unit> Tools::sortUnitsByClosest(BWAPI::Unit unit, const BWAPI
 	{
 		for (unsigned int j = 0; j < units.size() - i - 1; j++)
 		{
-			if (units.at(j)->getDistance(unit) > units.at(i)->getDistance(unit))
+			if (units.at(j)->getDistance(pos) > units.at(i)->getDistance(pos))
 			{
 				// Swap elements
 				auto* temp = units.at(j);
@@ -61,35 +67,31 @@ int Tools::countUnitsOfType(BWAPI::UnitType type, bool completed, bool idle, BWA
 }
 
 
-BWAPI::Unit Tools::getUnitOfType(BWAPI::UnitType type)
+BWAPI::Unit Tools::getUnitOfType(BWAPI::UnitType type, bool idle, bool completed)
 {
 	// For each unit that we own
 	for (auto& unit : BWAPI::Broodwar->self()->getUnits())
 	{
-		// if the unit is of the correct type, and it actually has been constructed, return it
-		if (unit->getType() == type && unit->isCompleted() && unit->isIdle())
-		{
-			return unit;
-		}
+		if (unit->getType() != type) continue;
+		if (idle && !unit->isIdle()) continue;
+		if (completed && !unit->isCompleted()) continue;
+		return unit;
 	}
 
 	// If we didn't find a valid unit to return, make sure we return nullptr
 	return nullptr;
 }
 
-// Returns a vector of available, idle units of given type
-std::vector<BWAPI::Unit> Tools::getUnitsOfType(BWAPI::UnitType type)
+// Default: Returns a vector of completed player-owned units of given type, including non-idle
+std::vector<BWAPI::Unit> Tools::getUnitsOfType(BWAPI::UnitType type, bool idle, bool completed)
 {
 	std::vector<BWAPI::Unit> units = {};
-
-	// For each unit that we own
-	for (auto& unit : BWAPI::Broodwar->self()->getUnits())
+	for (const auto& unit : BWAPI::Broodwar->self()->getUnits())
 	{
-		// if the unit is of the correct type, and it actually has been constructed, add it
-		if (unit->getType() == type && unit->isCompleted() && unit->isIdle())
-		{
-			units.push_back(unit);
-		}
+		if (unit->getType() != type) continue;
+		if (idle && !unit->isIdle()) continue;
+		if (completed && !unit->isCompleted()) continue;
+		units.push_back(unit);
 	}
 
 	return units;
@@ -98,7 +100,7 @@ std::vector<BWAPI::Unit> Tools::getUnitsOfType(BWAPI::UnitType type)
 BWAPI::Unit Tools::getDepot()
 {
 	const BWAPI::UnitType depot = BWAPI::Broodwar->self()->getRace().getResourceDepot();
-	return getUnitOfType(depot);
+	return getUnitOfType(depot, true);
 }
 
 void Tools::drawUnitCommands()

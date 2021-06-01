@@ -36,13 +36,13 @@ void WorkerManager::updateWorkerStatus()
 				{
 					/* Builder is idle when it has reached the build location and is waiting to build,
 					 * or it has gotten stuck along the way*/
-					updateIdleBuildWorker(worker);
+					handleIdleBuildWorker(worker);
 					break;
 				}
 			case WorkerData::Scout:
 				{
 					// Scout is idle when it has reached its current scouting target
-					updateIdleScout(worker);
+					handleIdleScout(worker);
 					break;
 				}
 			case WorkerData::Move:
@@ -171,9 +171,9 @@ BWAPI::Position WorkerManager::getScoutPosition(BWAPI::Unit scout)
 	return closestPosition;
 }
 
+// Returns the scout
 BWAPI::Unit WorkerManager::getWorkerScout()
 {
-	// for each of our workers
 	for (auto& worker : m_workerData.getWorkers())
 	{
 		if (!worker) continue;
@@ -217,78 +217,70 @@ BWAPI::Unit WorkerManager::getBuilder(BWAPI::UnitType type, BWAPI::Position pos)
 	return closestUnit;
 }
 
-// Returns a worker with one of the following jobs: Idle, Minerals, Default
-BWAPI::Unit WorkerManager::getWorker()
+// Returns a worker: used when you just need a worker asap
+BWAPI::Unit WorkerManager::getAnyWorker(BWAPI::Position pos)
 {
-	for (auto& unit : m_workerData.getWorkers(WorkerData::Idle))
+	// Prioritized job order: Prefers Idle, Default, Minerals, ..., Combat, Repair
+	for (auto& job : m_workerData.prioritized_jobs)
 	{
-		return unit;
-	}
+		const auto workers = m_workerData.getWorkers(job);
+		if (workers.empty()) continue;
 
-	for (auto& unit : m_workerData.getWorkers(WorkerData::Default))
-	{
-		return unit;
-	}
+		// If position doesn't matter, use first found candidate
+		if (pos == BWAPI::Positions::None)
+		{
+			for (auto& unit : workers) return unit;
+		}
 
-	for (auto& unit : m_workerData.getWorkers(WorkerData::Minerals))
-	{
-		return unit;
+		// Return closest candidate
+		auto sorted_workers = Tools::sortUnitsByClosest(pos, workers);
+		return sorted_workers[0];
 	}
 
 	return nullptr;
 }
 
-
-void WorkerManager::updateIdleBuildWorker(BWAPI::Unit worker)
+// Handles a build-worker who is idling
+void WorkerManager::handleIdleBuildWorker(BWAPI::Unit worker)
 {
-	auto buildingType = m_workerData.m_workerBuildingTypeMap[worker];
-	if (buildingType == BWAPI::UnitTypes::None)
+	// Get build job assigned to worker
+	const auto building_type = m_workerData.m_workerBuildingTypeMap[worker];
+	auto building_pos = m_workerData.m_buildPosMap[worker];
+
+	// If worker idling because build job is completed, set job to idle
+	if (building_type == BWAPI::UnitTypes::None && !worker->isConstructing())
 	{
 		m_workerData.setWorkerJob(worker, WorkerData::Idle, nullptr);
 		return;
 	}
 
-	// TODO: Make sure we didn't get trapped somewhere, if we're not at the target we should walk there
-	// TODO: What if worker can't reach the position? check if is walkable
-	// TODO: use getbuildtile instead of getbuildlocation?
-	// Check if worker reached the goal position // TODO: Or is close enough!
-	/*auto workerMove = m_workerData.m_workerMoveMap[worker];
-	if (!Global::Map().isWalkable(workerMove.x, workerMove.y))
+	// Otherwise, worker is idling because it is waiting for the required resources
+	if (building_type.mineralPrice() > BWAPI::Broodwar->self()->minerals()) return;
+	if (building_type.gasPrice() > BWAPI::Broodwar->self()->gas()) return;
+
+
+	// Try to place the building and generate new position if the first one fails
+	auto fail_count = 0;
+	while (!worker->build(building_type, building_pos) && fail_count < 4)
 	{
-		std::cout << "Whoops can't walk there\n";
-		m_workerData.setWorkerJob(worker, WorkerData::Idle, nullptr);
-		break;
-	}*/
-
-	// Wait until we have enough resources // TODO: Also check for gas
-	if (buildingType.mineralPrice() > BWAPI::Broodwar->self()->minerals()) return;
-
-	auto buildingPos = m_workerData.m_buildPosMap[worker];
-
-
-	// Try to place the building
-	auto failCount = 0; // number of times we have tried to build
-	while (!worker->build(buildingType, buildingPos) && failCount < 4)
-	{
-		failCount++;
-
-		// Ask BWAPI for a new building location
-		int maxBuildRange = 64;
-		bool buildingOnCreep = buildingType.requiresCreep();
-		buildingPos = BWAPI::Broodwar->getBuildLocation(
-			buildingType, buildingPos, maxBuildRange, buildingOnCreep);
-		std::cout << "Failed to build " << buildingType.getName() << "\n";
+		fail_count++;
+		const auto max_range = 64;
+		const auto creep = building_type.requiresCreep();
+		building_pos = BWAPI::Broodwar->getBuildLocation(building_type, building_pos, max_range, creep);
+		std::cout << "Failed to build " << building_type.getName() << "\n";
 	}
 
+	// Used in the beginning of the function next frame
 	m_workerData.m_workerBuildingTypeMap[worker] = BWAPI::UnitTypes::None;
-	std::cout << "Now building " << buildingType.getName() << "\n";
+	std::cout << "Now building " << building_type.getName() << "\n";
 }
 
-// TODO: Scout continuously
-void WorkerManager::updateIdleScout(BWAPI::Unit worker)
+// Send worker to unexplored scout position
+// TODO: Scout continuously, not just once
+void WorkerManager::handleIdleScout(BWAPI::Unit worker)
 {
-	auto scoutPosition = getScoutPosition(worker);
-	if (!scoutPosition)
+	const auto scout_position = getScoutPosition(worker);
+	if (!scout_position)
 	{
 		// All starting positions have been explored
 		m_workerData.setWorkerJob(worker, WorkerData::Idle, nullptr);
@@ -296,7 +288,7 @@ void WorkerManager::updateIdleScout(BWAPI::Unit worker)
 	else
 	{
 		// Set scout's new target position
-		m_workerData.setWorkerJob(worker, WorkerData::Scout, scoutPosition);
+		m_workerData.setWorkerJob(worker, WorkerData::Scout, scout_position);
 	}
 }
 
@@ -304,37 +296,35 @@ void WorkerManager::updateIdleScout(BWAPI::Unit worker)
 // Returns a vector of all active (=unfinished) build jobs
 std::vector<WorkerData::BuildJob> WorkerManager::getActiveBuildJobs()
 {
-	std::vector<WorkerData::BuildJob> buildJobs;
+	std::vector<WorkerData::BuildJob> build_jobs;
 
 	auto builders = m_workerData.getWorkers(WorkerData::Build);
-	for (auto& unit : builders)
+	for (const auto& unit : builders)
 	{
-		auto unitBuildingType = m_workerData.m_workerBuildingTypeMap[unit];
-		if (unitBuildingType == BWAPI::UnitTypes::None) continue;
+		auto unit_building_type = m_workerData.m_workerBuildingTypeMap[unit];
+		if (unit_building_type == BWAPI::UnitTypes::None) continue;
 		// TODO: safer way to check map, this can cause exceptions - use find instead
 
-		auto buildJob = WorkerData::BuildJob{m_workerData.m_buildPosMap[unit], unitBuildingType};
-		buildJobs.push_back(buildJob);
+		auto build_job = WorkerData::BuildJob{m_workerData.m_buildPosMap[unit], unit_building_type};
+		build_jobs.push_back(build_job);
 	}
-	return buildJobs;
+	return build_jobs;
 }
 
 // Returns a vector of active (=unfinished) build jobs of given unit type
-std::vector<WorkerData::BuildJob> WorkerManager::getActiveBuildJobs(BWAPI::UnitType unitType)
+std::vector<WorkerData::BuildJob> WorkerManager::getActiveBuildJobs(BWAPI::UnitType unit_type)
 {
-	std::vector<WorkerData::BuildJob> buildJobs;
+	std::vector<WorkerData::BuildJob> build_jobs;
 	auto builders = m_workerData.getWorkers(WorkerData::Build);
-	for (auto& unit : builders)
+	for (const auto& unit : builders)
 	{
-		auto unitBuildingType = m_workerData.m_workerBuildingTypeMap[unit];
-		if (unitBuildingType == BWAPI::UnitTypes::None) continue;
-		// TODO: safer way to check map, this can cause exceptions - use find instead
-
-		if (unitBuildingType == unitType)
+		// If unit has build job for this unit type, add to vector
+		const auto it = m_workerData.m_workerBuildingTypeMap.find(unit);
+		if (it != m_workerData.m_workerBuildingTypeMap.end() && it->second == unit_type)
 		{
-			auto buildJob = WorkerData::BuildJob{m_workerData.m_buildPosMap[unit], unitType};
-			buildJobs.push_back(buildJob);
+			auto build_job = WorkerData::BuildJob{m_workerData.m_buildPosMap[unit], unit_type};
+			build_jobs.push_back(build_job);
 		}
 	}
-	return buildJobs;
+	return build_jobs;
 }
