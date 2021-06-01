@@ -10,6 +10,7 @@ namespace MiraBot
 		friend class Global;
 
 		bool m_should_update_ = false;
+		StrategyManager::strategy_type m_current_enemy_strategy_ = StrategyManager::none;
 
 	public:
 		static inline bool found_enemy = false;
@@ -19,6 +20,7 @@ namespace MiraBot
 		static inline std::unordered_set<BWAPI::Unit> enemy_units = {};
 
 		InformationManager();
+		void updateEnemyStrategy();
 		void informationIsUpdated();
 		void onFrame();
 		void informationUpdateShouldHappen();

@@ -33,7 +33,28 @@ void InformationManager::informationUpdateShouldHappen()
 /// </summary>
 void InformationManager::informationIsUpdated()
 {
+	updateEnemyStrategy();
 	Global::strategy().informationUpdate();
+}
+
+/// <summary>
+/// TODO support for expanding
+/// </summary>
+void InformationManager::updateEnemyStrategy()
+{
+	// Do not update if we do not know any enemies.
+	if (enemy_units.empty()) return;
+
+	auto offensive_count = 0;
+	auto defensive_count = 0;
+
+	for (BWAPI::UnitInterface* enemy_unit : enemy_units)
+	{
+		enemy_unit->canAttack() ? offensive_count++ : defensive_count++;
+	}
+
+	if (offensive_count >= defensive_count) m_current_enemy_strategy_ = StrategyManager::offensive;
+	else m_current_enemy_strategy_ = StrategyManager::defensive;
 }
 
 /// <summary>
@@ -122,10 +143,10 @@ void InformationManager::onUnitDestroy(BWAPI::Unit unit)
 
 
 /// <summary>
-/// TODO not implemented yet
+/// Gets the strategy from enemy units
 /// </summary>
-/// <returns></returns>
+/// <returns>strategy based on units</returns>
 StrategyManager::strategy_type InformationManager::getEnemyStrategy()
 {
-	return StrategyManager::offensive;
+	return m_current_enemy_strategy_;
 }
