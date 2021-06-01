@@ -9,23 +9,60 @@
 #include "MapTools.h"
 #include "Global.h"
 
+#include "BWEM/src/bwem.h"
+#include <iostream>
+
 using namespace MiraBot;
+
+using namespace BWAPI;
+using namespace Filter;
+
+//using namespace BWEM;
+//using namespace BWEM::BWAPI_ext;
+//using namespace BWEM::utils;
+
+namespace
+{
+	auto& theMap = BWEM::Map::Instance();
+}
+
 
 MiraBotMain::MiraBotMain() = default;
 
 // Called when the bot starts!
 void MiraBotMain::onStart()
 {
-	// Set our BWAPI options here    
-	BWAPI::Broodwar->setLocalSpeed(10); // 10
-	BWAPI::Broodwar->setFrameSkip(0);
+	try
+	{
+		Broodwar->setLocalSpeed(10); // 10
+		Broodwar->setFrameSkip(0);
 
-	// Enable the flag that tells BWAPI to let users enter input while bot plays
-	BWAPI::Broodwar->enableFlag(BWAPI::Flag::UserInput);
+		// Enable the flag that tells BWAPI to let users enter input while bot plays
+		Broodwar->enableFlag(Flag::UserInput);
 
-	// Call MapTools OnStart
-	Global::map().onStart();
-	Global::information().onStart();
+		// Call MapTools OnStart
+		Global::map().onStart();
+		Global::information().onStart();
+
+		std::cout << "Map initialization..." << std::endl;
+
+		theMap.Initialize();
+		theMap.EnableAutomaticPathAnalysis();
+		//bool startingLocationsOK = theMap.FindBasesForStartingLocations();
+		//assert(startingLocationsOK);
+
+		std::cout << "ChokepointCount: " << theMap.ChokePointCount() << "\n";
+
+		BWEM::utils::MapPrinter::Initialize(&theMap);
+		BWEM::utils::printMap(theMap); // will print the map into the file <StarCraftFolder>bwapi-data/map.bmp
+		BWEM::utils::pathExample(theMap); // add to the printed map a path between two starting locations
+
+		std::cout << "gg" << std::endl;
+	}
+	catch (const std::exception& e)
+	{
+		std::cout << "EXCEPTION: " << e.what() << std::endl;
+	}
 }
 
 // Win/lose, Timestamp, Length of game(frames), Enemy race, Own race, Map, Number of units built, Supply, Total supply, git message and branch
@@ -45,12 +82,12 @@ void MiraBotMain::logResult(bool is_winner)
 	auto time = oss.str();
 
 
-	auto frames = std::to_string(BWAPI::Broodwar->getFrameCount());
-	auto race = BWAPI::Broodwar->self()->getRace().c_str();
-	auto map = BWAPI::Broodwar->mapFileName();
-	auto number_of_units = std::to_string(BWAPI::Broodwar->self()->allUnitCount());
-	auto supply = std::to_string(BWAPI::Broodwar->self()->supplyUsed());
-	auto total_supply = std::to_string(BWAPI::Broodwar->self()->supplyTotal());
+	auto frames = std::to_string(Broodwar->getFrameCount());
+	auto race = Broodwar->self()->getRace().c_str();
+	auto map = Broodwar->mapFileName();
+	auto number_of_units = std::to_string(Broodwar->self()->allUnitCount());
+	auto supply = std::to_string(Broodwar->self()->supplyUsed());
+	auto total_supply = std::to_string(Broodwar->self()->supplyTotal());
 	auto git = exec("git log -1 --pretty='%C(auto)%s'");
 	size_t end = git.find_last_not_of(whitespace);
 	git = git.substr(0, end + 1);
@@ -117,7 +154,7 @@ void MiraBotMain::onFrame()
 // Draw some relevant information to the screen to help us debug the bot
 void MiraBotMain::drawDebugInformation()
 {
-	BWAPI::Broodwar->drawTextScreen(BWAPI::Position(10, 10), "Hello, World!\n");
+	Broodwar->drawTextScreen(Position(10, 10), "Hello, World!\n");
 	Tools::DrawUnitCommands();
 	Tools::DrawUnitBoundingBoxes();
 
@@ -125,7 +162,7 @@ void MiraBotMain::drawDebugInformation()
 }
 
 // Called whenever a unit is destroyed, with a pointer to the unit
-void MiraBotMain::onUnitDestroy(BWAPI::Unit unit)
+void MiraBotMain::onUnitDestroy(Unit unit)
 {
 	if (unit->getType().isWorker()) Global::workers().onUnitDestroy(unit);
 	// TODO maybe fix?
@@ -135,7 +172,7 @@ void MiraBotMain::onUnitDestroy(BWAPI::Unit unit)
 
 // Called whenever a unit is morphed, with a pointer to the unit
 // Zerg units morph when they turn into other units
-void MiraBotMain::onUnitMorph(BWAPI::Unit unit)
+void MiraBotMain::onUnitMorph(Unit unit)
 {
 }
 
@@ -151,7 +188,7 @@ void MiraBotMain::onSendText(std::string text)
 // Called whenever a unit is created, with a pointer to the unit
 // Units are created in buildings like barracks before they are visible, 
 // so this will trigger when you issue the build command for most units
-void MiraBotMain::onUnitCreate(BWAPI::Unit unit)
+void MiraBotMain::onUnitCreate(Unit unit)
 {
 	// TODO: Worker manager and combat manager have to decide which job to assign new units
 	if (unit->getType().isWorker()) Global::workers().onUnitCreate(unit);
@@ -161,26 +198,26 @@ void MiraBotMain::onUnitCreate(BWAPI::Unit unit)
 }
 
 // Called whenever a unit finished construction, with a pointer to the unit
-void MiraBotMain::onUnitComplete(BWAPI::Unit unit)
+void MiraBotMain::onUnitComplete(Unit unit)
 {
 	Global::production().onUnitComplete(unit);
 }
 
 // Called whenever a unit appears, with a pointer to the destroyed unit
 // This is usually triggered when units appear from fog of war and become visible
-void MiraBotMain::onUnitShow(BWAPI::Unit unit)
+void MiraBotMain::onUnitShow(Unit unit)
 {
 	Global::information().onUnitShow(unit);
 }
 
 // Called whenever a unit gets hidden, with a pointer to the destroyed unit
 // This is usually triggered when units enter the fog of war and are no longer visible
-void MiraBotMain::onUnitHide(BWAPI::Unit unit)
+void MiraBotMain::onUnitHide(Unit unit)
 {
 }
 
 // Called whenever a unit switches player control
 // This usually happens when a dark archon takes control of a unit
-void MiraBotMain::onUnitRenegade(BWAPI::Unit unit)
+void MiraBotMain::onUnitRenegade(Unit unit)
 {
 }
