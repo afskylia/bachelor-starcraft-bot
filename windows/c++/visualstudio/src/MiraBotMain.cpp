@@ -179,10 +179,11 @@ void MiraBotMain::onUnitMorph(Unit unit)
 // Called whenever a text is sent to the game by a user
 void MiraBotMain::onSendText(std::string text)
 {
-	if (text == "/map")
-	{
-		Global::map().toggleDraw();
-	}
+	if (text == "/speed0") Broodwar->setLocalSpeed(25); // Slowest speed
+	if (text == "/speed1") Broodwar->setLocalSpeed(17);
+	if (text == "/speed2") Broodwar->setLocalSpeed(10);
+	if (text == "/speed3") Broodwar->setLocalSpeed(0); // Fastest speed
+	if (text == "/map")Global::map().toggleDraw();
 }
 
 // Called whenever a unit is created, with a pointer to the unit

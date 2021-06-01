@@ -25,7 +25,7 @@ void WorkerManager::onFrame()
 		auto minerals_workers = m_workerData.getWorkers(WorkerData::Minerals);
 
 		//if (gas_workers.size() < 5)
-		if (gas_workers.size() < minerals_workers.size() / 4)
+		if (gas_workers.size() < minerals_workers.size() / 5 && gas_workers.size() < 5)
 		{
 			// Assign new gas worker
 			setGasWorker(getWorker());

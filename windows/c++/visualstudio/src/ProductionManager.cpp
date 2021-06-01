@@ -20,6 +20,9 @@ ProductionManager::ProductionManager()
 	m_build_order[10] = BWAPI::UnitTypes::Protoss_Gateway;
 	m_build_order[12] = BWAPI::UnitTypes::Protoss_Assimilator;
 	m_build_order[13] = BWAPI::UnitTypes::Protoss_Cybernetics_Core;
+	m_build_order[15] = BWAPI::UnitTypes::Protoss_Gateway;
+	m_build_order[20] = BWAPI::UnitTypes::Protoss_Gateway;
+	m_build_order[25] = BWAPI::UnitTypes::Protoss_Gateway;
 }
 
 
