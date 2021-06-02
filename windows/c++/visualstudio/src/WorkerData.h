@@ -11,6 +11,8 @@ namespace MiraBot
 	public:
 		enum WorkerJob { Minerals, Gas, Build, Combat, Idle, Repair, Move, Scout, Default };
 
+		WorkerJob prioritized_jobs[9] = {Idle, Default, Minerals, Gas, Move, Scout, Combat, Repair};
+
 		// initialized like this:  struct BuildJob move = {tilepos, unittype}
 		struct BuildJob
 		{

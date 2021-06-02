@@ -5,6 +5,7 @@
 #include "WorkerManager.h"
 
 using namespace MiraBot;
+//using namespace BWAPI;
 /*
  * Everything production related
  */
@@ -94,7 +95,7 @@ std::map<BWAPI::UnitType, int> ProductionManager::getMapOfRequiredUnits()
 	std::map<BWAPI::UnitType, int> required_units;
 
 	// Get next supply
-	const int supply = (Tools::GetTotalUsedSupply(true) / 2);
+	const int supply = (Tools::getTotalUsedSupply(true) / 2);
 
 	// Iterate build order
 	for (auto build_order : StrategyManager::m_build_order_)
@@ -167,9 +168,9 @@ void ProductionManager::activateIdleBuildings()
 	 */
 
 	const auto worker_type = BWAPI::Broodwar->self()->getRace().getWorker();
-	auto workers_owned = Tools::CountUnitsOfType(worker_type, BWAPI::Broodwar->self()->getUnits());
+	auto workers_owned = Tools::countUnitsOfType(worker_type);
 	const auto workers_wanted = 50;
-	auto idle_nexuses = Tools::GetUnitsOfType(BWAPI::UnitTypes::Protoss_Nexus);
+	auto idle_nexuses = Tools::getUnitsOfType(BWAPI::UnitTypes::Protoss_Nexus, true);
 	while (workers_owned <= workers_wanted && !idle_nexuses.empty())
 	{
 		//if (unit->getType() == type && unit->isCompleted() && unit->isIdle())
@@ -182,13 +183,12 @@ void ProductionManager::activateIdleBuildings()
 
 	// TODO: Find a way to efficiently do this for all types (instead of repetitive code):
 	auto zealot_type = BWAPI::UnitTypes::Protoss_Zealot;
-	auto zealots_owned = Tools::CountUnitsOfType(zealot_type, BWAPI::Broodwar->self()->getUnits());
+	auto zealots_owned = Tools::countUnitsOfType(zealot_type);
 	auto zealots_wanted = 30;
-	auto idle_gateways = Tools::GetUnitsOfType(BWAPI::UnitTypes::Protoss_Gateway);
+	auto idle_gateways = Tools::getUnitsOfType(BWAPI::UnitTypes::Protoss_Gateway, true);
 	while (zealots_owned <= zealots_wanted && !idle_gateways.empty())
 	{
-		//if (unit->getType() == type && unit->isCompleted() && unit->isIdle())
-		auto gateway = idle_gateways.back();
+		auto* gateway = idle_gateways.back();
 		if (!gateway) return;
 		gateway->train(zealot_type);
 		idle_gateways.pop_back();
@@ -202,7 +202,10 @@ void ProductionManager::activateIdleBuildings()
  */
 void ProductionManager::onUnitDestroy(BWAPI::Unit unit)
 {
-	m_build_queue_.push_back(unit->getType());
+	if (unit->getPlayer() == BWAPI::Broodwar->self())
+	{
+		m_build_queue_.push_back(unit->getType());
+	}
 }
 
 /**
@@ -214,32 +217,25 @@ void ProductionManager::onUnitComplete(BWAPI::Unit unit)
 }
 
 /**
- * Try to train unit
+ * Try to train unit_type
  */
-bool ProductionManager::trainUnit(const BWAPI::UnitType& unit)
+bool ProductionManager::trainUnit(const BWAPI::UnitType& unit_type)
 {
-	// If we cannot afford unit
-	if (unit.mineralPrice() > getTotalMinerals()) { return false; }
-	if (unit.gasPrice() > getTotalGas()) { return false; }
+	// If we cannot afford unit_type
+	if (unit_type.mineralPrice() > getTotalMinerals()) { return false; }
+	if (unit_type.gasPrice() > getTotalGas()) { return false; }
 
-	switch (unit)
+	switch (unit_type)
 	{
 	case BWAPI::UnitTypes::Protoss_Probe:
 		{
-			// get the unit pointer to my depot
-			const BWAPI::Unit myDepot = Tools::GetDepot();
-
-			// if we have a valid depot unit and it's currently not training something, train a worker
-			// there is no reason for a bot to ever use the unit queueing system, it just wastes resources
-			if (myDepot && !myDepot->isTraining())
-			{
-				myDepot->train(unit);
-			}
+			auto* depot = Tools::getDepot();
+			if (depot) depot->train(unit_type);
 			break;
 		}
 	default:
 		{
-			std::cout << unit << " not supported \n";
+			std::cout << unit_type << " not supported \n";
 			return false;
 		}
 	}
@@ -248,7 +244,9 @@ bool ProductionManager::trainUnit(const BWAPI::UnitType& unit)
 
 bool ProductionManager::trainUnit(const BWAPI::UnitType& unit, BWAPI::Unit depot)
 {
-	if (unit.mineralPrice() > BWAPI::Broodwar->self()->minerals()) { return false; }
+	if (unit.mineralPrice() > Global::production().getTotalMinerals()) { return false; }
+	if (unit.gasPrice() > Global::production().getTotalGas()) { return false; }
+
 	if (depot && !depot->isTraining())
 	{
 		depot->train(unit);
@@ -257,37 +255,8 @@ bool ProductionManager::trainUnit(const BWAPI::UnitType& unit, BWAPI::Unit depot
 	return false;
 }
 
-/**
- *@deprecated use build order
- */
-[[deprecated]]
-void ProductionManager::buildGateway()
-{
-	const auto unitType = BWAPI::UnitTypes::Protoss_Gateway;
-	if (countBuildings(unitType, true) < 4)
-	{
-		auto startedBuilding = buildBuilding(unitType);
-	}
-}
 
-/**
- *@deprecated use build order
- */
-[[deprecated]]
-void ProductionManager::buildAttackUnits()
-{
-	const auto unitType = BWAPI::UnitTypes::Protoss_Zealot;
-	auto gateways = Tools::GetUnitsOfType(BWAPI::UnitTypes::Protoss_Gateway);
-	for (auto* gateway : gateways)
-	{
-		if (gateway && !gateway->isTraining()) { gateway->train(unitType); }
-	}
-}
-
-/**
- *@deprecated use build order
- */
-[[deprecated]]
+// Builds additional supply if needed
 void ProductionManager::buildAdditionalSupply()
 {
 	// Get the amount of supply supply we currently have unused
@@ -297,16 +266,11 @@ void ProductionManager::buildAdditionalSupply()
 	if (pendingBuildingsCount(supplyProviderType) > 0) return;
 
 	// If we have a sufficient amount of supply, we don't need to do anything
-	if (BWAPI::Broodwar->self()->supplyUsed() + 8 >= Tools::GetTotalSupply(true))
+	if (BWAPI::Broodwar->self()->supplyUsed() + 8 >= Tools::getTotalSupply(true))
 	{
 		// Otherwise, we are going to build a supply provider
-		const auto startedBuilding = buildBuilding(supplyProviderType);
+		buildBuilding(supplyProviderType);
 	}
-}
-
-int ProductionManager::countIdleBuildings(BWAPI::UnitType type, bool pending)
-{
-	return 0;
 }
 
 
@@ -345,51 +309,52 @@ int ProductionManager::pendingBuildingsCount(BWAPI::UnitType type)
 	return std::size(buildJobs);
 }
 
-// Return currently owned minerals, INCLUDING cost of pending build jobs
+// Return currently owned minerals, minus the cost of pending build jobs
 int ProductionManager::getTotalMinerals()
 {
-	auto totalMinerals = BWAPI::Broodwar->self()->minerals();
-
-	for (auto& buildJob : Global::workers().getActiveBuildJobs())
+	auto total_minerals = BWAPI::Broodwar->self()->minerals();
+	for (auto& build_job : Global::workers().getActiveBuildJobs())
 	{
-		totalMinerals -= buildJob.unitType.mineralPrice();
+		total_minerals -= build_job.unitType.mineralPrice();
 	}
-	return totalMinerals;
+	return total_minerals;
 }
 
-// Return currently owned vespene gas, INCLUDING cost of pending build jobs
+// Return currently owned vespene gas, minus the cost of pending build jobs
 int ProductionManager::getTotalGas()
 {
-	// TODO
-	return 0;
+	auto total_gas = BWAPI::Broodwar->self()->gas();
+	for (auto& build_job : Global::workers().getActiveBuildJobs())
+	{
+		total_gas -= build_job.unitType.gasPrice();
+	}
+	return total_gas;
 }
 
-bool ProductionManager::buildBuilding(BWAPI::UnitType type)
+// Tries to build the desired building type
+// TODO: More strategic placement of buildings
+bool ProductionManager::buildBuilding(const BWAPI::UnitType type)
 {
-	// TODO: Does the unit type require multiple workers?
-
-	// TODO: Make a global variable with total minerals and total gas, subtract how much is spent?
-	// ^That way we know how much we actually can spend
-
 	// If we have much less gas and minerals than required, it's not worth the wait
-	if (Global::production().getTotalMinerals() < type.mineralPrice() * 0.7) return false;
-	if (Global::production().getTotalGas() < type.gasPrice() * 0.7) return false;
+	if (getTotalMinerals() < type.mineralPrice() * 0.7) return false;
+	if (getTotalGas() < type.gasPrice() * 0.7) return false;
 
 	// Get the type of unit that is required to build the desired building
-	BWAPI::UnitType builderType = type.whatBuilds().first;
+	const auto builder_type = type.whatBuilds().first;
 
 	// Get a location that we want to build the building next to
-	BWAPI::TilePosition desiredPos = BWAPI::Broodwar->self()->getStartLocation();
+	const auto desired_pos = BWAPI::Broodwar->self()->getStartLocation();
 
 	// Ask BWAPI for a building location near the desired position for the type
-	int maxBuildRange = 64;
-	bool buildingOnCreep = type.requiresCreep();
-	BWAPI::TilePosition buildPos = BWAPI::Broodwar->getBuildLocation(type, desiredPos, maxBuildRange, buildingOnCreep);
+	const auto max_build_range = 64;
+	const auto building_on_creep = type.requiresCreep();
+	const auto build_pos = BWAPI::Broodwar->getBuildLocation(type, desired_pos, max_build_range, building_on_creep);
 
-	// Try to build the unit
-	auto* builder = Global::workers().getBuilder(builderType, BWAPI::Position(buildPos));
+	// Try to build the structure
+	auto* builder = Global::workers().getBuilder(builder_type, BWAPI::Position(build_pos));
 	if (!builder) { return false; }
 
-	Global::workers().setBuildingWorker(builder, WorkerData::BuildJob{buildPos, type});
+	// Assign job to builder unit
+	Global::workers().setBuildingWorker(builder, WorkerData::BuildJob{build_pos, type});
 	return true;
 }

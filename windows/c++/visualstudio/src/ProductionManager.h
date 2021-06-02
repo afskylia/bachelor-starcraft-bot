@@ -44,7 +44,7 @@ namespace MiraBot
 
 		bool buildBuilding(BWAPI::UnitType type);
 
-		bool trainUnit(const BWAPI::UnitType& unit);
+		bool trainUnit(const BWAPI::UnitType& unit_type);
 		bool trainUnit(const BWAPI::UnitType& unit, BWAPI::Unit depot);
 	};
 }

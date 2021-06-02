@@ -113,6 +113,14 @@ void PlayGame()
 					bot.onSendText(e.getText());
 					break;
 				}
+			case BWAPI::EventType::MenuFrame: break;
+			case BWAPI::EventType::ReceiveText: break;
+			case BWAPI::EventType::PlayerLeft: break;
+			case BWAPI::EventType::NukeDetect: break;
+			case BWAPI::EventType::UnitDiscover: break;
+			case BWAPI::EventType::UnitEvade: break;
+			case BWAPI::EventType::SaveGame: break;
+			case BWAPI::EventType::None: break;
 			}
 		}
 
