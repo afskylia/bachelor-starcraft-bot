@@ -23,7 +23,7 @@ using namespace Filter;
 
 namespace
 {
-	auto& theMap = BWEM::Map::Instance();
+	auto& map = BWEM::Map::Instance();
 }
 
 
@@ -46,16 +46,16 @@ void MiraBotMain::onStart()
 
 		std::cout << "Map initialization..." << std::endl;
 
-		theMap.Initialize();
-		theMap.EnableAutomaticPathAnalysis();
-		//bool startingLocationsOK = theMap.FindBasesForStartingLocations();
-		//assert(startingLocationsOK);
+		map.Initialize();
+		map.EnableAutomaticPathAnalysis();
+		const auto starting_locations_ok = map.FindBasesForStartingLocations();
+		assert(starting_locations_ok);
 
-		std::cout << "ChokepointCount: " << theMap.ChokePointCount() << "\n";
+		std::cout << "ChokepointCount: " << map.ChokePointCount() << "\n";
 
-		BWEM::utils::MapPrinter::Initialize(&theMap);
-		BWEM::utils::printMap(theMap); // will print the map into the file <StarCraftFolder>bwapi-data/map.bmp
-		BWEM::utils::pathExample(theMap); // add to the printed map a path between two starting locations
+		BWEM::utils::MapPrinter::Initialize(&map);
+		BWEM::utils::printMap(map); // will print the map into the file <StarCraftFolder>bwapi-data/map.bmp
+		BWEM::utils::pathExample(map); // add to the printed map a path between two starting locations
 
 		std::cout << "gg" << std::endl;
 	}
@@ -166,10 +166,14 @@ void MiraBotMain::drawDebugInformation()
 // Called whenever a unit is destroyed, with a pointer to the unit
 void MiraBotMain::onUnitDestroy(Unit unit)
 {
-	if (unit->getType().isWorker()) Global::workers().onUnitDestroy(unit);
 	// TODO maybe fix?
+	if (unit->getType().isWorker()) Global::workers().onUnitDestroy(unit);
 	Global::production().onUnitDestroy(unit);
 	Global::information().onUnitDestroy(unit);
+
+	// BWEM updates
+	if (unit->getType().isSpecialBuilding() == true) map.OnStaticBuildingDestroyed(unit);
+	if (unit->getType().isMineralField() == true) map.OnMineralDestroyed(unit);
 }
 
 // Called whenever a unit is morphed, with a pointer to the unit
@@ -182,10 +186,13 @@ void MiraBotMain::onUnitMorph(Unit unit)
 void MiraBotMain::onSendText(std::string text)
 {
 	if (text == "/speed0") Broodwar->setLocalSpeed(25); // Slowest speed
-	if (text == "/speed1") Broodwar->setLocalSpeed(17);
-	if (text == "/speed2") Broodwar->setLocalSpeed(10);
-	if (text == "/speed3") Broodwar->setLocalSpeed(0); // Fastest speed
-	if (text == "/map")Global::map().toggleDraw();
+	else if (text == "/speed1") Broodwar->setLocalSpeed(17);
+	else if (text == "/speed2") Broodwar->setLocalSpeed(10);
+	else if (text == "/speed3") Broodwar->setLocalSpeed(0); // Fastest speed
+	else if (text == "/map")Global::map().toggleDraw();
+
+	// TODO: Why doesn't this work????
+	else BWEM::utils::MapDrawer::ProcessCommand(text);
 }
 
 // Called whenever a unit is created, with a pointer to the unit
