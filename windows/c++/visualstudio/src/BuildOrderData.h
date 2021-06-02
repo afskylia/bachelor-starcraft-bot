@@ -1,28 +1,19 @@
 ﻿#pragma once
 
 #include "BWAPI.h"
-/**
- * Class for storing a build order
- * if nothing else is noted in between two Supply marks - the player should build Probes and send them to mine
- */
-class BuildOrder
-{
-public:
-	BWAPI::UnitType steps[200];
+#include "Global.h"
+#include "StrategyManager.h"
 
-	BuildOrder()
-	{
-		for (auto step : steps)
-		{
-			step = BWAPI::UnitTypes::Protoss_Probe;
-		}
-	}
-};
+using namespace MiraBot;
 
 class BuildOrderData
 {
 public:
-
+	void initStarterBuildOrder();
+	void initProtossVTerranBuildOrder();
+	void initBuildOrders();
 	BuildOrderData();
-	static BuildOrder SimpleBuildOrder();
+	static inline std::map<int, BWAPI::UnitType> clean_build_order;
+	static inline std::map<int, BWAPI::UnitType> starter_build_order;
+	static inline std::map<int, BWAPI::UnitType> protoss_v_terran;
 };
