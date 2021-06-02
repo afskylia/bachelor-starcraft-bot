@@ -1,6 +1,9 @@
 .idea
 .idea/
 
+windows/bin/log.csv
+windows/bin/map.bmp
+
 *.aps
 
 windows/c++/visualstudio/Release
