@@ -12,28 +12,36 @@
 
 
 using namespace BWAPI;
-using namespace BWAPI::UnitTypes::Enum;
-namespace { auto & bw = Broodwar; }
+using namespace UnitTypes::Enum;
+
+namespace
+{
+	auto& bw = Broodwar;
+}
 
 using namespace std;
 
 
-namespace BWEM {
-
-using namespace utils;
-using namespace detail;
-
-namespace BWAPI_ext {
-
-
-void drawDiagonalCrossMap(BWAPI::Position topLeft, BWAPI::Position bottomRight, BWAPI::Color col)
+namespace BWEM
 {
-	bw->drawLineMap(topLeft, bottomRight, col);
-	bw->drawLineMap(Position(bottomRight.x, topLeft.y), Position(topLeft.x, bottomRight.y), col);
-}
+	using namespace utils;
+	using namespace detail;
 
-
-}} // namespace BWEM::BWAPI_ext
-
-
-
+	namespace BWAPI_ext
+	{
+		void drawDiagonalCrossMap(Position topLeft, Position bottomRight, Color col)
+		{
+			try
+			{
+				// TODO: For some reason drawLineMap makes the bot crash
+				//bw->drawLineMap(topLeft, bottomRight, col);
+				//bw->drawLineMap(Position(bottomRight.x, topLeft.y), Position(topLeft.x, bottomRight.y), col);
+			}
+			catch (const std::exception& e)
+			{
+				std::cout << "EXCEPTION: " << e.what();
+				std::cout << topLeft << ", " << bottomRight << ", " << col.toString() << "\n";
+			}
+		}
+	}
+} // namespace BWEM::BWAPI_ext

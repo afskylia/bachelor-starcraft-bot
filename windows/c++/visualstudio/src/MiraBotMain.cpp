@@ -140,6 +140,9 @@ void MiraBotMain::onFrame()
 	Global::strategy().onFrame();
 	Global::information().onFrame();
 
+	BWEM::utils::gridMapExample(map);
+	BWEM::utils::drawMap(map);
+
 
 	// Update our MapTools information
 	Global::map().onFrame();
@@ -191,7 +194,7 @@ void MiraBotMain::onSendText(std::string text)
 	else if (text == "/speed3") Broodwar->setLocalSpeed(0); // Fastest speed
 	else if (text == "/map")Global::map().toggleDraw();
 
-	// TODO: Why doesn't this work????
+		// TODO: Why doesn't this work????
 	else BWEM::utils::MapDrawer::ProcessCommand(text);
 }
 
