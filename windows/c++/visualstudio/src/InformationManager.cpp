@@ -53,8 +53,8 @@ void InformationManager::updateEnemyStrategy()
 		enemy_unit->canAttack() ? offensive_count++ : defensive_count++;
 	}
 
-	if (offensive_count >= defensive_count) m_current_enemy_strategy_ = StrategyManager::offensive;
-	else m_current_enemy_strategy_ = StrategyManager::defensive;
+	if (offensive_count >= defensive_count) m_current_enemy_strategy_ = Enums::strategy_type::offensive;
+	else m_current_enemy_strategy_ = Enums::strategy_type::defensive;
 }
 
 /// <summary>
@@ -146,7 +146,7 @@ void InformationManager::onUnitDestroy(BWAPI::Unit unit)
 /// Gets the strategy from enemy units
 /// </summary>
 /// <returns>strategy based on units</returns>
-StrategyManager::strategy_type InformationManager::getEnemyStrategy()
+Enums::strategy_type InformationManager::getEnemyStrategy()
 {
 	return m_current_enemy_strategy_;
 }

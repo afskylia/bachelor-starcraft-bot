@@ -98,12 +98,12 @@ std::map<BWAPI::UnitType, int> ProductionManager::getMapOfRequiredUnits()
 	const int supply = (Tools::getTotalUsedSupply(true) / 2);
 
 	// Iterate build order
-	for (auto build_order : StrategyManager::m_build_order_)
+	for (auto [supply_lvl, unit_type] : Global::strategy().m_build_order)
 	{
 		// If unit needed to be build, add it to required_units
-		if (build_order.first <= supply)
+		if (supply_lvl <= supply)
 		{
-			required_units[build_order.second]++;
+			required_units[unit_type]++;
 		}
 	}
 

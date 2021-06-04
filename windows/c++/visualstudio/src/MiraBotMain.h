@@ -16,22 +16,7 @@ namespace MiraBot
 	{
 		// Non-global managers can go here, e.g. a TimerManager
 
-		// Managers
-		//MapTools m_mapTools;
-		//ProductionManager m_production_manager;
-		//CombatManager m_combat_manager;
-		//WorkerManager m_worker_manager;
-		//bool found_enemy_ = false;
-
-		//BWAPI::Unitset workers = BWAPI::Unitset::none;
-		//BWAPI::Unitset attackUnits = BWAPI::Unitset::none;
-
 	public:
-
-		//static inline BWAPI::Unit main_base = nullptr;
-		//static inline BWAPI::Race enemy_race = BWAPI::Races::None;
-		//static inline BWAPI::TilePosition enemy_start_location = BWAPI::TilePositions::None;
-
 		MiraBotMain();
 
 		// helper functions to get you started with bot programming and learn the API

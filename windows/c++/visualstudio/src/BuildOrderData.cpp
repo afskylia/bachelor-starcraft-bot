@@ -1,5 +1,6 @@
 ﻿#include "BuildOrderData.h"
 
+using namespace MiraBot;
 
 void BuildOrderData::initStarterBuildOrder()
 {

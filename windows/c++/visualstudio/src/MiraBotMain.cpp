@@ -97,7 +97,7 @@ void MiraBotMain::logResult(bool is_winner)
 
 	std::ofstream file;
 	file.open("log.csv", std::ios::in | std::ios::out | std::ios::ate);
-	file << win << ';' << date << ';' << time << ';' << frames << ';' << InformationManager::enemy_race.toString() <<
+	file << win << ';' << date << ';' << time << ';' << frames << ';' << Global::information().enemy_race.toString() <<
 		';' << race << ';' <<
 		map << ';' << number_of_units << ';' << supply << ';' << total_supply << ';' << git << ';' << branch << "\n";
 	file.close();
@@ -163,7 +163,7 @@ void MiraBotMain::drawDebugInformation()
 	Tools::drawUnitCommands();
 	Tools::drawUnitBoundingBoxes();
 
-	if (InformationManager::found_enemy) Tools::drawEnemyBases(InformationManager::enemy_start_location);
+	if (Global::information().found_enemy) Tools::drawEnemyBases(Global::information().enemy_start_location);
 }
 
 // Called whenever a unit is destroyed, with a pointer to the unit
