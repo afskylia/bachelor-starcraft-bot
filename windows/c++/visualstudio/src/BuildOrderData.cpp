@@ -51,11 +51,17 @@ void BuildOrderData::initProtossVZergBuildOrder()
 {
 	protoss_v_zerg = clean_build_order;
 
-	protoss_v_terran[10] = BWAPI::UnitTypes::Protoss_Gateway;
-	protoss_v_terran[12] = BWAPI::UnitTypes::Protoss_Gateway;
+	protoss_v_zerg[10] = BWAPI::UnitTypes::Protoss_Gateway;
+	protoss_v_zerg[12] = BWAPI::UnitTypes::Protoss_Gateway;
 }
 
 void BuildOrderData::initProtossVProtossBuildOrder()
 {
 	protoss_v_protoss = clean_build_order;
+
+	protoss_v_protoss[10] = BWAPI::UnitTypes::Protoss_Gateway;
+	protoss_v_protoss[12] = BWAPI::UnitTypes::Protoss_Gateway;
+	protoss_v_protoss[13] = BWAPI::UnitTypes::Protoss_Nexus;
+	protoss_v_protoss[14] = BWAPI::UnitTypes::Protoss_Assimilator;
+	protoss_v_protoss[15] = BWAPI::UnitTypes::Protoss_Cybernetics_Core;
 }
