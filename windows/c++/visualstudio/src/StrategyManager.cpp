@@ -24,6 +24,10 @@ std::map<int, BWAPI::UnitType> StrategyManager::getBuildOrder(BWAPI::Race enemy_
 		return m_build_order_data.starter_build_order;
 	case BWAPI::Races::Terran:
 		return m_build_order_data.protoss_v_terran;
+	case BWAPI::Races::Protoss:
+		return m_build_order_data.protoss_v_protoss;
+	case BWAPI::Races::Zerg:
+		return m_build_order_data.protoss_v_zerg;
 	default: return m_build_order_data.starter_build_order;
 	}
 }
