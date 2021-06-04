@@ -55,10 +55,14 @@ void ProductionManager::tryBuildOrTrainUnit()
 
 bool ProductionManager::addToBuildQueue(const BWAPI::UnitType& unit_type)
 {
+	// TODO this is a hotfix
+	if (unit_type == BWAPI::Broodwar->self()->getRace().getWorker()) return true;
+
 	if (std::find(m_build_queue_.begin(), m_build_queue_.end(), unit_type) == m_build_queue_.end())
 	{
 		// Add unit to build queue and remove from build order
 		m_build_queue_.push_back(unit_type);
+		printDebugData();
 
 		// TODO debug
 		for (auto build_queue : m_build_queue_)
@@ -191,6 +195,24 @@ void ProductionManager::trainUnitInBuilding(BWAPI::UnitType unit_type, int units
 	}
 }
 
+void ProductionManager::printDebugData()
+{
+	std::cout << "\nBUILD QUEUE: [";
+	for (auto s : m_build_queue_)
+	{
+		std::cout << s << ", ";
+	}
+	std::cout << "]\n";
+
+	std::cout << "BUILD ORDER: [";
+	for (auto [fst, snd] : Global::strategy().m_build_order)
+	{
+		if (snd == BWAPI::UnitTypes::Protoss_Probe) continue;
+		std::cout << "[" << fst << ", " << snd.getName() << "], ";
+	}
+	std::cout << "]\n\n";
+}
+
 
 /**
  * Update build queue with destroyed units
@@ -220,21 +242,23 @@ bool ProductionManager::trainUnit(const BWAPI::UnitType& unit_type)
 	if (unit_type.mineralPrice() > getTotalMinerals()) { return false; }
 	if (unit_type.gasPrice() > getTotalGas()) { return false; }
 
-	switch (unit_type)
+
+	for (auto [req_type,req_num] : unit_type.requiredUnits())
 	{
-	case BWAPI::UnitTypes::Protoss_Probe:
+		auto units = Tools::getUnitsOfType(req_type, true);
+		if (units.size() < req_num)
 		{
-			auto* depot = Tools::getDepot();
-			if (depot) depot->train(unit_type);
-			break;
-		}
-	default:
-		{
-			std::cout << unit_type << " not supported \n";
+			std::cout << "Need " << req_num << " " << req_type << " to train " << unit_type << "\n";
 			return false;
 		}
 	}
-	return true;
+
+	auto builder_type = unit_type.whatBuilds().first;
+	auto builder_unit = Tools::getUnitOfType(builder_type);
+
+	if (builder_unit) return builder_unit->train(unit_type);
+
+	return false;
 }
 
 bool ProductionManager::trainUnit(const BWAPI::UnitType& unit, BWAPI::Unit depot)

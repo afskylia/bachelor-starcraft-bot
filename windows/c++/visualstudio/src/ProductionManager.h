@@ -26,6 +26,8 @@ namespace MiraBot
 		void activateIdleBuildings();
 		void trainUnitInBuilding(BWAPI::UnitType unit_type, int units_wanted);
 
+		void printDebugData();
+
 		void onFrame();
 		void onUnitDestroy(BWAPI::Unit unit);
 		void onUnitComplete(BWAPI::Unit unit);

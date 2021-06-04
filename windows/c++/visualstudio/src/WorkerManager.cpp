@@ -268,6 +268,7 @@ void WorkerManager::handleIdleBuildWorker(BWAPI::Unit worker)
 		const auto creep = building_type.requiresCreep();
 		building_pos = BWAPI::Broodwar->getBuildLocation(building_type, building_pos, max_range, creep);
 		std::cout << "Failed to build " << building_type.getName() << "\n";
+		return;
 	}
 
 	// Used in the beginning of the function next frame

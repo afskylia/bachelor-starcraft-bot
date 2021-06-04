@@ -140,8 +140,8 @@ void MiraBotMain::onFrame()
 	Global::strategy().onFrame();
 	Global::information().onFrame();
 
-	BWEM::utils::gridMapExample(map);
-	BWEM::utils::drawMap(map);
+	//BWEM::utils::gridMapExample(map);
+	//BWEM::utils::drawMap(map);
 
 
 	// Update our MapTools information
@@ -159,7 +159,6 @@ void MiraBotMain::onFrame()
 // Draw some relevant information to the screen to help us debug the bot
 void MiraBotMain::drawDebugInformation()
 {
-	Broodwar->drawTextScreen(Position(10, 10), "Hello, World!\n");
 	Tools::drawUnitCommands();
 	Tools::drawUnitBoundingBoxes();
 
@@ -188,11 +187,13 @@ void MiraBotMain::onUnitMorph(Unit unit)
 // Called whenever a text is sent to the game by a user
 void MiraBotMain::onSendText(std::string text)
 {
-	if (text == "/speed0") Broodwar->setLocalSpeed(25); // Slowest speed
-	else if (text == "/speed1") Broodwar->setLocalSpeed(17);
-	else if (text == "/speed2") Broodwar->setLocalSpeed(10);
-	else if (text == "/speed3") Broodwar->setLocalSpeed(0); // Fastest speed
-	else if (text == "/map")Global::map().toggleDraw();
+	if (text == "speed0") Broodwar->setLocalSpeed(25); // Slowest speed
+	else if (text == "speed1") Broodwar->setLocalSpeed(17);
+	else if (text == "speed2") Broodwar->setLocalSpeed(10);
+	else if (text == "speed3") Broodwar->setLocalSpeed(0); // Fastest speed
+		//else if (text == "/map")Global::map().toggleDraw();
+
+	else if (text == "production") Global::production().printDebugData();
 
 		// TODO: Why doesn't this work????
 	else BWEM::utils::MapDrawer::ProcessCommand(text);
