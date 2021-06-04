@@ -124,19 +124,20 @@ void ProductionManager::compareUnitsAndBuild()
 
 	// TODO if maps are the same, return
 
-	for (auto required_unit : required_units)
+	for (auto [req_type, req_amount] : required_units)
 	{
-		// Try find in all units
-		auto it = all_units.find(required_unit.first);
-		// If not found or we need more units, build it
-		if (it == all_units.end())
+		auto owned_units = Tools::getUnitsOfType(req_type, false, false);
+		auto amount_owned = owned_units.size();
+
+		//if (owned_units.size() < req_amount) continue;
+
+		while (amount_owned < req_amount)
 		{
-			addToBuildQueue(required_unit.first);
-			break;
+			addToBuildQueue(req_type);
+			amount_owned++;
 		}
-		if (required_unit.second > it->second)
-			addToBuildQueue(required_unit.first);
 	}
+
 	tryBuildOrTrainUnit();
 }
 
@@ -243,7 +244,7 @@ bool ProductionManager::trainUnit(const BWAPI::UnitType& unit_type)
 	if (unit_type.gasPrice() > getTotalGas()) { return false; }
 
 
-	for (auto [req_type,req_num] : unit_type.requiredUnits())
+	for (auto [req_type, req_num] : unit_type.requiredUnits())
 	{
 		auto units = Tools::getUnitsOfType(req_type, true);
 		if (units.size() < req_num)
