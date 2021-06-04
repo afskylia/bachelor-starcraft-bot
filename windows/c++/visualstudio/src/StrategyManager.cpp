@@ -7,8 +7,7 @@ using namespace MiraBot;
 
 
 /// <summary>
-/// Gets new build order from data
-/// TODO consider more variables
+/// Gets new build order from data. 
 /// </summary>
 /// <param name="race"></param>
 /// <param name="enemy_race"></param>
@@ -47,6 +46,10 @@ void StrategyManager::onFrame()
 void StrategyManager::informationUpdate()
 {
 	std::cout << "Information is updated \n";
-	m_build_order = getBuildOrder(Global::information().enemy_race,
-	                              Global::information().m_current_enemy_strategy_);
+	// do not update if supply > 20
+	if (BWAPI::Broodwar->self()->supplyUsed() <= 20)
+	{
+		m_build_order = getBuildOrder(Global::information().enemy_race,
+		                              Global::information().m_current_enemy_strategy_);
+	}
 }
