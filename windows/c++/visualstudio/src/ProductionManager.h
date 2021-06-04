@@ -24,6 +24,7 @@ namespace MiraBot
 		void compareUnitsAndBuild();
 		void tryCompareUnitsAndBuild();
 		void activateIdleBuildings();
+		void trainUnitInBuilding(BWAPI::UnitType unit_type, int units_wanted);
 
 		void onFrame();
 		void onUnitDestroy(BWAPI::Unit unit);

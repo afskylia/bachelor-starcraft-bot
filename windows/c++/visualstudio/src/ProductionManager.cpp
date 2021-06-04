@@ -168,31 +168,26 @@ void ProductionManager::activateIdleBuildings()
 	 */
 
 	const auto worker_type = BWAPI::Broodwar->self()->getRace().getWorker();
-	auto workers_owned = Tools::countUnitsOfType(worker_type);
 	const auto workers_wanted = 50;
-	auto idle_nexuses = Tools::getUnitsOfType(BWAPI::UnitTypes::Protoss_Nexus, true);
-	while (workers_owned <= workers_wanted && !idle_nexuses.empty())
-	{
-		//if (unit->getType() == type && unit->isCompleted() && unit->isIdle())
-		auto nexus = idle_nexuses.back();
-		if (!nexus) return;
-		nexus->train(worker_type);
-		idle_nexuses.pop_back();
-		workers_owned++;
-	}
+	trainUnitInBuilding(worker_type, workers_wanted);
 
-	// TODO: Find a way to efficiently do this for all types (instead of repetitive code):
 	auto zealot_type = BWAPI::UnitTypes::Protoss_Zealot;
-	auto zealots_owned = Tools::countUnitsOfType(zealot_type);
 	auto zealots_wanted = 30;
-	auto idle_gateways = Tools::getUnitsOfType(BWAPI::UnitTypes::Protoss_Gateway, true);
-	while (zealots_owned <= zealots_wanted && !idle_gateways.empty())
+	trainUnitInBuilding(zealot_type, zealots_wanted);
+}
+
+void ProductionManager::trainUnitInBuilding(BWAPI::UnitType unit_type, int units_wanted)
+{
+	auto idle_buildings = Tools::getUnitsOfType(unit_type.whatBuilds().first, true);
+	auto owned = Tools::countUnitsOfType(unit_type);
+
+	while (owned <= units_wanted && !idle_buildings.empty())
 	{
-		auto* gateway = idle_gateways.back();
-		if (!gateway) return;
-		gateway->train(zealot_type);
-		idle_gateways.pop_back();
-		zealots_owned++;
+		auto* idle_building = idle_buildings.back();
+		if (!idle_building) return;
+		idle_building->train(unit_type);
+		idle_buildings.pop_back();
+		owned++;
 	}
 }
 
