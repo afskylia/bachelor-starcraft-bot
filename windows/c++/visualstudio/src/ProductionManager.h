@@ -10,10 +10,27 @@ namespace MiraBot
 	{
 		friend class Global;
 
+		// The build queue: contains the items we need to build asap
 		std::deque<BWAPI::UnitType> m_build_queue_;
+
+		// The last supply level we enqueued
+		int prev_supply = 0;
+
+		// Units built/enqueued from build order (used when checking onUnitDestroy), initially contains the nexus (lvl 4)
+		std::vector<int> enqueued_levels = {4};
+		std::vector<BWAPI::UnitType> built_units;
+
 		std::map<int, BWAPI::UnitType> m_try_built_or_trained_;
 		/*std::map<int, BWAPI::UnitType> m_build_order;*/
 		int m_last_build_frame_ = 0;
+
+		// Push the unit type at given supply lvl to build queue
+		void pushToBuildQueue(int supply_lvl);
+		void pushToBuildQueue(BWAPI::UnitType unit_type);
+
+		// Pop from build queue if we can start building it
+		void pollBuildQueue();
+
 	public:
 
 		ProductionManager();
@@ -34,6 +51,8 @@ namespace MiraBot
 		void buildGateway();
 		void buildAttackUnits();
 		void buildAdditionalSupply();
+
+		void pollBuildOrder();
 
 		int countBuildings(bool pending = true);
 		int countBuildings(BWAPI::UnitType type, bool pending = true);

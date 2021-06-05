@@ -17,7 +17,9 @@ ProductionManager::ProductionManager()
 void ProductionManager::onFrame()
 {
 	// Enforce build order
-	tryCompareUnitsAndBuild();
+	//tryCompareUnitsAndBuild();
+	pollBuildOrder();
+	tryBuildOrTrainUnit();
 
 	// Make idle buildings produce units if needed
 	activateIdleBuildings();
@@ -26,31 +28,72 @@ void ProductionManager::onFrame()
 	buildAdditionalSupply();
 }
 
-void ProductionManager::tryBuildOrTrainUnit()
+// Check if anything should be added to the build queue
+void ProductionManager::pollBuildOrder()
 {
-	if (m_build_queue_.empty())
+	// Get closest (not null) supply level in build order
+	auto supply = BWAPI::Broodwar->self()->supplyUsed() / 2;
+	auto test = supply;
+	while (!Global::strategy().m_build_order.count(supply))
+		supply--;
+
+	// TODO: Check if we have built all the things required by the build order, otherwise enqueue those (using getrequiredunits?)
+	/*for (auto [lvl_, _] : Global::strategy().m_build_order)
 	{
+		if (lvl_ == supply) break;
+		if (std::find(enqueued_levels.begin(), enqueued_levels.end(), lvl_) == enqueued_levels.end())
+		{
+			pushToBuildQueue(lvl_);
+			enqueued_levels.push_back(lvl_);
+		}
+	}*/
+
+	// If we built this last
+	if (supply == prev_supply) return;
+
+	// If supply lower than previously, i.e. after an attack by the enemy
+	if (supply < prev_supply)
+	{
+		std::cout << "***** supply < prev_supply ******\n";
 		return;
 	}
+
+	// Push to build queue and update prev_supply
+	pushToBuildQueue(supply);
+	prev_supply = supply;
+}
+
+// Push unit type at given supply lvl to build queue if not already enqueued
+void ProductionManager::pushToBuildQueue(int supply_lvl)
+{
+	// TODO: Make null proof
+	const auto unit_type = Global::strategy().m_build_order[supply_lvl];
+
+	// Make sure this exact supply level has not already been enqueued
+	if (std::find(enqueued_levels.begin(), enqueued_levels.end(), supply_lvl) == enqueued_levels.end())
+	{
+		// Push to build queue and save in enqueued levels for future checks
+		pushToBuildQueue(unit_type);
+		enqueued_levels.push_back(supply_lvl);
+	}
+}
+
+// Push given unit type to back of build queue
+void ProductionManager::pushToBuildQueue(BWAPI::UnitType unit_type)
+{
+	m_build_queue_.push_back(unit_type);
+}
+
+
+void ProductionManager::tryBuildOrTrainUnit()
+{
+	if (m_build_queue_.empty()) return;
+
 	// Access oldest element and remove it
-	const BWAPI::UnitType unit_type = m_build_queue_.front();
-	m_build_queue_.pop_front();
+	auto unit_type = m_build_queue_.front();
 
-	// Try to build unit type
-	if (unit_type.isBuilding())
-	{
-		const auto built = buildBuilding(unit_type);
-		if (!built) m_last_build_frame_ = BWAPI::Broodwar->getFrameCount();
-	}
-	else
-	{
-		// TODO: revamp of build order system so it doesn't have probes on the empty spots?
-		// This is a hotfix until then - ignores all "probe" levels from the build order
-		if (unit_type == BWAPI::UnitTypes::Protoss_Probe) return;
-
-		const auto built = trainUnit(unit_type);
-		if (!built) m_last_build_frame_ = BWAPI::Broodwar->getFrameCount();
-	}
+	// Try to build or train unit, remove from queue upon success
+	if (unit_type.isBuilding() && buildBuilding(unit_type) || trainUnit(unit_type)) m_build_queue_.pop_front();
 }
 
 bool ProductionManager::addToBuildQueue(const BWAPI::UnitType& unit_type)
@@ -246,7 +289,7 @@ bool ProductionManager::trainUnit(const BWAPI::UnitType& unit_type)
 
 	for (auto [req_type, req_num] : unit_type.requiredUnits())
 	{
-		auto units = Tools::getUnitsOfType(req_type, true);
+		auto units = Tools::getUnitsOfType(req_type); //idle=true
 		if (units.size() < req_num)
 		{
 			std::cout << "Need " << req_num << " " << req_type << " to train " << unit_type << "\n";
