@@ -67,6 +67,7 @@
     <ClCompile Include="src\BWEM\EasyBMP_1.06\EasyBMP.cpp">
       <Filter>BWEM</Filter>
     </ClCompile>
+    <ClCompile Include="BuildOrder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -142,6 +143,7 @@
     <ClInclude Include="src\BWEM\EasyBMP_1.06\EasyBMP_BMP.h">
       <Filter>BWEM</Filter>
     </ClInclude>
+    <ClInclude Include="BuildOrder.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="BWEM">

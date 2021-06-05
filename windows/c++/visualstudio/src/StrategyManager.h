@@ -3,6 +3,7 @@
 #include <BWAPI/Race.h>
 
 #include "BuildOrderData.h"
+#include "Enums.h"
 
 namespace MiraBot
 {
@@ -14,15 +15,14 @@ namespace MiraBot
 	public:
 		BuildOrderData m_build_order_data;
 		std::map<int, BWAPI::UnitType> m_build_order;
-
-		//enum strategy_type { offensive = 0, defensive = 1, expanding = 2, none = 3 };
-
+		int prev_supply{};
 
 		std::map<int, BWAPI::UnitType> getBuildOrder(BWAPI::Race enemy_race = BWAPI::Races::None,
 		                                             Enums::strategy_type enemy_strategy = Enums::offensive);
 
 		StrategyManager();
 		void onFrame();
+		void switchBuildOrder(std::map<int, BWAPI::UnitType> new_build_order);
 		void informationUpdate();
 	};
 }
