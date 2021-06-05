@@ -34,6 +34,7 @@ void MiraBotMain::onStart()
 {
 	try
 	{
+		// Set initial local game speed
 		Broodwar->setLocalSpeed(10); // 10
 		Broodwar->setFrameSkip(0);
 
@@ -44,20 +45,17 @@ void MiraBotMain::onStart()
 		Global::map().onStart();
 		Global::information().onStart();
 
-		std::cout << "Map initialization..." << std::endl;
-
+		std::cout << "Map initialization...";
 		map.Initialize();
 		map.EnableAutomaticPathAnalysis();
 		const auto starting_locations_ok = map.FindBasesForStartingLocations();
 		assert(starting_locations_ok);
 
-		std::cout << "ChokepointCount: " << map.ChokePointCount() << "\n";
-
 		BWEM::utils::MapPrinter::Initialize(&map);
-		BWEM::utils::printMap(map); // will print the map into the file <StarCraftFolder>bwapi-data/map.bmp
+		BWEM::utils::printMap(map); // will print the map into the file bin/map.bmp
 		BWEM::utils::pathExample(map); // add to the printed map a path between two starting locations
 
-		std::cout << "gg" << std::endl;
+		std::cout << " complete!\n";
 	}
 	catch (const std::exception& e)
 	{

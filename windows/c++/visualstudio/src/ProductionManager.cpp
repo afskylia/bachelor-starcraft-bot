@@ -19,7 +19,7 @@ void ProductionManager::onFrame()
 
 	// Make idle buildings produce units if needed
 	/*TODO: when training something in trybuildortrainunit, does the building then become
-	 * non-idle in the same frame? if so that is an issue because it will be overridden!*/
+	 * non-idle in the same frame? if not that is an issue because it will be overridden!*/
 	activateIdleBuildings();
 
 	// TODO: Instead, automatically add supply depots to build order when about to run out?
@@ -31,38 +31,53 @@ void ProductionManager::pollBuildOrder()
 {
 	// Get closest (not null) supply level in build order
 	auto supply = BWAPI::Broodwar->self()->supplyUsed() / 2;
-	auto test = supply;
 	while (!Global::strategy().m_build_order.count(supply))
 		supply--;
 
-	// TODO: Check if we have built all the things required by the build order, otherwise enqueue those (using getrequiredunits?)
-	/*for (auto [lvl_, _] : Global::strategy().m_build_order)
-	{
-		if (lvl_ == supply) break;
-		if (std::find(enqueued_levels.begin(), enqueued_levels.end(), lvl_) == enqueued_levels.end())
-		{
-			pushToBuildQueue(lvl_);
-			enqueued_levels.push_back(lvl_);
-		}
-	}*/
-
-	// If we built this last
 	if (supply == prev_supply) return;
+	if (prev_supply > supply) std::cout << "lvl > supply\n";
 
-	// If supply lower than previously, i.e. after an attack by the enemy
-	if (supply < prev_supply)
+	// From prev_supply up to current supply, enqueue missing units
+	auto lvl = prev_supply + 1;
+	while (lvl <= supply)
 	{
-		std::cout << "***** supply < prev_supply ******\n";
-		return;
+		if (Global::strategy().m_build_order.count(lvl))
+			pushToBuildQueue(lvl);
+		lvl++;
 	}
 
-	// Push to build queue and update prev_supply
-	pushToBuildQueue(supply);
 	prev_supply = supply;
+
+
+	//// TODO: Check if we have built all the things required by the build order, otherwise enqueue those (using getrequiredunits?)
+	///*for (auto [lvl_, _] : Global::strategy().m_build_order)
+	//{
+	//	if (lvl_ == supply) break;
+	//	if (std::find(enqueued_levels.begin(), enqueued_levels.end(), lvl_) == enqueued_levels.end())
+	//	{
+	//		pushToBuildQueue(lvl_);
+	//		enqueued_levels.push_back(lvl_);
+	//	}
+	//}*/
+
+	//// If we built this last
+	//if (supply == prev_supply) return;
+
+	//// If supply lower than previously, i.e. after an attack by the enemy
+	//if (supply < prev_supply)
+	//{
+	//	// TODO figure out what to do there
+	//	std::cout << "***** supply < prev_supply ******\n";
+	//	return;
+	//}
+
+	//// Push to build queue and update prev_supply
+	//pushToBuildQueue(supply);
+	//prev_supply = supply;
 }
 
 // Push unit type at given supply lvl to build queue if not already enqueued
-void ProductionManager::pushToBuildQueue(int supply_lvl)
+bool ProductionManager::pushToBuildQueue(int supply_lvl)
 {
 	// TODO: Make null proof
 	const auto unit_type = Global::strategy().m_build_order[supply_lvl];
@@ -73,7 +88,10 @@ void ProductionManager::pushToBuildQueue(int supply_lvl)
 		// Push to build queue and save in enqueued levels for future checks
 		m_build_queue_.push_back(unit_type);
 		enqueued_levels.push_back(supply_lvl);
+		std::cout << "Added " << unit_type << " to build queue\n";
+		return true;
 	}
+	return false;
 }
 
 
@@ -119,8 +137,6 @@ void ProductionManager::activateIdleBuildings()
 // TODO: Optional "depot/building" parameter: the building in which to train unit (or in an overload)
 bool ProductionManager::trainUnit(const BWAPI::UnitType& unit_type)
 {
-	// TODO Don't cancel whatever is currently being built - priority system!
-
 	// Return if we cannot afford the unit
 	if (unit_type.mineralPrice() > getTotalMinerals()) { return false; }
 	if (unit_type.gasPrice() > getTotalGas()) { return false; }
@@ -150,8 +166,8 @@ bool ProductionManager::trainUnit(const BWAPI::UnitType& unit_type)
 bool ProductionManager::buildBuilding(const BWAPI::UnitType type)
 {
 	// If we have much less gas and minerals than required, it's not worth the wait
-	if (getTotalMinerals() < type.mineralPrice() * 0.7) return false;
-	if (getTotalGas() < type.gasPrice() * 0.7) return false;
+	if (getTotalMinerals() < type.mineralPrice() * 0.9) return false;
+	if (getTotalGas() < type.gasPrice() * 0.9) return false;
 
 	// Get the type of unit that is required to build the desired building
 	const auto builder_type = type.whatBuilds().first;
