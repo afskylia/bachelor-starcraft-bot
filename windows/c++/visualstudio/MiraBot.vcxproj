@@ -11,7 +11,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BuildOrder.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="src\BuildOrderData.h" />
     <ClInclude Include="src\BWEM\EasyBMP_1.06\EasyBMP.h" />
@@ -34,6 +33,7 @@
     <ClInclude Include="src\BWEM\src\tiles.h" />
     <ClInclude Include="src\BWEM\src\utils.h" />
     <ClInclude Include="src\BWEM\src\winutils.h" />
+    <ClInclude Include="src\CombatData.h" />
     <ClInclude Include="src\CombatManager.h" />
     <ClInclude Include="src\Global.h" />
     <ClInclude Include="src\Grid.hpp" />
@@ -47,7 +47,6 @@
     <ClInclude Include="src\WorkerData.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="BuildOrder.cpp" />
     <ClCompile Include="src\BuildOrderData.cpp" />
     <ClCompile Include="src\BWEM\EasyBMP_1.06\EasyBMP.cpp" />
     <ClCompile Include="src\BWEM\src\area.cpp" />

@@ -418,7 +418,6 @@ std::map<BWAPI::UnitType, int> ProductionManager::getMapOfRequiredUnits()
 
 
 // Trains a unit in specified building
-[[deprecated]]
 void ProductionManager::trainUnitInBuilding(BWAPI::UnitType unit_type, int units_wanted)
 {
 	auto idle_buildings = Tools::getUnitsOfType(unit_type.whatBuilds().first, true);

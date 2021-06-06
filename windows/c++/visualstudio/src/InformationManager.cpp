@@ -50,11 +50,25 @@ void InformationManager::updateEnemyStrategy()
 
 	for (BWAPI::UnitInterface* enemy_unit : enemy_units)
 	{
-		enemy_unit->canAttack() ? offensive_count++ : defensive_count++;
+		enemy_unit->canAttack() ? offensive_count++ : defensive_count++; // TODO workers might be able to attack
 	}
 
-	if (offensive_count >= defensive_count) m_current_enemy_strategy_ = Enums::strategy_type::offensive;
-	else m_current_enemy_strategy_ = Enums::strategy_type::defensive;
+	if (offensive_count >= defensive_count) m_current_enemy_strategy = Enums::strategy_type::offensive;
+	else m_current_enemy_strategy = Enums::strategy_type::defensive;
+
+	// counter enemy strategy with offensive > expanding > defensive > offensive
+	switch (m_current_enemy_strategy)
+	{
+	case Enums::defensive: m_current_strategy = Enums::expanding;
+		break;
+	case Enums::offensive: m_current_strategy = Enums::defensive;
+		break;
+	case Enums::expanding: m_current_strategy = Enums::offensive;
+		break;
+	case Enums::none:
+		break;
+	default: ;
+	}
 }
 
 /// <summary>
@@ -148,5 +162,5 @@ void InformationManager::onUnitDestroy(BWAPI::Unit unit)
 /// <returns>strategy based on units</returns>
 Enums::strategy_type InformationManager::getEnemyStrategy()
 {
-	return m_current_enemy_strategy_;
+	return m_current_enemy_strategy;
 }

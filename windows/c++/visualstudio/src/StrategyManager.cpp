@@ -50,7 +50,7 @@ void StrategyManager::informationUpdate()
 	if (BWAPI::Broodwar->self()->supplyUsed() <= 20)
 	{
 		m_build_order = getBuildOrder(Global::information().enemy_race,
-		                              Global::information().m_current_enemy_strategy_);
+		                              Global::information().m_current_enemy_strategy);
 		// TODO: Update production (build queue, prev_supply and enqueued_items here!!)
 		// compare old build order to new one and set prev_supply, enqueued_items etc.
 	}

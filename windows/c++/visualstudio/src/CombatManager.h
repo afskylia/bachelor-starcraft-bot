@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <iostream>
 
+
 namespace MiraBot
 {
 	class CombatManager
@@ -10,6 +11,5 @@ namespace MiraBot
 
 		CombatManager();
 		void onFrame();
-		static void rushEnemyBase();
 	};
 }

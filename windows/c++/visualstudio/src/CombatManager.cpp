@@ -2,6 +2,7 @@
 
 #include "MiraBotMain.h"
 #include "Global.h"
+#include "CombatData.h"
 
 using namespace MiraBot;
 
