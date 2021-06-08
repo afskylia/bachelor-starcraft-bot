@@ -1,5 +1,5 @@
 #pragma once
-#include "Global.h"
+//#include "Global.h"
 
 class CombatData
 {
@@ -16,5 +16,4 @@ public:
 		BWAPI::UnitTypes::Protoss_Scout,
 		BWAPI::UnitTypes::Protoss_Zealot
 	};
-	std::vector<BWAPI::UnitType[5]> attack_unit_groups;
 };

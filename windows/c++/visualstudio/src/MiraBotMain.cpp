@@ -170,6 +170,7 @@ void MiraBotMain::onUnitDestroy(Unit unit)
 	if (unit->getType().isWorker()) Global::workers().onUnitDestroy(unit);
 	Global::production().onUnitDestroy(unit);
 	Global::information().onUnitDestroy(unit);
+	Global::combat().onUnitDestroy(unit);
 
 	// BWEM updates
 	if (unit->getType().isSpecialBuilding() == true) map.OnStaticBuildingDestroyed(unit);
@@ -213,6 +214,7 @@ void MiraBotMain::onUnitCreate(Unit unit)
 void MiraBotMain::onUnitComplete(Unit unit)
 {
 	Global::production().onUnitComplete(unit);
+	Global::combat().onUnitComplete(unit);
 }
 
 // Called whenever a unit appears, with a pointer to the destroyed unit
