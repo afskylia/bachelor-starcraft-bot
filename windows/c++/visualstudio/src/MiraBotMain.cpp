@@ -119,7 +119,7 @@ void MiraBotMain::onFrame()
 	Global::combat().onFrame();
 	Global::strategy().onFrame();
 	Global::information().onFrame();
-	
+
 	// Update our MapTools information & draw
 	Global::map().onFrame();
 
@@ -144,14 +144,14 @@ void MiraBotMain::drawDebugInformation()
 // Called whenever a unit is destroyed, with a pointer to the unit
 void MiraBotMain::onUnitDestroy(Unit unit)
 {
+	// BWEM updates
+	Global::map().onUnitDestroy(unit);
+
 	// TODO maybe fix?
 	if (unit->getType().isWorker()) Global::workers().onUnitDestroy(unit);
 	Global::production().onUnitDestroy(unit);
 	Global::information().onUnitDestroy(unit);
 	Global::combat().onUnitDestroy(unit);
-
-	// BWEM updates
-	Global::map().onUnitDestroy(unit);
 }
 
 // Called whenever a unit is morphed, with a pointer to the unit

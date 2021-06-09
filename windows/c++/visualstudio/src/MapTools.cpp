@@ -90,7 +90,7 @@ void MapTools::onStart()
 void MapTools::onFrame()
 {
 	//utils::gridMapExample(map);
-	utils::drawMap(map);
+	//utils::drawMap(map);
 
 	for (int x = 0; x < m_width; ++x)
 	{
@@ -116,8 +116,8 @@ void MapTools::toggleDraw()
 
 void MapTools::onUnitDestroy(BWAPI::Unit unit)
 {
-	if (unit->getType().isSpecialBuilding() == true) map.OnStaticBuildingDestroyed(unit);
-	if (unit->getType().isMineralField() == true) map.OnMineralDestroyed(unit);
+	if (unit->getType().isMineralField()) map.OnMineralDestroyed(unit);
+	else if (unit->getType().isSpecialBuilding()) map.OnStaticBuildingDestroyed(unit);
 }
 
 bool MapTools::isExplored(const BWAPI::TilePosition& pos) const

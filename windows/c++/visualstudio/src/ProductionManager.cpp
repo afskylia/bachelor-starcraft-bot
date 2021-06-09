@@ -147,12 +147,11 @@ void ProductionManager::activateIdleBuildings()
 	const auto workers_wanted = 50;
 	trainUnitInBuilding(worker_type, workers_wanted);
 
-	// TODO: Temp fix, we need to find a way to distribute the production here so not only zealots are produced
-	const auto zealot_type = BWAPI::UnitTypes::Protoss_Zealot;
-	if (Tools::countUnitsOfType(zealot_type, false, false) > Tools::countUnitsOfType(
-		BWAPI::UnitTypes::Protoss_Dragoon, false, false) * 2)
-		trainUnitInBuilding(BWAPI::UnitTypes::Protoss_Dragoon, 30);
-	else trainUnitInBuilding(zealot_type, 50);
+	// TODO this seems bugged, only zealots are built
+	auto zealot_type = BWAPI::UnitTypes::Protoss_Zealot;
+	auto zealots_wanted = 30;
+	trainUnitInBuilding(zealot_type, zealots_wanted);
+	trainUnitInBuilding(BWAPI::UnitTypes::Protoss_Dragoon, 30);
 }
 
 

@@ -61,15 +61,37 @@ void CombatManager::guardBase(BWAPI::Unit unit)
 	}
 
 	// Randomize position a bit
+	auto pp = BWAPI::Broodwar->getBuildLocation(BWAPI::Broodwar->self()->getRace().getSupplyProvider(),
+	                                            BWAPI::TilePosition(closest_cp));
 	srand(time(nullptr));
 	auto x = (rand() % 50) + 75;
 	auto y = (rand() % 50) + 75;
 	if (rand() & 1) x *= -1;
 	if (rand() & 1) y *= -1;
+	auto attack_pos = BWAPI::Position(pp) + BWAPI::Position(x, y);
+	//auto attack_pos = BWAPI::Position(pp);
+	//auto attack_pos = closest_cp + BWAPI::Position(x, y);
+
+	//// this is a hotfix, sometimes (e.g. on Destination.scx) units are sent to an unreachable location...
+	//auto fail_count = 0;
+	//while (!Global::map().isWalkable(BWAPI::TilePosition(attack_pos)))
+	//{
+	//	if (fail_count>10)
+	//	{
+	//		std::cout << "Failed to find walkable position for chokepoint " << closest_cp;
+	//		return;
+	//	}
+	//	x = (rand() % 50) + 75;
+	//	y = (rand() % 50) + 75;
+	//	if (rand() & 1) x *= -1;
+	//	if (rand() & 1) y *= -1;
+	//	attack_pos = closest_cp + BWAPI::Position(x, y);
+	//	fail_count++;
+	//}
 
 	// Assign unit to chokepoint guard and attack-move there
 	guard_map[unit] = closest_cp;
-	unit->attack(closest_cp + BWAPI::Position(x, y));
+	unit->attack(attack_pos);
 }
 
 void CombatManager::addCombatUnit(BWAPI::Unit unit)
