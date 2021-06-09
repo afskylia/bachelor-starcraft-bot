@@ -48,6 +48,12 @@ void CombatManager::onUnitDestroy(BWAPI::Unit unit)
 // Send the unit to a chokepoint in the main base and stand ready
 void CombatManager::guardBase(BWAPI::Unit unit)
 {
+	// Find nearest chokepoint
+	//auto main_base = Global::information().main_base;
+	auto s = Global::map().getClosestCP(unit->getTilePosition());
+
+	// Attack-move unit to location of chokepoint
+	unit->attack(s);
 }
 
 void CombatManager::addCombatUnit(BWAPI::Unit unit)
