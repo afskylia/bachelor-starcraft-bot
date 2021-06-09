@@ -53,30 +53,16 @@ void InformationManager::updateEnemyStrategy()
 	// Do not update if we do not know any enemies.
 	if (enemy_units.empty()) return;
 
-	auto offensive_count = 0;
-	auto defensive_count = 0;
-
 	for (BWAPI::UnitInterface* enemy_unit : enemy_units)
 	{
-		enemy_unit->canAttack() ? offensive_count++ : defensive_count++; // TODO workers might be able to attack
+		if (enemy_unit->getPosition().getApproxDistance(main_base->getPosition()) < 1000)
+		{
+			m_current_enemy_strategy = offensive;
+			return;
+		}
 	}
 
-	if (offensive_count >= defensive_count) m_current_enemy_strategy = offensive;
-	else m_current_enemy_strategy = defensive;
-
-	// counter enemy strategy with offensive > expanding > defensive > offensive
-	switch (m_current_enemy_strategy)
-	{
-	case defensive: m_current_strategy = expanding;
-		break;
-	case offensive: m_current_strategy = defensive;
-		break;
-	case expanding: m_current_strategy = offensive;
-		break;
-	case none:
-		break;
-	default: ;
-	}
+	m_current_enemy_strategy = defensive;
 }
 
 /// <summary>

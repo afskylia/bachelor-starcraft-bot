@@ -14,11 +14,12 @@ namespace MiraBot
 
 	public:
 		BuildOrderData m_build_order_data;
-		std::map<int, BWAPI::UnitType> m_build_order;
+		std::map<int, std::pair<BWAPI::UnitType, int>> m_build_order;
 		int prev_supply{};
 
-		std::map<int, BWAPI::UnitType> getBuildOrder(BWAPI::Race enemy_race = BWAPI::Races::None,
-		                                             Enums::strategy_type enemy_strategy = Enums::offensive);
+		std::map<int, std::pair<BWAPI::UnitType, int>> getBuildOrder(BWAPI::Race enemy_race = BWAPI::Races::None,
+		                                                             Enums::strategy_type enemy_strategy =
+			                                                             Enums::offensive);
 
 		StrategyManager();
 		void onFrame();

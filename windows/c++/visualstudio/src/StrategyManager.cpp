@@ -7,14 +7,14 @@ using namespace MiraBot;
 
 
 /// <summary>
-/// Gets new build order from data. 
+/// Gets new build order from data. TODO enemy strat not used
 /// </summary>
 /// <param name="race"></param>
 /// <param name="enemy_race"></param>
 /// <param name="enemy_strategy"></param>
 /// <returns></returns>
-std::map<int, BWAPI::UnitType> StrategyManager::getBuildOrder(BWAPI::Race enemy_race,
-                                                              Enums::strategy_type enemy_strategy)
+std::map<int, std::pair<BWAPI::UnitType, int>> StrategyManager::getBuildOrder(BWAPI::Race enemy_race,
+                                                                              strategy_type enemy_strategy)
 {
 	std::cout << "Updating Build Order \n";
 	switch (enemy_race)
@@ -45,7 +45,7 @@ void StrategyManager::onFrame()
 /// </summary>
 void StrategyManager::informationUpdate()
 {
-	std::cout << "Information is updated \n";
+	//std::cout << "Information is updated \n";
 	// do not update if supply > 20
 	if (BWAPI::Broodwar->self()->supplyUsed() <= 20)
 	{

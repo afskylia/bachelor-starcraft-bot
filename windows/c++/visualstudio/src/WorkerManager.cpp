@@ -2,6 +2,7 @@
 
 #include <BWAPI/Client/Client.h>
 #include "Global.h"
+#include "BWEM/src/bwem.h"
 
 #include "Tools.h"
 using namespace MiraBot;
@@ -149,6 +150,9 @@ BWAPI::Unit WorkerManager::getClosestDepot(BWAPI::Unit worker)
 // Returns next scouting location for scout, favoring closest locations
 BWAPI::Position WorkerManager::getScoutPosition(BWAPI::Unit scout)
 {
+	// if we found enemy, we don't have more positions
+	if (Global::information().enemy_start_location) return BWAPI::Positions::None;
+
 	auto& startLocations = BWAPI::Broodwar->getStartLocations();
 
 	BWAPI::Position closestPosition = BWAPI::Positions::None;
@@ -280,14 +284,24 @@ void WorkerManager::handleIdleBuildWorker(BWAPI::Unit worker)
 }
 
 // Send worker to unexplored scout position
-// TODO: Scout continuously, not just once
 void WorkerManager::handleIdleScout(BWAPI::Unit worker)
 {
 	const auto scout_position = getScoutPosition(worker);
 	if (!scout_position)
 	{
+		BWAPI::Position enemy_location = BWAPI::Position(Global::information().enemy_start_location);
 		// All starting positions have been explored
-		m_workerData.setWorkerJob(worker, WorkerData::Idle, nullptr);
+		// If worker is away from enemy base keep going in and out to attack nearest worker
+		if (50 < worker->getDistance(enemy_location))
+		{
+			m_workerData.setWorkerJob(worker, WorkerData::Scout,
+			                          enemy_location);
+		}
+		else
+		{
+			m_workerData.setWorkerJob(worker, WorkerData::Scout,
+			                          BWAPI::Position(enemy_location.x, enemy_location.y - 500));
+		}
 	}
 	else
 	{
