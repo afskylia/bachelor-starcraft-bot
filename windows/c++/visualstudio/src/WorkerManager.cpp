@@ -295,12 +295,12 @@ void WorkerManager::handleIdleScout(BWAPI::Unit worker)
 		if (50 < worker->getDistance(enemy_location))
 		{
 			m_workerData.setWorkerJob(worker, WorkerData::Scout,
-			                          enemy_location); // TODO Should attack enemy worker
+			                          enemy_location);
 		}
 		else
 		{
 			m_workerData.setWorkerJob(worker, WorkerData::Scout,
-			                          BWAPI::Position(enemy_location.x, enemy_location.y - 350));
+			                          BWAPI::Position(enemy_location.x, enemy_location.y - 500));
 		}
 	}
 	else

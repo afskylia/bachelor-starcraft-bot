@@ -1,5 +1,7 @@
 ﻿#pragma once
 #include <BWAPI/Unit.h>
+#include <BWAPI/Unitset.h>
+
 #include "Enums.h"
 
 namespace MiraBot
@@ -16,7 +18,7 @@ namespace MiraBot
 		BWAPI::Unit main_base = nullptr;
 		BWAPI::Race enemy_race = BWAPI::Races::None;
 		BWAPI::TilePosition enemy_start_location = BWAPI::TilePositions::None;
-		std::unordered_set<BWAPI::Unit> enemy_units = {};
+		BWAPI::Unitset enemy_units = BWAPI::Unitset::none;
 
 		InformationManager();
 		void updateEnemyStrategy();
