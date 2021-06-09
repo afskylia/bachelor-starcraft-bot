@@ -14,7 +14,10 @@ namespace MiraBot
 
 	public:
 		bool found_enemy = false;
-		Enums::strategy_type m_current_enemy_strategy_ = Enums::strategy_type::none;
+		std::vector<BWAPI::Position> base_chokepoints;
+		
+		Enums::strategy_type m_current_enemy_strategy = Enums::strategy_type::none;
+		Enums::strategy_type m_current_strategy = Enums::strategy_type::none;
 		BWAPI::Unit main_base = nullptr;
 		BWAPI::Race enemy_race = BWAPI::Races::None;
 		BWAPI::TilePosition enemy_start_location = BWAPI::TilePositions::None;

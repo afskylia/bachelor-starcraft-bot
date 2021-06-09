@@ -147,10 +147,10 @@ void ProductionManager::activateIdleBuildings()
 	const auto workers_wanted = 50;
 	trainUnitInBuilding(worker_type, workers_wanted);
 
+	// TODO this seems bugged, only zealots are built
 	auto zealot_type = BWAPI::UnitTypes::Protoss_Zealot;
 	auto zealots_wanted = 30;
 	trainUnitInBuilding(zealot_type, zealots_wanted);
-
 	trainUnitInBuilding(BWAPI::UnitTypes::Protoss_Dragoon, 30);
 }
 
@@ -221,7 +221,8 @@ void ProductionManager::buildAdditionalSupply()
 	if (pendingBuildingsCount(supplyProviderType) > 0) return;
 
 	// If we have a sufficient amount of supply, we don't need to do anything
-	if (BWAPI::Broodwar->self()->supplyUsed() + 6 >= Tools::getTotalSupply(true))
+	//if (BWAPI::Broodwar->self()->supplyUsed() + 6 >= Tools::getTotalSupply(true))
+	if (BWAPI::Broodwar->self()->supplyUsed() * 1.3 >= Tools::getTotalSupply(true))
 	{
 		// Otherwise, we are going to build a supply provider
 		buildBuilding(supplyProviderType);
@@ -308,7 +309,7 @@ void ProductionManager::printDebugData()
 void ProductionManager::onUnitDestroy(BWAPI::Unit unit)
 {
 	// TODO: Enqueue only if unit type belongs to a level in enqueued_levels
-	if (unit->getPlayer() == BWAPI::Broodwar->self())
+	if (unit->getPlayer() == BWAPI::Broodwar->self() && unit->getType().isBuilding())
 	{
 		m_build_queue_.push_back(unit->getType());
 	}

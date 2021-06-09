@@ -5,14 +5,35 @@
 #include <fstream>
 #include <array>
 #include "Global.h"
+
+#include "BWEM/src/bwem.h"
+#include <iostream>
+
 using namespace MiraBot;
-// constructor for MapTools
-MapTools::MapTools()
-{
-}
+using namespace BWEM;
+
+
+MapTools::MapTools() = default;
+
 
 void MapTools::onStart()
 {
+	// Initialize BWEM
+	std::cout << "Map initialization...";
+	map.Initialize();
+	map.EnableAutomaticPathAnalysis();
+	const auto starting_locations_ok = map.FindBasesForStartingLocations();
+	assert(starting_locations_ok);
+
+	utils::MapPrinter::Initialize(&map);
+
+	utils::printMap(map); // will print the map into the file bin/map.bmp
+	utils::pathExample(map); // add to the printed map a path between two starting locations
+
+	std::cout << " complete!\n";
+
+
+	// Initialize map grid stuff
 	m_width = BWAPI::Broodwar->mapWidth();
 	m_height = BWAPI::Broodwar->mapHeight();
 	m_walkable = Grid<int>(m_width, m_height, 1);
@@ -68,6 +89,9 @@ void MapTools::onStart()
 
 void MapTools::onFrame()
 {
+	//utils::gridMapExample(map);
+	//utils::drawMap(map);
+
 	for (int x = 0; x < m_width; ++x)
 	{
 		for (int y = 0; y < m_height; ++y)
@@ -88,6 +112,12 @@ void MapTools::onFrame()
 void MapTools::toggleDraw()
 {
 	m_drawMap = !m_drawMap;
+}
+
+void MapTools::onUnitDestroy(BWAPI::Unit unit)
+{
+	if (unit->getType().isMineralField()) map.OnMineralDestroyed(unit);
+	else if (unit->getType().isSpecialBuilding()) map.OnStaticBuildingDestroyed(unit);
 }
 
 bool MapTools::isExplored(const BWAPI::TilePosition& pos) const
@@ -214,6 +244,36 @@ void MapTools::drawTile(int tileX, int tileY, const BWAPI::Color& color) const
 	BWAPI::Broodwar->drawLineMap(px + d, py + d, px, py + d, color);
 	BWAPI::Broodwar->drawLineMap(px, py + d, px, py, color);
 }
+
+// Returns the position of the closest chokepoint to given tileposition
+BWAPI::Position MapTools::getClosestCP(BWAPI::TilePosition tile_pos)
+{
+	auto pos = BWAPI::Position(tile_pos.x, tile_pos.y);
+	BWAPI::Position closest_cp = BWAPI::Positions::None;
+
+	const auto* area = map.GetNearestArea(tile_pos);
+	auto chokepoints = area->ChokePoints();
+	for (const auto* cp : chokepoints)
+	{
+		auto cp_pos = BWAPI::Position(cp->Center());
+		if (closest_cp == BWAPI::Positions::None)
+		{
+			closest_cp = cp_pos;
+		}
+		else if (closest_cp.getDistance(pos) > cp_pos.getDistance(pos))
+		{
+			closest_cp = cp_pos;
+		}
+	}
+
+	return closest_cp;
+}
+
+//std::vector<BWEM::ChokePoint*> MapTools::getChokePoints()
+//{
+//	const BWEM::Area& area = *map.GetNearestArea(Global::information().main_base->getTilePosition());
+//	return area.ChokePoints();
+//}
 
 bool MapTools::canWalk(int tileX, int tileY) const
 {

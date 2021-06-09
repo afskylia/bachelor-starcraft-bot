@@ -13,18 +13,12 @@
 #include <iostream>
 
 using namespace MiraBot;
-
 using namespace BWAPI;
 using namespace Filter;
 
 //using namespace BWEM;
 //using namespace BWEM::BWAPI_ext;
 //using namespace BWEM::utils;
-
-namespace
-{
-	auto& map = BWEM::Map::Instance();
-}
 
 
 MiraBotMain::MiraBotMain() = default;
@@ -44,18 +38,6 @@ void MiraBotMain::onStart()
 		// Call MapTools OnStart
 		Global::map().onStart();
 		Global::information().onStart();
-
-		std::cout << "Map initialization...";
-		map.Initialize();
-		map.EnableAutomaticPathAnalysis();
-		const auto starting_locations_ok = map.FindBasesForStartingLocations();
-		assert(starting_locations_ok);
-
-		BWEM::utils::MapPrinter::Initialize(&map);
-		BWEM::utils::printMap(map); // will print the map into the file bin/map.bmp
-		BWEM::utils::pathExample(map); // add to the printed map a path between two starting locations
-
-		std::cout << " complete!\n";
 	}
 	catch (const std::exception& e)
 	{
@@ -138,11 +120,7 @@ void MiraBotMain::onFrame()
 	Global::strategy().onFrame();
 	Global::information().onFrame();
 
-	//BWEM::utils::gridMapExample(map);
-	//BWEM::utils::drawMap(map);
-
-
-	// Update our MapTools information
+	// Update our MapTools information & draw
 	Global::map().onFrame();
 
 
@@ -166,14 +144,14 @@ void MiraBotMain::drawDebugInformation()
 // Called whenever a unit is destroyed, with a pointer to the unit
 void MiraBotMain::onUnitDestroy(Unit unit)
 {
+	// BWEM updates
+	Global::map().onUnitDestroy(unit);
+
 	// TODO maybe fix?
 	if (unit->getType().isWorker()) Global::workers().onUnitDestroy(unit);
 	Global::production().onUnitDestroy(unit);
 	Global::information().onUnitDestroy(unit);
-
-	// BWEM updates
-	if (unit->getType().isSpecialBuilding() == true) map.OnStaticBuildingDestroyed(unit);
-	if (unit->getType().isMineralField() == true) map.OnMineralDestroyed(unit);
+	Global::combat().onUnitDestroy(unit);
 }
 
 // Called whenever a unit is morphed, with a pointer to the unit
@@ -213,6 +191,7 @@ void MiraBotMain::onUnitCreate(Unit unit)
 void MiraBotMain::onUnitComplete(Unit unit)
 {
 	Global::production().onUnitComplete(unit);
+	Global::combat().onUnitComplete(unit);
 }
 
 // Called whenever a unit appears, with a pointer to the destroyed unit

@@ -8,7 +8,15 @@ using namespace MiraBot;
 /// <summary>
 /// Here we save important information through the game e.g. enemy race and where they are.
 /// </summary>
-InformationManager::InformationManager() = default;
+InformationManager::InformationManager()
+{
+	// Save positions of all chokepoints in main base
+	auto base = BWAPI::Broodwar->self()->getStartLocation();
+	const auto area = Global::map().map.GetNearestArea(base);
+
+	for (auto cp : area->ChokePoints())
+		base_chokepoints.push_back(BWAPI::Position(cp->Center()));
+}
 
 
 void InformationManager::onFrame()
@@ -49,12 +57,12 @@ void InformationManager::updateEnemyStrategy()
 	{
 		if (enemy_unit->getPosition().getApproxDistance(main_base->getPosition()) < 1000)
 		{
-			m_current_enemy_strategy_ = Enums::strategy_type::offensive;
+			m_current_enemy_strategy = offensive;
 			return;
 		}
 	}
 
-	m_current_enemy_strategy_ = Enums::strategy_type::defensive;
+	m_current_enemy_strategy = defensive;
 }
 
 /// <summary>
@@ -146,7 +154,7 @@ void InformationManager::onUnitDestroy(BWAPI::Unit unit)
 /// Gets the strategy from enemy units
 /// </summary>
 /// <returns>strategy based on units</returns>
-Enums::strategy_type InformationManager::getEnemyStrategy()
+strategy_type InformationManager::getEnemyStrategy()
 {
-	return m_current_enemy_strategy_;
+	return m_current_enemy_strategy;
 }

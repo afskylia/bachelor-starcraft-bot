@@ -5,10 +5,15 @@
 #include <BWAPI.h>
 #include <vector>
 
+#include "BWEM/src/bwem.h"
+#include <iostream>
+
 namespace MiraBot
 {
 	class MapTools
 	{
+		friend class Global;
+
 		Grid<int> m_walkable; // whether a tile is buildable (includes static resources)          
 		Grid<int> m_buildable; // whether a tile is buildable (includes static resources)
 		Grid<int> m_depotBuildable;
@@ -26,12 +31,15 @@ namespace MiraBot
 
 	public:
 
+		BWEM::Map& map = BWEM::Map::Instance();
+
 		MapTools();
 
 		void onStart();
 		void onFrame();
 		void draw() const;
 		void toggleDraw();
+		void onUnitDestroy(BWAPI::Unit unit);
 
 		int width() const;
 		int height() const;
@@ -50,5 +58,8 @@ namespace MiraBot
 		bool isBuildable(const BWAPI::TilePosition& tile) const;
 		bool isDepotBuildableTile(int tileX, int tileY) const;
 		void drawTile(int tileX, int tileY, const BWAPI::Color& color) const;
+
+		std::vector<BWEM::ChokePoint*> getChokePoints();
+		BWAPI::Position getClosestCP(BWAPI::TilePosition tile_pos);
 	};
 }

@@ -21,7 +21,7 @@ namespace MiraBot
 			{10, std::make_pair(BWAPI::UnitTypes::Protoss_Gateway, 4)},
 			{12, std::make_pair(BWAPI::UnitTypes::Protoss_Assimilator, 1)},
 			{13, std::make_pair(BWAPI::UnitTypes::Protoss_Cybernetics_Core, 1)},
-			//{18, make_pair(BWAPI::UnitTypes::Protoss_Dragoon,1)},
+			//{18, std::make_pair(BWAPI::UnitTypes::Protoss_Dragoon, 20)},
 			{26, std::make_pair(BWAPI::UnitTypes::Protoss_Robotics_Facility, 1)},
 			{34, std::make_pair(BWAPI::UnitTypes::Protoss_Observatory, 1)},
 		};
