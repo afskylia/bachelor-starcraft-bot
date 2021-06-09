@@ -7,7 +7,7 @@ using namespace MiraBot;
 
 
 /// <summary>
-/// Gets new build order from data. 
+/// Gets new build order from data. TODO enemy strat not used
 /// </summary>
 /// <param name="race"></param>
 /// <param name="enemy_race"></param>

@@ -45,16 +45,16 @@ void InformationManager::updateEnemyStrategy()
 	// Do not update if we do not know any enemies.
 	if (enemy_units.empty()) return;
 
-	auto offensive_count = 0;
-	auto defensive_count = 0;
-
 	for (BWAPI::UnitInterface* enemy_unit : enemy_units)
 	{
-		enemy_unit->canAttack() ? offensive_count++ : defensive_count++;
+		if (enemy_unit->getPosition().getApproxDistance(main_base->getPosition()) < 1000)
+		{
+			m_current_enemy_strategy_ = Enums::strategy_type::offensive;
+			return;
+		}
 	}
 
-	if (offensive_count >= defensive_count) m_current_enemy_strategy_ = Enums::strategy_type::offensive;
-	else m_current_enemy_strategy_ = Enums::strategy_type::defensive;
+	m_current_enemy_strategy_ = Enums::strategy_type::defensive;
 }
 
 /// <summary>
