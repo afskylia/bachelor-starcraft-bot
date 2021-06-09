@@ -29,6 +29,11 @@ namespace MiraBot
 		void guardBase(BWAPI::Unit unit);
 		void addCombatUnit(BWAPI::Unit unit);
 
-		std::map<BWAPI::Unit, combat_status> worker_status_map;
+		// Map of chokepoints and a vector of units currently guarding the chokepoint
+		//std::map<BWAPI::Position, std::vector<BWAPI::Unit>> guard_map = {};
+		std::map<BWAPI::Unit, BWAPI::Position> guard_map = {};
+
+		// Map of attack units and their status
+		std::map<BWAPI::Unit, combat_status> fighter_status_map;
 	};
 }

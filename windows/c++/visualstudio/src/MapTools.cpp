@@ -26,6 +26,7 @@ void MapTools::onStart()
 	assert(starting_locations_ok);
 
 	utils::MapPrinter::Initialize(&map);
+
 	utils::printMap(map); // will print the map into the file bin/map.bmp
 	utils::pathExample(map); // add to the printed map a path between two starting locations
 
@@ -88,6 +89,9 @@ void MapTools::onStart()
 
 void MapTools::onFrame()
 {
+	//utils::gridMapExample(map);
+	utils::drawMap(map);
+
 	for (int x = 0; x < m_width; ++x)
 	{
 		for (int y = 0; y < m_height; ++y)

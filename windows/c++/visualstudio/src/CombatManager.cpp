@@ -4,6 +4,7 @@
 #include "Global.h"
 #include "Tools.h"
 #include "CombatData.h"
+#include "limits.h";
 
 using namespace MiraBot;
 
@@ -13,11 +14,6 @@ CombatManager::CombatManager()
 
 void CombatManager::onFrame()
 {
-	if (m_offensive_units_.size() <= 10)
-	{
-		m_offensive_units_.attack(
-			Tools::getClosestUnitTo(m_offensive_units_.getPosition(), Global::information().enemy_units));
-	}
 }
 
 void CombatManager::onUnitComplete(BWAPI::Unit unit)
@@ -35,25 +31,39 @@ void CombatManager::onUnitComplete(BWAPI::Unit unit)
 
 void CombatManager::onUnitDestroy(BWAPI::Unit unit)
 {
+	// Erase unit from maps and unit sets
+	guard_map.erase(unit);
+
 	auto it = m_attack_units_.find(unit);
 	if (it != m_attack_units_.end()) m_attack_units_.erase(it);
 
-	auto it_d = m_defensive_units_.find(unit);
-	if (it_d != m_defensive_units_.end()) m_defensive_units_.erase(it_d);
+	it = m_defensive_units_.find(unit);
+	if (it != m_defensive_units_.end()) m_defensive_units_.erase(it);
 
-	auto it_o = m_offensive_units_.find(unit);
-	if (it_o != m_offensive_units_.end()) m_offensive_units_.erase(it_o);
+	it = m_offensive_units_.find(unit);
+	if (it != m_offensive_units_.end()) m_offensive_units_.erase(it);
 }
 
 // Send the unit to a chokepoint in the main base and stand ready
 void CombatManager::guardBase(BWAPI::Unit unit)
 {
-	// Find nearest chokepoint
-	//auto main_base = Global::information().main_base;
-	auto s = Global::map().getClosestCP(unit->getTilePosition());
+	// Get chokepoint with fewest assigned units
+	auto chokepoints = Global::information().base_chokepoints;
+	auto closest_cp = BWAPI::Positions::None;
+	auto count_closest = INT_MAX;
+	for (auto cp : chokepoints)
+	{
+		// Count how many guards are assigned to this chokepoint
+		auto count = 0;
+		for (auto& p : guard_map) count += p.second == cp;
+		if (closest_cp == BWAPI::Positions::None || count < count_closest)
+			closest_cp = cp;
+	}
 
-	// Attack-move unit to location of chokepoint
-	unit->attack(s);
+	// Assign unit to chokepoint guard and attack-move there
+	guard_map[unit] = closest_cp;
+
+	unit->attack(closest_cp);
 }
 
 void CombatManager::addCombatUnit(BWAPI::Unit unit)

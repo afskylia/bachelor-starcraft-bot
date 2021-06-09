@@ -119,12 +119,8 @@ void MiraBotMain::onFrame()
 	Global::combat().onFrame();
 	Global::strategy().onFrame();
 	Global::information().onFrame();
-
-	//BWEM::utils::gridMapExample(map);
-	//BWEM::utils::drawMap(map);
-
-
-	// Update our MapTools information
+	
+	// Update our MapTools information & draw
 	Global::map().onFrame();
 
 

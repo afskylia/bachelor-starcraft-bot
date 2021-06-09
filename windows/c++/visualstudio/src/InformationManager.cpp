@@ -8,7 +8,15 @@ using namespace MiraBot;
 /// <summary>
 /// Here we save important information through the game e.g. enemy race and where they are.
 /// </summary>
-InformationManager::InformationManager() = default;
+InformationManager::InformationManager()
+{
+	// Save positions of all chokepoints in main base
+	auto base = BWAPI::Broodwar->self()->getStartLocation();
+	const auto area = Global::map().map.GetNearestArea(base);
+
+	for (auto cp : area->ChokePoints())
+		base_chokepoints.push_back(BWAPI::Position(cp->Center()));
+}
 
 
 void InformationManager::onFrame()
@@ -53,19 +61,19 @@ void InformationManager::updateEnemyStrategy()
 		enemy_unit->canAttack() ? offensive_count++ : defensive_count++; // TODO workers might be able to attack
 	}
 
-	if (offensive_count >= defensive_count) m_current_enemy_strategy = Enums::strategy_type::offensive;
-	else m_current_enemy_strategy = Enums::strategy_type::defensive;
+	if (offensive_count >= defensive_count) m_current_enemy_strategy = offensive;
+	else m_current_enemy_strategy = defensive;
 
 	// counter enemy strategy with offensive > expanding > defensive > offensive
 	switch (m_current_enemy_strategy)
 	{
-	case Enums::defensive: m_current_strategy = Enums::expanding;
+	case defensive: m_current_strategy = expanding;
 		break;
-	case Enums::offensive: m_current_strategy = Enums::defensive;
+	case offensive: m_current_strategy = defensive;
 		break;
-	case Enums::expanding: m_current_strategy = Enums::offensive;
+	case expanding: m_current_strategy = offensive;
 		break;
-	case Enums::none:
+	case none:
 		break;
 	default: ;
 	}
@@ -160,7 +168,7 @@ void InformationManager::onUnitDestroy(BWAPI::Unit unit)
 /// Gets the strategy from enemy units
 /// </summary>
 /// <returns>strategy based on units</returns>
-Enums::strategy_type InformationManager::getEnemyStrategy()
+strategy_type InformationManager::getEnemyStrategy()
 {
 	return m_current_enemy_strategy;
 }
