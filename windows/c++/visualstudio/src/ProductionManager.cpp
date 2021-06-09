@@ -82,13 +82,23 @@ bool ProductionManager::pushToBuildQueue(int supply_lvl)
 	// TODO: Make null proof
 	const auto unit_type = Global::strategy().m_build_order[supply_lvl];
 
+	const auto unit = unit_type.first;
+	const auto number_needed = unit_type.second;
+
 	// Make sure this exact supply level has not already been enqueued
 	if (std::find(enqueued_levels.begin(), enqueued_levels.end(), supply_lvl) == enqueued_levels.end())
 	{
 		// Push to build queue and save in enqueued levels for future checks
-		m_build_queue_.push_back(unit_type);
+		m_build_queue_.push_back(unit);
 		enqueued_levels.push_back(supply_lvl);
-		std::cout << "Added " << unit_type << " to build queue\n";
+		std::cout << "Added " << unit << " to build queue\n";
+		if (number_needed > 1)
+		{
+			for (auto i = 0; i <= number_needed; i++)
+			{
+				m_build_queue_keep_building_.push_back(unit);
+			}
+		}
 		return true;
 	}
 	return false;
@@ -98,12 +108,22 @@ bool ProductionManager::pushToBuildQueue(int supply_lvl)
 // Try to build/train the oldest element of the build queue
 void ProductionManager::tryBuildOrTrainUnit()
 {
-	if (m_build_queue_.empty()) return;
-	auto unit_type = m_build_queue_.front();
+	if (m_build_queue_.empty())
+	{
+		if (m_build_queue_keep_building_.empty()) return;
 
-	// Try to build or train unit, remove from queue upon success
-	if (unit_type.isBuilding() && buildBuilding(unit_type) || trainUnit(unit_type))
-		m_build_queue_.pop_front();
+		const auto unit = m_build_queue_keep_building_.front();
+		if (unit.isBuilding() && buildBuilding(unit) || trainUnit(unit))
+			m_build_queue_keep_building_.pop_front();
+	}
+	else
+	{
+		const auto unit_type = m_build_queue_.front();
+
+		// Try to build or train unit, remove from queue upon success
+		if (unit_type.isBuilding() && buildBuilding(unit_type) || trainUnit(unit_type))
+			m_build_queue_.pop_front();
+	}
 }
 
 
@@ -130,6 +150,8 @@ void ProductionManager::activateIdleBuildings()
 	auto zealot_type = BWAPI::UnitTypes::Protoss_Zealot;
 	auto zealots_wanted = 30;
 	trainUnitInBuilding(zealot_type, zealots_wanted);
+
+	trainUnitInBuilding(BWAPI::UnitTypes::Protoss_Dragoon, 30);
 }
 
 
@@ -199,7 +221,7 @@ void ProductionManager::buildAdditionalSupply()
 	if (pendingBuildingsCount(supplyProviderType) > 0) return;
 
 	// If we have a sufficient amount of supply, we don't need to do anything
-	if (BWAPI::Broodwar->self()->supplyUsed() + 8 >= Tools::getTotalSupply(true))
+	if (BWAPI::Broodwar->self()->supplyUsed() + 6 >= Tools::getTotalSupply(true))
 	{
 		// Otherwise, we are going to build a supply provider
 		buildBuilding(supplyProviderType);
@@ -276,8 +298,8 @@ void ProductionManager::printDebugData()
 	std::cout << "BUILD ORDER: [";
 	for (auto [fst, snd] : Global::strategy().m_build_order)
 	{
-		if (snd == BWAPI::UnitTypes::Protoss_Probe) continue;
-		std::cout << "[" << fst << ", " << snd.getName() << "], ";
+		if (snd.first == BWAPI::UnitTypes::Protoss_Probe) continue;
+		std::cout << "[" << fst << ", " << snd.first.getName() << "], ";
 	}
 	std::cout << "]\n\n";
 }
@@ -409,7 +431,7 @@ std::map<BWAPI::UnitType, int> ProductionManager::getMapOfRequiredUnits()
 		// If unit needed to be build, add it to required_units
 		if (supply_lvl <= supply)
 		{
-			required_units[unit_type]++;
+			required_units[unit_type.first]++;
 		}
 	}
 
@@ -418,7 +440,6 @@ std::map<BWAPI::UnitType, int> ProductionManager::getMapOfRequiredUnits()
 
 
 // Trains a unit in specified building
-[[deprecated]]
 void ProductionManager::trainUnitInBuilding(BWAPI::UnitType unit_type, int units_wanted)
 {
 	auto idle_buildings = Tools::getUnitsOfType(unit_type.whatBuilds().first, true);
