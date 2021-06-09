@@ -60,10 +60,16 @@ void CombatManager::guardBase(BWAPI::Unit unit)
 			closest_cp = cp;
 	}
 
+	// Randomize position a bit
+	srand(time(nullptr));
+	auto x = (rand() % 50) + 75;
+	auto y = (rand() % 50) + 75;
+	if (rand() & 1) x *= -1;
+	if (rand() & 1) y *= -1;
+
 	// Assign unit to chokepoint guard and attack-move there
 	guard_map[unit] = closest_cp;
-
-	unit->attack(closest_cp);
+	unit->attack(closest_cp + BWAPI::Position(x, y));
 }
 
 void CombatManager::addCombatUnit(BWAPI::Unit unit)
