@@ -35,6 +35,7 @@
     <ClInclude Include="src\BWEM\src\winutils.h" />
     <ClInclude Include="src\CombatData.h" />
     <ClInclude Include="src\CombatManager.h" />
+    <ClInclude Include="src\Enums.h" />
     <ClInclude Include="src\Global.h" />
     <ClInclude Include="src\Grid.hpp" />
     <ClInclude Include="src\InformationManager.h" />

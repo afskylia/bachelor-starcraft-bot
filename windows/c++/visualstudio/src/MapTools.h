@@ -5,6 +5,9 @@
 #include <BWAPI.h>
 #include <vector>
 
+#include "BWEM/src/bwem.h"
+#include <iostream>
+
 namespace MiraBot
 {
 	class MapTools
@@ -32,6 +35,7 @@ namespace MiraBot
 		void onFrame();
 		void draw() const;
 		void toggleDraw();
+		void onUnitDestroy(BWAPI::Unit unit);
 
 		int width() const;
 		int height() const;

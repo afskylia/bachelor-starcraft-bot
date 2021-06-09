@@ -5,14 +5,37 @@
 #include <fstream>
 #include <array>
 #include "Global.h"
+
+#include "BWEM/src/bwem.h"
+#include <iostream>
+
 using namespace MiraBot;
-// constructor for MapTools
-MapTools::MapTools()
+
+namespace
 {
+	auto& map = BWEM::Map::Instance();
 }
+
+
+MapTools::MapTools() = default;
+
 
 void MapTools::onStart()
 {
+	// Initialize BWEM
+	std::cout << "Map initialization...";
+	map.Initialize();
+	map.EnableAutomaticPathAnalysis();
+	const auto starting_locations_ok = map.FindBasesForStartingLocations();
+	assert(starting_locations_ok);
+
+	BWEM::utils::MapPrinter::Initialize(&map);
+	BWEM::utils::printMap(map); // will print the map into the file bin/map.bmp
+	BWEM::utils::pathExample(map); // add to the printed map a path between two starting locations
+
+	std::cout << " complete!\n";
+
+	// Initialize map grid stuff
 	m_width = BWAPI::Broodwar->mapWidth();
 	m_height = BWAPI::Broodwar->mapHeight();
 	m_walkable = Grid<int>(m_width, m_height, 1);
@@ -88,6 +111,12 @@ void MapTools::onFrame()
 void MapTools::toggleDraw()
 {
 	m_drawMap = !m_drawMap;
+}
+
+void MapTools::onUnitDestroy(BWAPI::Unit unit)
+{
+	if (unit->getType().isSpecialBuilding() == true) map.OnStaticBuildingDestroyed(unit);
+	if (unit->getType().isMineralField() == true) map.OnMineralDestroyed(unit);
 }
 
 bool MapTools::isExplored(const BWAPI::TilePosition& pos) const

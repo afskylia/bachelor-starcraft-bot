@@ -27,17 +27,7 @@ void CombatManager::onUnitComplete(BWAPI::Unit unit)
 	{
 		if (unit->getType() == protoss_attack_unit)
 		{
-			m_attack_units_.insert(unit);
-
-			// add units to defend base
-			if (m_defensive_units_.size() <= 2)
-			{
-				m_defensive_units_.insert(unit);
-				return;
-			}
-
-			// add units to attack
-			m_offensive_units_.insert(unit);
+			addCombatUnit(unit);
 			return;
 		}
 	}
@@ -53,4 +43,15 @@ void CombatManager::onUnitDestroy(BWAPI::Unit unit)
 
 	auto it_o = m_offensive_units_.find(unit);
 	if (it_o != m_offensive_units_.end()) m_offensive_units_.erase(it_o);
+}
+
+// Send the unit to a chokepoint in the main base and stand ready
+void CombatManager::guardBase(BWAPI::Unit unit)
+{
+}
+
+void CombatManager::addCombatUnit(BWAPI::Unit unit)
+{
+	m_attack_units_.insert(unit);
+	guardBase(unit);
 }
