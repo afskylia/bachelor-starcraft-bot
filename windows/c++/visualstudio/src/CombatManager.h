@@ -1,12 +1,9 @@
 ﻿#pragma once
-#include <iostream>
-#include <BWAPI/Unit.h>
 #include "CombatData.h"
 
 #include "Tools.h"
 #include "Enums.h"
 
-using namespace Enums;
 
 namespace MiraBot
 {
@@ -21,7 +18,6 @@ namespace MiraBot
 
 
 	public:
-
 		CombatManager();
 		void onFrame();
 		void onUnitComplete(BWAPI::Unit unit);
@@ -34,6 +30,6 @@ namespace MiraBot
 		std::map<BWAPI::Unit, BWAPI::Position> guard_map = {};
 
 		// Map of attack units and their status
-		std::map<BWAPI::Unit, combat_status> fighter_status_map;
+		std::map<BWAPI::Unit, Enums::combat_status> fighter_status_map;
 	};
 }

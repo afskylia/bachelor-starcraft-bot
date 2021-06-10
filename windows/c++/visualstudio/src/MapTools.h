@@ -24,8 +24,8 @@ namespace MiraBot
 		int m_frame = 0;
 		bool m_drawMap = false;
 
-		bool canBuild(int tileX, int tileY) const;
-		bool canWalk(int tileX, int tileY) const;
+		static bool canBuild(int tile_x, int tile_y);
+		static bool canWalk(int tile_x, int tile_y);
 		void printMap() const;
 
 
@@ -39,27 +39,27 @@ namespace MiraBot
 		void onFrame();
 		void draw() const;
 		void toggleDraw();
-		void onUnitDestroy(BWAPI::Unit unit);
+		void onUnitDestroy(BWAPI::Unit unit) const;
 
 		int width() const;
 		int height() const;
 
-		bool isValidTile(int tileX, int tileY) const;
+		bool isValidTile(int tile_x, int tile_y) const;
 		bool isValidTile(const BWAPI::TilePosition& tile) const;
 		bool isValidPosition(const BWAPI::Position& pos) const;
-		static bool isPowered(int tileX, int tileY);
-		bool isExplored(int tileX, int tileY) const;
+		static bool isPowered(int tile_x, int tile_y);
+		bool isExplored(int tile_x, int tile_y) const;
 		bool isExplored(const BWAPI::Position& pos) const;
 		bool isExplored(const BWAPI::TilePosition& pos) const;
 		bool isVisible(int tile_x, int tile_y) const;
-		bool isWalkable(int tileX, int tileY) const;
+		bool isWalkable(int tile_x, int tile_y) const;
 		bool isWalkable(const BWAPI::TilePosition& tile) const;
-		bool isBuildable(int tileX, int tileY) const;
+		bool isBuildable(int tile_x, int tileY) const;
 		bool isBuildable(const BWAPI::TilePosition& tile) const;
-		bool isDepotBuildableTile(int tileX, int tileY) const;
-		void drawTile(int tileX, int tileY, const BWAPI::Color& color) const;
+		bool isDepotBuildableTile(int tile_x, int tile_y) const;
+		static void drawTile(int tile_x, int tile_y, const BWAPI::Color& color);
 
 		std::vector<BWEM::ChokePoint*> getChokePoints();
-		BWAPI::Position getClosestCP(BWAPI::TilePosition tile_pos);
+		BWAPI::Position getClosestCP(BWAPI::TilePosition tile_pos) const;
 	};
 }

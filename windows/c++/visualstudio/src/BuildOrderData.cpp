@@ -2,6 +2,4 @@
 
 using namespace MiraBot;
 
-BuildOrderData::BuildOrderData()
-{
-}
+BuildOrderData::BuildOrderData() = default;

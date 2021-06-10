@@ -28,6 +28,9 @@ void MiraBotMain::onStart()
 {
 	try
 	{
+		// Set randomness seed
+		srand(time(nullptr));
+
 		// Set initial local game speed
 		Broodwar->setLocalSpeed(10); // 10
 		Broodwar->setFrameSkip(0);

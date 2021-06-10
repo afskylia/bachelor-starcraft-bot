@@ -1,10 +1,10 @@
 #pragma once
-//#include "Global.h"
+#include "BWAPI.h"
 
 class CombatData
 {
 public:
-	enum attacker_job { attack, move, default };
+	enum attacker_job { attack, move, idle };
 
 	BWAPI::UnitType protoss_attack_units[8] = {
 		BWAPI::UnitTypes::Protoss_Arbiter,
