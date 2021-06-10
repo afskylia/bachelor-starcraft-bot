@@ -112,13 +112,13 @@ void ProductionManager::tryBuildOrTrainUnit()
 	{
 		if (m_build_queue_keep_building_.empty()) return;
 
-		const auto unit = m_build_queue_keep_building_.front();
+		const auto& unit = m_build_queue_keep_building_.front();
 		if (unit.isBuilding() && buildBuilding(unit) || trainUnit(unit))
 			m_build_queue_keep_building_.pop_front();
 	}
 	else
 	{
-		const auto unit_type = m_build_queue_.front();
+		const auto& unit_type = m_build_queue_.front();
 
 		// Try to build or train unit, remove from queue upon success
 		if (unit_type.isBuilding() && buildBuilding(unit_type) || trainUnit(unit_type))
@@ -220,9 +220,10 @@ void ProductionManager::buildAdditionalSupply()
 	// Only build one supply depot at a time
 	if (pendingBuildingsCount(supplyProviderType) > 0) return;
 
-	// If we have a sufficient amount of supply, we don't need to do anything
+	// If we have a sufficient amount of supply, we don't need to do anything TODO Still builds past supply 200, but we might need psi
 	//if (BWAPI::Broodwar->self()->supplyUsed() + 6 >= Tools::getTotalSupply(true))
-	if (BWAPI::Broodwar->self()->supplyUsed() * 1.3 >= Tools::getTotalSupply(true))
+	if (BWAPI::Broodwar->self()->supplyTotal() != 200 && BWAPI::Broodwar->self()->supplyUsed() * 1.3 >=
+		Tools::getTotalSupply(true))
 	{
 		// Otherwise, we are going to build a supply provider
 		buildBuilding(supplyProviderType);
@@ -440,7 +441,7 @@ std::map<BWAPI::UnitType, int> ProductionManager::getMapOfRequiredUnits()
 }
 
 
-// Trains a unit in specified building
+// Trains a unit in a building
 void ProductionManager::trainUnitInBuilding(BWAPI::UnitType unit_type, int units_wanted)
 {
 	auto idle_buildings = Tools::getUnitsOfType(unit_type.whatBuilds().first, true);
@@ -450,7 +451,7 @@ void ProductionManager::trainUnitInBuilding(BWAPI::UnitType unit_type, int units
 	{
 		auto* idle_building = idle_buildings.back();
 		if (!idle_building) return;
-		idle_building->train(unit_type);
+		if (idle_building->train(unit_type)) return;
 		idle_buildings.pop_back();
 		owned++;
 	}

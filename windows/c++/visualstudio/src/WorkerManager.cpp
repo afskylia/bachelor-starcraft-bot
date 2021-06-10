@@ -259,12 +259,14 @@ void WorkerManager::handleIdleBuildWorker(BWAPI::Unit worker)
 	}
 
 	// Otherwise, worker is idling because it is waiting for the required resources
-	if (building_type.mineralPrice() > BWAPI::Broodwar->self()->minerals()) return;
-	if (building_type.gasPrice() > BWAPI::Broodwar->self()->gas()) return;
+	if (building_type.mineralPrice() > 0 && building_type.mineralPrice() + 10 > BWAPI::Broodwar->self()->minerals())
+		return;
+	if (building_type.gasPrice() > 0 && building_type.gasPrice() + 10 > BWAPI::Broodwar->self()->gas()) return;
 
 
 	// Try to place the building and generate new position if the first one fails
 	auto fail_count = 0;
+	auto id = building_type.getID(); // TODO debug info
 	while (!worker->build(building_type, building_pos) && fail_count < 4)
 	{
 		fail_count++;
