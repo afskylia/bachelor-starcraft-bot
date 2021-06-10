@@ -14,7 +14,7 @@ using namespace MiraBot;
 /// <param name="enemy_strategy"></param>
 /// <returns></returns>
 std::map<int, std::pair<BWAPI::UnitType, int>> StrategyManager::getBuildOrder(BWAPI::Race enemy_race,
-                                                                              strategy_type enemy_strategy)
+                                                                              Enums::strategy_type enemy_strategy)
 {
 	std::cout << "Updating Build Order \n";
 	switch (enemy_race)

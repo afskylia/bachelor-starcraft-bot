@@ -42,9 +42,9 @@ void MapTools::onStart()
 	m_lastSeen = Grid<int>(m_width, m_height, 0);
 
 	// Set the boolean grid data from the Map
-	for (int x(0); x < m_width; ++x)
+	for (auto x(0); x < m_width; ++x)
 	{
-		for (int y(0); y < m_height; ++y)
+		for (auto y(0); y < m_height; ++y)
 		{
 			m_buildable.set(x, y, canBuild(x, y));
 			m_depotBuildable.set(x, y, canBuild(x, y));
@@ -60,19 +60,19 @@ void MapTools::onStart()
 			continue;
 		}
 
-		const int tileX = resource->getTilePosition().x;
-		const int tileY = resource->getTilePosition().y;
+		const auto tile_x = resource->getTilePosition().x;
+		const auto tile_y = resource->getTilePosition().y;
 
-		for (int x = tileX; x < tileX + resource->getType().tileWidth(); ++x)
+		for (auto x = tile_x; x < tile_x + resource->getType().tileWidth(); ++x)
 		{
-			for (int y = tileY; y < tileY + resource->getType().tileHeight(); ++y)
+			for (auto y = tile_y; y < tile_y + resource->getType().tileHeight(); ++y)
 			{
 				m_buildable.set(x, y, false);
 
 				// depots can't be built within 3 tiles of any resource
-				for (int rx = -3; rx <= 3; rx++)
+				for (auto rx = -3; rx <= 3; rx++)
 				{
-					for (int ry = -3; ry <= 3; ry++)
+					for (auto ry = -3; ry <= 3; ry++)
 					{
 						if (!BWAPI::TilePosition(x + rx, y + ry).isValid())
 						{
@@ -89,24 +89,24 @@ void MapTools::onStart()
 
 void MapTools::onFrame()
 {
-	//utils::gridMapExample(map);
-	//utils::drawMap(map);
-
-	for (int x = 0; x < m_width; ++x)
+	// Update last-seen grid
+	for (auto x = 0; x < m_width; ++x)
 	{
-		for (int y = 0; y < m_height; ++y)
+		for (auto y = 0; y < m_height; ++y)
 		{
 			if (isVisible(x, y))
-			{
 				m_lastSeen.set(x, y, BWAPI::Broodwar->getFrameCount());
-			}
 		}
 	}
 
-	if (m_drawMap)
-	{
-		draw();
-	}
+	// Draw stuff such as health bars
+	if (m_drawMap) draw();
+
+	// BWEM drawing functions are super slow in debug mode
+#ifdef NDEBUG
+	utils::gridMapExample(map);
+	utils::drawMap(map);
+#endif
 }
 
 void MapTools::toggleDraw()
@@ -114,7 +114,7 @@ void MapTools::toggleDraw()
 	m_drawMap = !m_drawMap;
 }
 
-void MapTools::onUnitDestroy(BWAPI::Unit unit)
+void MapTools::onUnitDestroy(const BWAPI::Unit unit) const
 {
 	if (unit->getType().isMineralField()) map.OnMineralDestroyed(unit);
 	else if (unit->getType().isSpecialBuilding()) map.OnStaticBuildingDestroyed(unit);
@@ -130,28 +130,28 @@ bool MapTools::isExplored(const BWAPI::Position& pos) const
 	return isExplored(BWAPI::TilePosition(pos));
 }
 
-bool MapTools::isExplored(int tileX, int tileY) const
+bool MapTools::isExplored(const int tile_x, const int tile_y) const
 {
-	if (!isValidTile(tileX, tileY)) { return false; }
+	if (!isValidTile(tile_x, tile_y)) { return false; }
 
-	return BWAPI::Broodwar->isExplored(tileX, tileY);
+	return BWAPI::Broodwar->isExplored(tile_x, tile_y);
 }
 
-bool MapTools::isVisible(int tile_x, int tile_y) const
+bool MapTools::isVisible(const int tile_x, const int tile_y) const
 {
 	if (!isValidTile(tile_x, tile_y)) { return false; }
 
 	return BWAPI::Broodwar->isVisible(BWAPI::TilePosition(tile_x, tile_y));
 }
 
-bool MapTools::isPowered(int tileX, int tileY)
+bool MapTools::isPowered(const int tile_x, const int tile_y)
 {
-	return BWAPI::Broodwar->hasPower(BWAPI::TilePosition(tileX, tileY));
+	return BWAPI::Broodwar->hasPower(BWAPI::TilePosition(tile_x, tile_y));
 }
 
-bool MapTools::isValidTile(int tileX, int tileY) const
+bool MapTools::isValidTile(const int tile_x, const int tile_y) const
 {
-	return tileX >= 0 && tileY >= 0 && tileX < m_width && tileY < m_height;
+	return tile_x >= 0 && tile_y >= 0 && tile_x < m_width && tile_y < m_height;
 }
 
 bool MapTools::isValidTile(const BWAPI::TilePosition& tile) const
@@ -164,14 +164,12 @@ bool MapTools::isValidPosition(const BWAPI::Position& pos) const
 	return isValidTile(BWAPI::TilePosition(pos));
 }
 
-bool MapTools::isBuildable(int tileX, int tileY) const
+bool MapTools::isBuildable(const int tile_x, const int tileY) const
 {
-	if (!isValidTile(tileX, tileY))
-	{
+	if (!isValidTile(tile_x, tileY))
 		return false;
-	}
 
-	return m_buildable.get(tileX, tileY);
+	return m_buildable.get(tile_x, tileY);
 }
 
 bool MapTools::isBuildable(const BWAPI::TilePosition& tile) const
@@ -182,12 +180,10 @@ bool MapTools::isBuildable(const BWAPI::TilePosition& tile) const
 void MapTools::printMap() const
 {
 	std::stringstream ss;
-	for (int y(0); y < m_height; ++y)
+	for (auto y(0); y < m_height; ++y)
 	{
-		for (int x(0); x < m_width; ++x)
-		{
+		for (auto x(0); x < m_width; ++x)
 			ss << isWalkable(x, y);
-		}
 
 		ss << "\n";
 	}
@@ -197,24 +193,22 @@ void MapTools::printMap() const
 	out.close();
 }
 
-bool MapTools::isDepotBuildableTile(int tileX, int tileY) const
+bool MapTools::isDepotBuildableTile(const int tile_x, const int tile_y) const
 {
-	if (!isValidTile(tileX, tileY))
-	{
+	if (!isValidTile(tile_x, tile_y))
 		return false;
-	}
 
-	return m_depotBuildable.get(tileX, tileY);
+	return m_depotBuildable.get(tile_x, tile_y);
 }
 
-bool MapTools::isWalkable(int tileX, int tileY) const
+bool MapTools::isWalkable(const int tile_x, const int tile_y) const
 {
-	if (!isValidTile(tileX, tileY))
+	if (!isValidTile(tile_x, tile_y))
 	{
 		return false;
 	}
 
-	return m_walkable.get(tileX, tileY);
+	return m_walkable.get(tile_x, tile_y);
 }
 
 bool MapTools::isWalkable(const BWAPI::TilePosition& tile) const
@@ -232,12 +226,12 @@ int MapTools::height() const
 	return m_height;
 }
 
-void MapTools::drawTile(int tileX, int tileY, const BWAPI::Color& color) const
+void MapTools::drawTile(const int tile_x, const int tile_y, const BWAPI::Color& color)
 {
-	const int padding = 2;
-	const int px = tileX * 32 + padding;
-	const int py = tileY * 32 + padding;
-	const int d = 32 - 2 * padding;
+	const auto padding = 2;
+	const auto px = tile_x * 32 + padding;
+	const auto py = tile_y * 32 + padding;
+	const auto d = 32 - 2 * padding;
 
 	BWAPI::Broodwar->drawLineMap(px, py, px + d, py, color);
 	BWAPI::Broodwar->drawLineMap(px + d, py, px + d, py + d, color);
@@ -245,22 +239,21 @@ void MapTools::drawTile(int tileX, int tileY, const BWAPI::Color& color) const
 	BWAPI::Broodwar->drawLineMap(px, py + d, px, py, color);
 }
 
-// Returns the position of the closest chokepoint to given tileposition
-BWAPI::Position MapTools::getClosestCP(BWAPI::TilePosition tile_pos)
+// Returns the position of the closest chokepoint to given tile position
+BWAPI::Position MapTools::getClosestCP(const BWAPI::TilePosition tile_pos) const
 {
-	auto pos = BWAPI::Position(tile_pos.x, tile_pos.y);
-	BWAPI::Position closest_cp = BWAPI::Positions::None;
+	// Cast to position
+	const auto pos = BWAPI::Position(tile_pos);
 
+	// Find the position of the closest chokepoint
+	auto closest_cp = BWAPI::Positions::None;
 	const auto* area = map.GetNearestArea(tile_pos);
 	auto chokepoints = area->ChokePoints();
 	for (const auto* cp : chokepoints)
 	{
 		auto cp_pos = BWAPI::Position(cp->Center());
-		if (closest_cp == BWAPI::Positions::None)
-		{
-			closest_cp = cp_pos;
-		}
-		else if (closest_cp.getDistance(pos) > cp_pos.getDistance(pos))
+		closest_cp = cp_pos;
+		if (closest_cp == BWAPI::Positions::None || closest_cp.getDistance(pos) > cp_pos.getDistance(pos))
 		{
 			closest_cp = cp_pos;
 		}
@@ -269,19 +262,13 @@ BWAPI::Position MapTools::getClosestCP(BWAPI::TilePosition tile_pos)
 	return closest_cp;
 }
 
-//std::vector<BWEM::ChokePoint*> MapTools::getChokePoints()
-//{
-//	const BWEM::Area& area = *map.GetNearestArea(Global::information().main_base->getTilePosition());
-//	return area.ChokePoints();
-//}
-
-bool MapTools::canWalk(int tileX, int tileY) const
+bool MapTools::canWalk(const int tile_x, const int tile_y)
 {
-	for (int i = 0; i < 4; ++i)
+	for (auto i = 0; i < 4; ++i)
 	{
-		for (int j = 0; j < 4; ++j)
+		for (auto j = 0; j < 4; ++j)
 		{
-			if (!BWAPI::Broodwar->isWalkable(tileX * 4 + i, tileY * 4 + j))
+			if (!BWAPI::Broodwar->isWalkable(tile_x * 4 + i, tile_y * 4 + j))
 			{
 				return false;
 			}
@@ -291,29 +278,29 @@ bool MapTools::canWalk(int tileX, int tileY) const
 	return true;
 }
 
-bool MapTools::canBuild(int tileX, int tileY) const
+bool MapTools::canBuild(const int tile_x, const int tile_y)
 {
-	return BWAPI::Broodwar->isBuildable(BWAPI::TilePosition(tileX, tileY));
+	return BWAPI::Broodwar->isBuildable(BWAPI::TilePosition(tile_x, tile_y));
 }
 
 void MapTools::draw() const
 {
 	const BWAPI::TilePosition screen(BWAPI::Broodwar->getScreenPosition());
-	const int sx = screen.x;
-	const int sy = screen.y;
-	const int ex = sx + 20;
-	const int ey = sy + 15;
+	const auto sx = screen.x;
+	const auto sy = screen.y;
+	const auto ex = sx + 20;
+	const auto ey = sy + 15;
 
-	for (int x = sx; x < ex; ++x)
+	for (auto x = sx; x < ex; ++x)
 	{
-		for (int y = sy; y < ey; y++)
+		for (auto y = sy; y < ey; y++)
 		{
-			const BWAPI::TilePosition tilePos(x, y);
-			if (!tilePos.isValid()) { continue; }
+			const BWAPI::TilePosition tile_pos(x, y);
+			if (!tile_pos.isValid()) { continue; }
 
 			if constexpr (true)
 			{
-				BWAPI::Color color = isWalkable(x, y) ? BWAPI::Color(0, 255, 0) : BWAPI::Color(255, 0, 0);
+				auto color = isWalkable(x, y) ? BWAPI::Color(0, 255, 0) : BWAPI::Color(255, 0, 0);
 				if (isWalkable(x, y) && !isBuildable(x, y)) { color = BWAPI::Color(255, 255, 0); }
 				if (isBuildable(x, y) && !isDepotBuildableTile(x, y)) { color = BWAPI::Color(127, 255, 255); }
 				drawTile(x, y, color);
@@ -321,10 +308,10 @@ void MapTools::draw() const
 		}
 	}
 
-	const char red = '\x08';
-	const char green = '\x07';
-	const char white = '\x04';
-	const char yellow = '\x03';
+	const auto red = '\x08';
+	const auto green = '\x07';
+	const auto white = '\x04';
+	const auto yellow = '\x03';
 
 	BWAPI::Broodwar->drawBoxScreen(0, 0, 200, 100, BWAPI::Colors::Black, true);
 	BWAPI::Broodwar->setTextSize(BWAPI::Text::Size::Huge);

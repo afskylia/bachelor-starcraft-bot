@@ -47,21 +47,21 @@ namespace BWEM
 
 		const bool MapPrinter::showAltitude = true;
 		const bool MapPrinter::showAreas = true;
-		const bool MapPrinter::showContinents = !showAreas && true;
+		const bool MapPrinter::showContinents = !showAreas;
 		const bool MapPrinter::showLakes = true;
 		const bool MapPrinter::showSeaSide = true;
 		const bool MapPrinter::showUnbuildable = false;
 		const bool MapPrinter::showGroundHeight = true;
 		const bool MapPrinter::showChokePoints = true;
 		const bool MapPrinter::showResources = true;
-		const bool MapPrinter::showMinerals = showResources && true;
-		const bool MapPrinter::showGeysers = showResources && true;
+		const bool MapPrinter::showMinerals = showResources;
+		const bool MapPrinter::showGeysers = showResources;
 		const bool MapPrinter::showStaticBuildings = true;
 		const bool MapPrinter::showBlockingBuildings = true;
 		const bool MapPrinter::showStackedNeutrals = true;
 		const bool MapPrinter::showStartingLocations = true;
 		const bool MapPrinter::showBases = true;
-		const bool MapPrinter::showAssignedRessources = showBases && true;
+		const bool MapPrinter::showAssignedRessources = showBases;
 		const bool MapPrinter::showData = false;
 
 		const MapPrinter::Color MapPrinter::Color::higherGround = Color(0, 0, 0);

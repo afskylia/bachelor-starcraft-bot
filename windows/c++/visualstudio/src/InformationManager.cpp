@@ -57,12 +57,12 @@ void InformationManager::updateEnemyStrategy()
 	{
 		if (enemy_unit->getPosition().getApproxDistance(main_base->getPosition()) < 1000)
 		{
-			m_current_enemy_strategy = offensive;
+			m_current_enemy_strategy = Enums::offensive;
 			return;
 		}
 	}
 
-	m_current_enemy_strategy = defensive;
+	m_current_enemy_strategy = Enums::defensive;
 }
 
 /// <summary>
@@ -154,7 +154,7 @@ void InformationManager::onUnitDestroy(BWAPI::Unit unit)
 /// Gets the strategy from enemy units
 /// </summary>
 /// <returns>strategy based on units</returns>
-strategy_type InformationManager::getEnemyStrategy()
+Enums::strategy_type InformationManager::getEnemyStrategy()
 {
 	return m_current_enemy_strategy;
 }

@@ -221,9 +221,9 @@ void ProductionManager::buildAdditionalSupply()
 	if (pendingBuildingsCount(supplyProviderType) > 0) return;
 
 	// If we have a sufficient amount of supply, we don't need to do anything TODO Still builds past supply 200, but we might need psi
-	//if (BWAPI::Broodwar->self()->supplyUsed() + 6 >= Tools::getTotalSupply(true))
-	if (BWAPI::Broodwar->self()->supplyTotal() != 200 && BWAPI::Broodwar->self()->supplyUsed() * 1.3 >=
-		Tools::getTotalSupply(true))
+	/*if (BWAPI::Broodwar->self()->supplyTotal() != 200 && BWAPI::Broodwar->self()->supplyUsed() * 1.3 >=
+		Tools::getTotalSupply(true))*/
+	if (BWAPI::Broodwar->self()->supplyUsed() + 10 >= Tools::getTotalSupply(true))
 	{
 		// Otherwise, we are going to build a supply provider
 		buildBuilding(supplyProviderType);

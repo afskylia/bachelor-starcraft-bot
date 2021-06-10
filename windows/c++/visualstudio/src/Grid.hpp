@@ -12,9 +12,7 @@ class Grid
 
 public:
 
-	Grid()
-	{
-	}
+	Grid() = default;
 
 	Grid(size_t width, size_t height, T val)
 		: m_width(width)

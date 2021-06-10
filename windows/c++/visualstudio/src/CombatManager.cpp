@@ -4,13 +4,11 @@
 #include "Global.h"
 #include "Tools.h"
 #include "CombatData.h"
-#include "limits.h";
+#include "limits.h"
 
 using namespace MiraBot;
 
-CombatManager::CombatManager()
-{
-}
+CombatManager::CombatManager() = default;
 
 void CombatManager::onFrame()
 {
@@ -55,24 +53,39 @@ void CombatManager::guardBase(BWAPI::Unit unit)
 	{
 		// Count how many guards are assigned to this chokepoint
 		auto count = 0;
-		for (auto& p : guard_map) count += p.second == cp;
+		for (auto& [_, _cp] : guard_map) count += _cp == cp;
+
+		// Choose this chokepoint if it has too few units assigned to it
 		if (closest_cp == BWAPI::Positions::None || count < count_closest)
+		{
 			closest_cp = cp;
+			count_closest = count;
+		}
 	}
 
 	// Randomize position a bit
-	auto pp = BWAPI::Broodwar->getBuildLocation(BWAPI::Broodwar->self()->getRace().getSupplyProvider(),
-	                                            BWAPI::TilePosition(closest_cp));
+	const auto supply_provider = BWAPI::Broodwar->self()->getRace().getSupplyProvider();
+	const auto tile_pos = BWAPI::Broodwar->getBuildLocation(supply_provider, BWAPI::TilePosition(closest_cp));
+
 	srand(time(nullptr));
 	auto x = (rand() % 50) + 75;
 	auto y = (rand() % 50) + 75;
 	if (rand() & 1) x *= -1;
 	if (rand() & 1) y *= -1;
-	auto attack_pos = BWAPI::Position(pp) + BWAPI::Position(x, y);
-	//auto attack_pos = BWAPI::Position(pp);
-	//auto attack_pos = closest_cp + BWAPI::Position(x, y);
 
-	//// this is a hotfix, sometimes (e.g. on Destination.scx) units are sent to an unreachable location...
+	// TODO: Choose one of the following placement options for guards
+	// A) Send unit to non-randomized pylon position
+	const auto option_a = BWAPI::Position(tile_pos);
+
+	// B) Send unit to randomized pylon position
+	const auto option_b = BWAPI::Position(tile_pos) + BWAPI::Position(x, y);
+
+	// C) Send unit to randomized position near the center of the CP - not using pylon placement
+	const auto option_c = closest_cp + BWAPI::Position(x, y);
+
+	const auto attack_pos = option_c;
+
+	// TODO: Fix bug where units try to walk to unreachable chokepoint (e.g. on (2)Destination.scx)
 	//auto fail_count = 0;
 	//while (!Global::map().isWalkable(BWAPI::TilePosition(attack_pos)))
 	//{
@@ -81,11 +94,7 @@ void CombatManager::guardBase(BWAPI::Unit unit)
 	//		std::cout << "Failed to find walkable position for chokepoint " << closest_cp;
 	//		return;
 	//	}
-	//	x = (rand() % 50) + 75;
-	//	y = (rand() % 50) + 75;
-	//	if (rand() & 1) x *= -1;
-	//	if (rand() & 1) y *= -1;
-	//	attack_pos = closest_cp + BWAPI::Position(x, y);
+	//	...
 	//	fail_count++;
 	//}
 
