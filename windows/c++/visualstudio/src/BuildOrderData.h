@@ -16,6 +16,7 @@ namespace MiraBot
 			{13, std::make_pair(BWAPI::UnitTypes::Protoss_Cybernetics_Core, 1)},
 			// Tweaks by us
 			{40, std::make_pair(BWAPI::UnitTypes::Protoss_Forge, 1)},
+			{41, std::make_pair(BWAPI::UnitTypes::Protoss_Fleet_Beacon, 1)},
 		};
 
 		std::map<int, std::pair<BWAPI::UnitType, int>> protoss_v_terran = {
@@ -28,6 +29,7 @@ namespace MiraBot
 			{34, std::make_pair(BWAPI::UnitTypes::Protoss_Observatory, 1)},
 			// Tweaks by us
 			{40, std::make_pair(BWAPI::UnitTypes::Protoss_Forge, 1)},
+			{41, std::make_pair(BWAPI::UnitTypes::Protoss_Fleet_Beacon, 1)},
 		};
 
 		std::map<int, std::pair<BWAPI::UnitType, int>> protoss_v_zerg = {
@@ -37,6 +39,7 @@ namespace MiraBot
 			{13, std::make_pair(BWAPI::UnitTypes::Protoss_Cybernetics_Core, 1)},
 			// Tweaks by us
 			{40, std::make_pair(BWAPI::UnitTypes::Protoss_Forge, 1)},
+			{41, std::make_pair(BWAPI::UnitTypes::Protoss_Fleet_Beacon, 1)},
 		};
 
 		std::map<int, std::pair<BWAPI::UnitType, int>> protoss_v_protoss = {
@@ -48,6 +51,7 @@ namespace MiraBot
 			{15, std::make_pair(BWAPI::UnitTypes::Protoss_Cybernetics_Core, 1)},
 			// Tweaks by us
 			{40, std::make_pair(BWAPI::UnitTypes::Protoss_Forge, 1)},
+			{41, std::make_pair(BWAPI::UnitTypes::Protoss_Fleet_Beacon, 1)},
 		};
 	};
 }
