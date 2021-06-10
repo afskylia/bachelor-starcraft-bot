@@ -47,6 +47,7 @@ namespace MiraBot
 
 		void printDebugData();
 
+		void checkIfUpgradesAreAvailable();
 		void onFrame();
 		void onUnitDestroy(BWAPI::Unit unit);
 		void onUnitComplete(BWAPI::Unit unit);
