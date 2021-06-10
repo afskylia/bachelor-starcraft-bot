@@ -24,6 +24,9 @@ void ProductionManager::onFrame()
 
 	// TODO: Instead, automatically add supply depots to build order when about to run out?
 	buildAdditionalSupply();
+
+	// Checks all buildings if they can be upgraded.
+	checkIfUpgradesAreAvailable();
 }
 
 // Check if anything should be added to the build queue
@@ -304,6 +307,34 @@ void ProductionManager::printDebugData()
 		std::cout << "[" << fst << ", " << snd.first.getName() << "], ";
 	}
 	std::cout << "]\n\n";
+}
+
+/// <summary>
+/// Go through all buildings to see if we can upgrade something
+/// </summary>
+void ProductionManager::checkIfUpgradesAreAvailable()
+{
+	auto buildings = Global::information().main_base->getUnitsInRadius(
+		9999, BWAPI::Filter::IsBuilding && BWAPI::Filter::IsOwned);
+
+	// No buildings
+	if (buildings.empty()) return;
+
+	auto& upgrades = BWAPI::UpgradeTypes::allUpgradeTypes();
+
+	for (auto* building : buildings)
+	{
+		if (!building->canUpgrade() || building->isTraining() || building->isUpgrading()) continue;
+
+		for (auto& upgrade : upgrades)
+		{
+			if (building->canUpgrade(upgrade))
+			{
+				building->upgrade(upgrade);
+				break;
+			}
+		}
+	}
 }
 
 // Rebuild destroyed strategic units (units from build order)
