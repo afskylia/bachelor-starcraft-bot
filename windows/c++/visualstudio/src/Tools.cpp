@@ -11,6 +11,9 @@ std::vector<BWAPI::Unit> Tools::sortUnitsByClosest(BWAPI::Unit unit, const BWAPI
 // Return vector of units in ascending order from distance to given position
 std::vector<BWAPI::Unit> Tools::sortUnitsByClosest(BWAPI::Position pos, const BWAPI::Unitset& unitSet)
 {
+	if (unitSet.empty())
+		return {};
+
 	std::vector<BWAPI::Unit> units(unitSet.size());
 	std::copy(unitSet.begin(), unitSet.end(), units.begin());
 

@@ -10,12 +10,12 @@ using namespace MiraBot;
 /// </summary>
 InformationManager::InformationManager()
 {
-	// Save positions of all chokepoints in main base
-	auto base = BWAPI::Broodwar->self()->getStartLocation();
-	const auto area = Global::map().map.GetNearestArea(base);
+	//// Save positions of all chokepoints in main base
+	//auto base = BWAPI::Broodwar->self()->getStartLocation();
+	//const auto area = Global::map().map.GetNearestArea(base);
 
-	for (auto cp : area->ChokePoints())
-		base_chokepoints.push_back(BWAPI::Position(cp->Center()));
+	//for (auto cp : area->ChokePoints())
+	//	base_chokepoints.push_back(BWAPI::Position(cp->Center()));
 }
 
 

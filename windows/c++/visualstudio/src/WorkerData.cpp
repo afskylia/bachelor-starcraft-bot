@@ -12,6 +12,7 @@ void WorkerData::addWorker(BWAPI::Unit unit)
 	if (!unit) { return; }
 
 	m_workers.insert(unit);
+	m_workerAreaMap[unit] = Global::map().main_area;
 	m_workerJobMap[unit] = Default;
 }
 
@@ -20,6 +21,7 @@ void WorkerData::addWorker(BWAPI::Unit unit, WorkerJob job, BWAPI::Unit jobUnit)
 {
 	if (!unit) { return; }
 	m_workers.insert(unit);
+	m_workerAreaMap[unit] = Global::map().main_area;
 	setWorkerJob(unit, job, jobUnit);
 }
 
@@ -28,6 +30,7 @@ void WorkerData::addWorker(BWAPI::Unit unit, WorkerJob job, BWAPI::Position pos)
 {
 	if (!unit) { return; }
 	m_workers.insert(unit);
+	m_workerAreaMap[unit] = Global::map().main_area;
 	setWorkerJob(unit, job, pos);
 }
 
@@ -35,6 +38,7 @@ void WorkerData::addWorker(BWAPI::Unit unit, WorkerJob job, struct BuildJob buil
 {
 	if (!unit) { return; }
 	m_workers.insert(unit);
+	m_workerAreaMap[unit] = Global::map().main_area;
 	setWorkerJob(unit, job, buildJob);
 }
 
@@ -64,6 +68,10 @@ void WorkerData::resetJob(BWAPI::Unit unit)
 	case Minerals:
 		{
 			//m_depotWorkerCount[m_workerDepotMap[unit]] -= 1; // TODO depots??
+
+			auto mineral = m_workerMineralMap[unit];
+			m_workersOnMineralPatch[mineral]--;
+
 			m_workerDepotMap.erase(unit);
 			m_workerMineralMap.erase(unit);
 			break;
@@ -110,9 +118,26 @@ void WorkerData::setWorkerJob(BWAPI::Unit unit, enum WorkerJob job, BWAPI::Unit 
 	{
 	case Minerals:
 		{
-			BWAPI::Unit mineralToMine = getMineralToMine(unit);
-			m_workerMineralMap[unit] = mineralToMine;
-			unit->gather(mineralToMine);
+			// Get available mineral in unit's area
+			auto mineral_to_mine = getMineralToMine(unit);
+
+			// TODO: Make function to switch base
+			// If no available minerals in main base, go to 2nd base
+			if (!mineral_to_mine && !(m_workerAreaMap[unit] == Global::map().snd_area))
+			{
+				m_workerAreaMap[unit] = Global::map().snd_area;
+				mineral_to_mine = getMineralToMine(unit);
+			}
+
+			if (!mineral_to_mine)
+			{
+				std::cout << "No available minerals in 2nd area\n";
+				return;
+			}
+
+			m_workerMineralMap[unit] = mineral_to_mine;
+			m_workersOnMineralPatch[mineral_to_mine]++;
+			unit->gather(mineral_to_mine);
 			break;
 		}
 
@@ -163,16 +188,49 @@ void WorkerData::setWorkerJob(BWAPI::Unit unit, enum WorkerJob job, struct Build
 
 BWAPI::Unit WorkerData::getMineralToMine(BWAPI::Unit unit)
 {
-	auto minerals_near_base = Global::information().main_base->getUnitsInRadius(1024, BWAPI::Filter::IsMineralField);
-	auto sorted_minerals = Tools::sortUnitsByClosest(unit, minerals_near_base);
-	for (auto m : sorted_minerals)
+	// TODO get mineral in area, if no more in main area go to snd area
+	// TODO make sure at most 2 units are assigned to patch
+
+	auto minerals_in_base = m_workerAreaMap[unit]->Minerals();
+	if (minerals_in_base.empty()) return nullptr;
+
+	//auto minerals_near_base = Global::information().main_base->getUnitsInRadius(1024, BWAPI::Filter::IsMineralField);
+	//auto sorted_minerals = Tools::sortUnitsByClosest(unit, minerals_in_base);
+
+	BWAPI::Unit closest_mineral = nullptr;
+	auto closest_distance = INT_MAX;
+	for (auto mineral : minerals_in_base)
+	{
+		// We want at most 3 workers per mineral patch
+		if (m_workersOnMineralPatch[mineral->Unit()] >= 3) continue;
+
+		// Set initially closest unit
+		if (!closest_mineral)
+		{
+			closest_mineral = mineral->Unit();
+			continue;
+		}
+
+		// Compare size of mineral to currently closest mineral
+		const auto distance = mineral->Unit()->getDistance(unit);
+		if (distance >= closest_distance) continue;
+
+		// Set closest mineral
+		closest_mineral = mineral->Unit();
+		closest_distance = distance;
+	}
+
+	return closest_mineral;
+
+
+	/*for (auto m : sorted_minerals)
 	{
 		if (!m->isBeingGathered())
 		{
 			return m;
 		}
 	}
-	return sorted_minerals[0];
+	return sorted_minerals[0];*/
 }
 
 BWAPI::Unit WorkerData::getClosestRefinery(BWAPI::Unit unit)

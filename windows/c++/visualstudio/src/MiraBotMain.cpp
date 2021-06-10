@@ -142,7 +142,12 @@ void MiraBotMain::drawDebugInformation()
 	Tools::drawUnitBoundingBoxes();
 
 	if (Global::information().found_enemy) Tools::drawEnemyBases(Global::information().enemy_start_location);
+
+	//DEBUG
+	auto loc = TilePosition(Global::map().snd_area->Bases()[0].Center());
+	Tools::drawEnemyBases(loc);
 }
+
 
 // Called whenever a unit is destroyed, with a pointer to the unit
 void MiraBotMain::onUnitDestroy(Unit unit)

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <BWAPI.h>
+#include "BWEM/src/bwem.h"
 
 // Made with inspiration from WorkerManager and WorkerData in UAlbertaBot
 
@@ -61,10 +62,12 @@ namespace MiraBot
 		std::map<BWAPI::Unit, BWAPI::TilePosition> m_buildPosMap;
 		// Tile position where the unit should place a building
 		std::map<BWAPI::Unit, BWAPI::UnitType> m_workerBuildingTypeMap; // Type of building to be built by builder
+		std::map<BWAPI::Unit, const BWEM::Area*> m_workerAreaMap;
+
+		std::map<BWAPI::Unit, int> m_workersOnMineralPatch;
 
 		std::map<BWAPI::Unit, int> m_depotWorkerCount;
 		std::map<BWAPI::Unit, int> m_refineryWorkerCount;
-		std::map<BWAPI::Unit, int> m_workersOnMineralPatch;
 		std::map<BWAPI::Unit, BWAPI::Unit> m_workerMineralAssignment;
 	};
 }
