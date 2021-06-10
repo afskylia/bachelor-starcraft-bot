@@ -110,26 +110,27 @@ void Tools::drawUnitCommands()
 {
 	for (auto& unit : BWAPI::Broodwar->self()->getUnits())
 	{
-		const BWAPI::UnitCommand& command = unit->getLastCommand();
+		if (unit->isIdle()) continue;
 
-		// If the previous command had a ground position target, draw it in red
+		const BWAPI::UnitCommand& command = unit->getLastCommand();
+		// If the previous command had a ground position target, draw it in green
 		// Example: move to location on the map
 		if (command.getTargetPosition() != BWAPI::Positions::None)
 		{
-			BWAPI::Broodwar->drawLineMap(unit->getPosition(), command.getTargetPosition(), BWAPI::Colors::Red);
+			BWAPI::Broodwar->drawLineMap(unit->getPosition(), command.getTargetPosition(), BWAPI::Colors::Green);
 		}
 
-		// If the previous command had a tile position target, draw it in red
-		// Example: build at given tile position location
-		if (command.getTargetTilePosition() != BWAPI::TilePositions::None)
+			// If the previous command had a tile position target, draw it in red
+			// Example: build at given tile position location
+		else if (command.getTargetTilePosition() != BWAPI::TilePositions::None)
 		{
 			BWAPI::Broodwar->drawLineMap(unit->getPosition(), BWAPI::Position(command.getTargetTilePosition()),
-			                             BWAPI::Colors::Green);
+			                             BWAPI::Colors::Red);
 		}
 
-		// If the previous command had a unit target, draw it in red
-		// Example: attack unit, mine mineral, etc
-		if (command.getTarget() != nullptr)
+			// If the previous command had a unit target, draw it in white
+			// Example: attack unit, mine mineral, etc
+		else if (command.getTarget() != nullptr)
 		{
 			BWAPI::Broodwar->drawLineMap(unit->getPosition(), command.getTarget()->getPosition(), BWAPI::Colors::White);
 		}

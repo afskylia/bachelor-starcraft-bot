@@ -143,7 +143,7 @@ void MiraBotMain::drawDebugInformation()
 
 	if (Global::information().found_enemy) Tools::drawEnemyBases(Global::information().enemy_start_location);
 
-	//DEBUG
+	// Debug: shows the secondary base
 	auto loc = TilePosition(Global::map().snd_area->Bases()[0].Center());
 	Tools::drawEnemyBases(loc);
 }

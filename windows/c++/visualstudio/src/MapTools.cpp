@@ -105,7 +105,6 @@ void MapTools::onFrame()
 		}
 	}
 
-	// Draw stuff such as health bars
 	if (m_drawMap) draw();
 
 	// BWEM drawing functions are super slow in debug mode
