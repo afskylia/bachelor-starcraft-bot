@@ -31,9 +31,13 @@ namespace MiraBot
 
 	public:
 
-		BWEM::Map& map = BWEM::Map::Instance();
-
 		MapTools();
+
+		BWEM::Map& map = BWEM::Map::Instance();
+		const BWEM::Area* main_area = nullptr; // Main base area
+		const BWEM::Area* snd_area = nullptr; // Second area (extension)
+		std::vector<BWAPI::Position> getChokepoints(const BWEM::Area* area);
+
 
 		void onStart();
 		void onFrame();

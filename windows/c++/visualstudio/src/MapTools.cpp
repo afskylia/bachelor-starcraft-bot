@@ -13,7 +13,9 @@ using namespace MiraBot;
 using namespace BWEM;
 
 
-MapTools::MapTools() = default;
+MapTools::MapTools()
+{
+}
 
 
 void MapTools::onStart()
@@ -29,6 +31,9 @@ void MapTools::onStart()
 
 	utils::printMap(map); // will print the map into the file bin/map.bmp
 	utils::pathExample(map); // add to the printed map a path between two starting locations
+
+	const auto base = BWAPI::Broodwar->self()->getStartLocation();
+	main_area = map.GetNearestArea(base);
 
 	std::cout << " complete!\n";
 
@@ -260,6 +265,16 @@ BWAPI::Position MapTools::getClosestCP(const BWAPI::TilePosition tile_pos) const
 	}
 
 	return closest_cp;
+}
+
+// Returns a vector of positions of chokepoints in given area
+std::vector<BWAPI::Position> MapTools::getChokepoints(const Area* area)
+{
+	std::vector<BWAPI::Position> chokepoint_positions = {};
+	for (const auto* cp : area->ChokePoints())
+		if (!cp->Blocked()) chokepoint_positions.emplace_back(cp->Center());
+
+	return chokepoint_positions;
 }
 
 bool MapTools::canWalk(const int tile_x, const int tile_y)

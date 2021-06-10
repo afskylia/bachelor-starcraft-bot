@@ -46,7 +46,8 @@ void CombatManager::onUnitDestroy(BWAPI::Unit unit)
 void CombatManager::guardBase(BWAPI::Unit unit)
 {
 	// Get chokepoint with fewest assigned units
-	auto chokepoints = Global::information().base_chokepoints;
+	//auto chokepoints = Global::information().base_chokepoints;
+	auto chokepoints = Global::map().getChokepoints(Global::map().main_area);
 	auto closest_cp = BWAPI::Positions::None;
 	auto count_closest = INT_MAX;
 	for (auto cp : chokepoints)
