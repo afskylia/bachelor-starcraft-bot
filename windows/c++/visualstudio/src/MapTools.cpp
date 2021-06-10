@@ -34,6 +34,7 @@ void MapTools::onStart()
 
 	const auto base = BWAPI::Broodwar->self()->getStartLocation();
 	main_area = map.GetNearestArea(base);
+	snd_area = main_area->AccessibleNeighbours()[0];
 
 	std::cout << " complete!\n";
 
