@@ -68,23 +68,14 @@ void CombatManager::guardBase(BWAPI::Unit unit)
 	const auto supply_provider = BWAPI::Broodwar->self()->getRace().getSupplyProvider();
 	const auto tile_pos = BWAPI::Broodwar->getBuildLocation(supply_provider, BWAPI::TilePosition(closest_cp));
 
-	srand(time(nullptr));
 	auto x = (rand() % 50) + 75;
 	auto y = (rand() % 50) + 75;
 	if (rand() & 1) x *= -1;
 	if (rand() & 1) y *= -1;
 
-	// TODO: Choose one of the following placement options for guards
-	// A) Send unit to non-randomized pylon position
-	const auto option_a = BWAPI::Position(tile_pos);
+	// Send unit to randomized position near the center of the CP
+	const auto attack_pos = closest_cp + BWAPI::Position(x, y);
 
-	// B) Send unit to randomized pylon position
-	const auto option_b = BWAPI::Position(tile_pos) + BWAPI::Position(x, y);
-
-	// C) Send unit to randomized position near the center of the CP - not using pylon placement
-	const auto option_c = closest_cp + BWAPI::Position(x, y);
-
-	const auto attack_pos = option_c;
 
 	// TODO: Fix bug where units try to walk to unreachable chokepoint (e.g. on (2)Destination.scx)
 	//auto fail_count = 0;
