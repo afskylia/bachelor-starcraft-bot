@@ -221,16 +221,6 @@ BWAPI::Unit WorkerData::getMineralToMine(BWAPI::Unit unit)
 	}
 
 	return closest_mineral;
-
-
-	/*for (auto m : sorted_minerals)
-	{
-		if (!m->isBeingGathered())
-		{
-			return m;
-		}
-	}
-	return sorted_minerals[0];*/
 }
 
 BWAPI::Unit WorkerData::getClosestRefinery(BWAPI::Unit unit)

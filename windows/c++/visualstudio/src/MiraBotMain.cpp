@@ -207,6 +207,7 @@ void MiraBotMain::onUnitComplete(Unit unit)
 void MiraBotMain::onUnitShow(Unit unit)
 {
 	Global::information().onUnitShow(unit);
+	Global::combat().onUnitShow(unit);
 }
 
 // Called whenever a unit gets hidden, with a pointer to the destroyed unit
