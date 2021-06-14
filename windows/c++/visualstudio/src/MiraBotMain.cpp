@@ -178,6 +178,8 @@ void MiraBotMain::onSendText(std::string text)
 		//else if (text == "/map")Global::map().toggleDraw();
 
 	else if (text == "production") Global::production().printDebugData();
+	else if (text == "rush") Global::combat().startRushing();
+	else if (text == "retreat") Global::combat().retreatFromCombat();
 
 		// TODO: Why doesn't this work????
 	else BWEM::utils::MapDrawer::ProcessCommand(text);

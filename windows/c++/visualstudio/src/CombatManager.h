@@ -37,13 +37,20 @@ namespace MiraBot
 		void setTarget(BWAPI::Unit unit, BWAPI::Unit target); // Set unit's target unit
 		void goRetreat(BWAPI::Unit unit);
 		void goAttack(BWAPI::Unit unit);
+		void goAttack(BWAPI::Unit unit, BWAPI::Position target_pos);
 		void goDefend(BWAPI::Unit unit);
+
+		void updateAttackStatus();
+		void cleanUpTargets();
+		void startRushing();
+		void retreatFromCombat();
 
 		BWAPI::Position getChokepointToGuard(BWAPI::Unit unit); // Return chokepoint to be guarded by unit
 		BWAPI::Unit chooseTarget(BWAPI::Unit unit, bool same_area = false); // Get closest target unit to unit
 
 		bool attacking = false; // Whether we're currently rushing the enemy
 		bool under_attack = false; // Whether we're currently under attack in one of our bases
+		BWAPI::Position rush_target_pos = BWAPI::Positions::None;
 
 		// Set of all our attack units
 		BWAPI::Unitset m_attack_units_ = BWAPI::Unitset::none;
