@@ -131,7 +131,7 @@ void WorkerData::setWorkerJob(BWAPI::Unit unit, enum WorkerJob job, BWAPI::Unit 
 
 			if (!mineral_to_mine)
 			{
-				std::cout << "No available minerals in 2nd area\n";
+				//std::cout << "No available minerals in 2nd area\n";
 				return;
 			}
 

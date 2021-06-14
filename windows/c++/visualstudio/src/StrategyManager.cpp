@@ -38,7 +38,6 @@ StrategyManager::StrategyManager()
 
 void StrategyManager::onFrame()
 {
-	shouldStartRushing();
 }
 
 /// <summary>

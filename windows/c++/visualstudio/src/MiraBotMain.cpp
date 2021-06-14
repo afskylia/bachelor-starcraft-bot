@@ -214,6 +214,7 @@ void MiraBotMain::onUnitShow(Unit unit)
 // This is usually triggered when units enter the fog of war and are no longer visible
 void MiraBotMain::onUnitHide(Unit unit)
 {
+	Global::combat().onUnitHide(unit);
 }
 
 // Called whenever a unit switches player control

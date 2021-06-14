@@ -12,11 +12,46 @@ CombatManager::CombatManager() = default;
 
 void CombatManager::onFrame()
 {
+	// Hotfix:
+	std::vector<BWAPI::Unit> to_reset = {};
+	for (auto& t : targets)
+		if (!t->isVisible()) to_reset.push_back(t);
+
+	for (auto t : to_reset)
+	{
+		resetTarget(t);
+		std::cout << "removed " << t->getType() << " from targets\n";
+	}
+
+
 	// See if we should start rushing
+	if (Global::strategy().shouldStartRushing())
+	{
+		std::cout << "Start rushing!\n";
+	}
 
 	// Handle idle units
+	for (auto& u : m_attack_units_)
+	{
+		if (u->isIdle())
+		{
+			switch (fighter_status_map[u])
+			{
+			case Enums::defending:
+				handleIdleDefender(u);
+				break;
+			case Enums::attacking:
+				handleIdleAttacker(u);
+				break;
+			case Enums::retreating:
+				handleIdleRetreater(u);
+				break;
+			}
+		}
+	}
 
 	// Check status of current combat - can we win or should we retreat?
+	updateCombatStatus();
 }
 
 void CombatManager::onUnitComplete(BWAPI::Unit unit)
@@ -34,6 +69,8 @@ void CombatManager::onUnitComplete(BWAPI::Unit unit)
 
 void CombatManager::onUnitDestroy(BWAPI::Unit unit)
 {
+	// if enemy unit: remove as target
+
 	// Erase unit from maps and unit sets
 	guard_map.erase(unit);
 
@@ -49,27 +86,26 @@ void CombatManager::onUnitDestroy(BWAPI::Unit unit)
 
 void CombatManager::onUnitShow(BWAPI::Unit unit)
 {
-	if (!unit) return;
-
-	if (unit->canAttack() && unit->getPlayer() != BWAPI::Broodwar->self())
+	auto a = unit->getType();
+	// If enemy unit, add to targets so it will be attacked by the defense squad
+	if (unit->getPlayer()->isEnemy(BWAPI::Broodwar->self()))
 	{
+		targets.insert(unit);
+		target_attackers[unit] = 0;
+
 		auto area = Global::map().map.GetNearestArea(unit->getTilePosition());
 		if (area == Global::map().main_area || area == Global::map().snd_area)
 		{
-			// If unit is enemy and in our base, attack it!
-			for (auto u : m_attack_units_)
-			{
-				if (fighter_status_map[u] == Enums::defending)
-				{
-					u->attack(unit);
-				}
-			}
+			// We are under attack! Unless it's just a scout.
+			if (!unit->getType().isWorker()) under_attack = true;
 		}
 	}
 }
 
 void CombatManager::onUnitHide(BWAPI::Unit unit)
 {
+	if (unit->getPlayer()->isEnemy(BWAPI::Broodwar->self()))
+		resetTarget(unit);
 }
 
 BWAPI::Position CombatManager::getChokepointToGuard(BWAPI::Unit unit)
@@ -101,32 +137,93 @@ void CombatManager::addCombatUnit(BWAPI::Unit unit)
 	goDefend(unit);
 }
 
+void CombatManager::resetTarget(BWAPI::Unit target)
+{
+	// Remove target from maps
+	target_attackers.erase(target);
+	targets.erase(target);
+
+	// Remove as target for units currently targeting it
+	for (auto& u : m_attack_units_)
+	{
+		if (fighter_target_map[u] == target)
+		{
+			//fighter_target_map[u] = nullptr;
+			fighter_target_map.erase(u);
+			u->stop();
+		}
+	}
+}
+
 void CombatManager::resetCombatUnit(BWAPI::Unit unit)
 {
+	// TODO: remove from maps and stuff
+}
+
+void CombatManager::removeUnitTarget(BWAPI::Unit unit)
+{
+	// Reset unit target
+	const auto prev_target = fighter_target_map[unit];
+	if (prev_target) target_attackers[prev_target]--;
+	//fighter_target_map[unit] = nullptr;
+	fighter_target_map.erase(unit);
 }
 
 void CombatManager::handleIdleDefender(BWAPI::Unit unit)
 {
+	// If last command was an attack, and we're no longer under attack, send to guard position again
+	if (!under_attack && fighter_target_map[unit])
+	{
+		removeUnitTarget(unit);
+		goDefend(unit);
+	}
+	else if (under_attack && !targets.empty())
+	{
+		// Set new target
+		auto* const target = chooseTarget(unit, true);
+		setTarget(unit, target);
+	}
 }
 
 void CombatManager::handleIdleRetreater(BWAPI::Unit unit)
 {
+	// TODO
 }
 
 void CombatManager::handleIdleAttacker(BWAPI::Unit unit)
 {
+	// Remove current target
+	removeUnitTarget(unit);
+
+	// Set new target
+	auto* const target = chooseTarget(unit);
+	setTarget(unit, target);
+}
+
+void CombatManager::updateCombatStatus()
+{
+	// Check how the battle is going - should we retreat?
+	// TODO
 }
 
 void CombatManager::setTarget(BWAPI::Unit unit, BWAPI::Unit target)
 {
+	// Set target and attack it
+	target_attackers[target]++;
+	fighter_target_map[unit] = target;
+	unit->attack(target);
 }
 
 void CombatManager::goRetreat(BWAPI::Unit unit)
 {
+	// TODO
 }
 
 void CombatManager::goAttack(BWAPI::Unit unit)
 {
+	fighter_status_map[unit] = Enums::attacking;
+	auto* const target = chooseTarget(unit);
+	setTarget(unit, target);
 }
 
 void CombatManager::goDefend(BWAPI::Unit unit)
@@ -149,7 +246,29 @@ void CombatManager::goDefend(BWAPI::Unit unit)
 	unit->attack(attack_pos);
 }
 
-BWAPI::Unit CombatManager::getClosestTarget(BWAPI::Unit unit)
+// Get closest target from (visible/known?) targets
+BWAPI::Unit CombatManager::chooseTarget(BWAPI::Unit unit, bool same_area)
 {
-	return unit;
+	// same_area: Whether target needs to be in same area as unit
+	const auto* area = Global::map().map.GetNearestArea(unit->getTilePosition());
+
+	// First try to find a target that has at most 2 other units assigned to it
+	BWAPI::Unitset available_targets = {};
+	if (targets.empty())
+	{
+		std::cout << "blup\n";
+	}
+	for (auto& t : targets)
+	{
+		if (target_attackers[t] > 2) continue;
+
+		const auto target_area = Global::map().map.GetNearestArea(t->getTilePosition());
+		if (same_area && area != target_area) continue;
+		available_targets.insert(t);
+	}
+
+	// Return the closest target (out of all targets if no targets w. <=2 units assigned)
+	if (available_targets.empty() && !same_area) return Tools::getClosestUnitTo(unit->getPosition(), targets);
+	if (available_targets.empty()) return nullptr;
+	return Tools::getClosestUnitTo(unit->getPosition(), available_targets);
 }
