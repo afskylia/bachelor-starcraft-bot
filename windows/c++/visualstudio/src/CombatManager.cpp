@@ -19,6 +19,7 @@ void CombatManager::onFrame()
 	if (!attacking && Global::strategy().shouldStartRushing())
 	{
 		std::cout << "Start rushing!\n";
+		//startRushing();
 	}
 
 	// Handle idle units
@@ -61,6 +62,8 @@ void CombatManager::onUnitComplete(BWAPI::Unit unit)
 void CombatManager::onUnitDestroy(BWAPI::Unit unit)
 {
 	// if enemy unit: remove as target
+	if (unit->getPlayer()->isEnemy(BWAPI::Broodwar->self()))
+		resetTarget(unit);
 
 	// Erase unit from maps and unit sets
 	guard_map.erase(unit);
@@ -188,6 +191,8 @@ void CombatManager::handleIdleAttacker(BWAPI::Unit unit)
 
 	// Set new target
 	auto* const target = chooseTarget(unit);
+	if (!target) goAttack(unit, rush_target_pos);
+
 	setTarget(unit, target);
 }
 
@@ -215,6 +220,12 @@ void CombatManager::goAttack(BWAPI::Unit unit)
 	fighter_status_map[unit] = Enums::attacking;
 	auto* const target = chooseTarget(unit);
 	setTarget(unit, target);
+}
+
+void CombatManager::goAttack(BWAPI::Unit unit, BWAPI::Position target_pos)
+{
+	fighter_status_map[unit] = Enums::attacking;
+	unit->attack(target_pos);
 }
 
 void CombatManager::goDefend(BWAPI::Unit unit)
@@ -245,6 +256,28 @@ void CombatManager::cleanUpTargets()
 
 	for (auto t : to_reset)
 		resetTarget(t);
+}
+
+void CombatManager::startRushing()
+{
+	auto enemy_base = Global::information().enemy_start_location;
+	rush_target_pos = BWAPI::Position(enemy_base);
+
+	std::vector<BWAPI::Unit> rush_squad = {};
+	auto count = 0;
+	// Turn half of our attack units into combat units
+	for (auto* u : m_attack_units_)
+	{
+		if (count >= m_attack_units_.size() / 2) break;
+		goAttack(u, rush_target_pos);
+		count++;
+	}
+
+	// TODO: re-position guards so chokepoints remain equally guarded
+}
+
+void CombatManager::retreatFromCombat()
+{
 }
 
 // Get closest target from (visible/known?) targets
