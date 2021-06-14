@@ -207,12 +207,14 @@ void MiraBotMain::onUnitComplete(Unit unit)
 void MiraBotMain::onUnitShow(Unit unit)
 {
 	Global::information().onUnitShow(unit);
+	Global::combat().onUnitShow(unit);
 }
 
 // Called whenever a unit gets hidden, with a pointer to the destroyed unit
 // This is usually triggered when units enter the fog of war and are no longer visible
 void MiraBotMain::onUnitHide(Unit unit)
 {
+	Global::combat().onUnitHide(unit);
 }
 
 // Called whenever a unit switches player control

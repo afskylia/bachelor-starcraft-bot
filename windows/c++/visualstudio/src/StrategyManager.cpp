@@ -55,3 +55,22 @@ void StrategyManager::informationUpdate()
 		// compare old build order to new one and set prev_supply, enqueued_items etc.
 	}
 }
+
+bool StrategyManager::shouldStartRushing()
+{
+	auto enemy_units = Global::information().enemy_units;
+	std::vector<BWAPI::Unit> enemy_attack_units = {};
+
+	for (auto* u : enemy_units)
+	{
+		if (!u->getType().isWorker() && u->canAttack())
+			enemy_attack_units.push_back(u);
+	}
+
+	const auto our_attack_units = Global::combat().m_attack_units_;
+
+	if (our_attack_units.size() >= 20 && enemy_attack_units.size() < our_attack_units.size())
+		return true;
+
+	return false;
+}

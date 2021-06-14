@@ -4,8 +4,6 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
-#include "Global.h"
-#include "WorkerManager.h"
 
 using namespace MiraBot;
 void PlayGame();

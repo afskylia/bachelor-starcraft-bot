@@ -25,5 +25,6 @@ namespace MiraBot
 		void onFrame();
 		void switchBuildOrder(std::map<int, BWAPI::UnitType> new_build_order);
 		void informationUpdate();
+		bool shouldStartRushing();
 	};
 }

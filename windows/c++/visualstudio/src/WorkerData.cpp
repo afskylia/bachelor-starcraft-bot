@@ -131,7 +131,7 @@ void WorkerData::setWorkerJob(BWAPI::Unit unit, enum WorkerJob job, BWAPI::Unit 
 
 			if (!mineral_to_mine)
 			{
-				std::cout << "No available minerals in 2nd area\n";
+				//std::cout << "No available minerals in 2nd area\n";
 				return;
 			}
 
@@ -221,16 +221,6 @@ BWAPI::Unit WorkerData::getMineralToMine(BWAPI::Unit unit)
 	}
 
 	return closest_mineral;
-
-
-	/*for (auto m : sorted_minerals)
-	{
-		if (!m->isBeingGathered())
-		{
-			return m;
-		}
-	}
-	return sorted_minerals[0];*/
 }
 
 BWAPI::Unit WorkerData::getClosestRefinery(BWAPI::Unit unit)
