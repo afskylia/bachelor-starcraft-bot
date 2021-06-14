@@ -40,6 +40,7 @@ namespace MiraBot
 		void goAttack(BWAPI::Unit unit, BWAPI::Position target_pos);
 		void goDefend(BWAPI::Unit unit);
 
+		void updateAttackStatus();
 		void cleanUpTargets();
 		void startRushing();
 		void retreatFromCombat();

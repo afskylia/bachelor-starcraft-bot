@@ -15,6 +15,8 @@ void CombatManager::onFrame()
 	// Clean up targets that have gone invisible (e.g. in fog of war)
 	cleanUpTargets();
 
+	updateAttackStatus();
+
 	// See if we should start rushing
 	if (!attacking && Global::strategy().shouldStartRushing())
 	{
@@ -87,12 +89,12 @@ void CombatManager::onUnitShow(BWAPI::Unit unit)
 		targets.insert(unit);
 		target_attackers[unit] = 0;
 
-		auto area = Global::map().map.GetNearestArea(unit->getTilePosition());
-		if (area == Global::map().main_area || area == Global::map().snd_area)
-		{
-			// We are under attack! Unless it's just a scout.
-			if (!unit->getType().isWorker()) under_attack = true;
-		}
+		//auto area = Global::map().map.GetNearestArea(unit->getTilePosition());
+		//if (area == Global::map().main_area || area == Global::map().snd_area)
+		//{
+		//	// We are under attack! Unless it's just a scout.
+		//	if (!unit->getType().isWorker()) under_attack = true;
+		//}
 	}
 }
 
@@ -254,6 +256,42 @@ void CombatManager::goDefend(BWAPI::Unit unit)
 	unit->attack(attack_pos);
 }
 
+void CombatManager::updateAttackStatus()
+{
+	auto fst = Global::map().main_area->Minerals()[0]->Unit();
+	auto snd = Global::map().snd_area->Minerals()[0]->Unit();
+
+	auto u1 = fst->getUnitsInRadius(600);
+	auto u2 = snd->getUnitsInRadius(600);
+	u1.insert(u2.begin(), u2.end());
+
+	if (under_attack)
+	{
+		auto has_enemy = false;
+		for (auto u : u1)
+		{
+			if (u->getPlayer()->isEnemy(BWAPI::Broodwar->self()))
+			{
+				has_enemy = true;
+				break;
+			}
+		}
+
+		if (!has_enemy) under_attack = false;
+		return;
+	}
+
+	// If not currently marked as under attack, check if we ARE under attack
+	for (auto u : u1)
+	{
+		if (u->getPlayer()->isEnemy(BWAPI::Broodwar->self()))
+		{
+			under_attack = true;
+			return;
+		}
+	}
+}
+
 void CombatManager::cleanUpTargets()
 {
 	std::vector<BWAPI::Unit> to_reset = {};
@@ -306,7 +344,7 @@ BWAPI::Unit CombatManager::chooseTarget(BWAPI::Unit unit, bool same_area)
 
 	for (auto& t : targets)
 	{
-		if (target_attackers[t] > 2) continue;
+		if (target_attackers[t] > 4) continue;
 
 		const auto target_area = Global::map().map.GetNearestArea(t->getTilePosition());
 		if (same_area && area != target_area) continue;
