@@ -12,20 +12,11 @@ CombatManager::CombatManager() = default;
 
 void CombatManager::onFrame()
 {
-	// Hotfix:
-	std::vector<BWAPI::Unit> to_reset = {};
-	for (auto& t : targets)
-		if (!t->isVisible()) to_reset.push_back(t);
-
-	for (auto t : to_reset)
-	{
-		resetTarget(t);
-		std::cout << "removed " << t->getType() << " from targets\n";
-	}
-
+	// Clean up targets that have gone invisible (e.g. in fog of war)
+	cleanUpTargets();
 
 	// See if we should start rushing
-	if (Global::strategy().shouldStartRushing())
+	if (!attacking && Global::strategy().shouldStartRushing())
 	{
 		std::cout << "Start rushing!\n";
 	}
@@ -244,6 +235,16 @@ void CombatManager::goDefend(BWAPI::Unit unit)
 	// Send unit to randomized position near the center of the CP
 	const auto attack_pos = guard_map[unit] + BWAPI::Position(x, y);
 	unit->attack(attack_pos);
+}
+
+void CombatManager::cleanUpTargets()
+{
+	std::vector<BWAPI::Unit> to_reset = {};
+	for (auto& t : targets)
+		if (!t->isVisible()) to_reset.push_back(t);
+
+	for (auto t : to_reset)
+		resetTarget(t);
 }
 
 // Get closest target from (visible/known?) targets

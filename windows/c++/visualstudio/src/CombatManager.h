@@ -39,6 +39,8 @@ namespace MiraBot
 		void goAttack(BWAPI::Unit unit);
 		void goDefend(BWAPI::Unit unit);
 
+		void cleanUpTargets();
+
 		BWAPI::Position getChokepointToGuard(BWAPI::Unit unit); // Return chokepoint to be guarded by unit
 		BWAPI::Unit chooseTarget(BWAPI::Unit unit, bool same_area = false); // Get closest target unit to unit
 
