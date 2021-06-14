@@ -181,7 +181,7 @@ void CombatManager::handleIdleDefender(BWAPI::Unit unit)
 
 void CombatManager::handleIdleRetreater(BWAPI::Unit unit)
 {
-	// TODO
+	goDefend(unit);
 }
 
 void CombatManager::handleIdleAttacker(BWAPI::Unit unit)
@@ -212,11 +212,17 @@ void CombatManager::setTarget(BWAPI::Unit unit, BWAPI::Unit target)
 
 void CombatManager::goRetreat(BWAPI::Unit unit)
 {
-	// TODO
+	fighter_status_map[unit] = Enums::retreating;
+	unit->attack(BWAPI::Position(Global::map().snd_area->BottomRight()));
 }
 
 void CombatManager::goAttack(BWAPI::Unit unit)
 {
+	if (targets.empty())
+	{
+		goAttack(unit, rush_target_pos);
+		return;
+	}
 	fighter_status_map[unit] = Enums::attacking;
 	auto* const target = chooseTarget(unit);
 	setTarget(unit, target);
@@ -270,6 +276,7 @@ void CombatManager::startRushing()
 	{
 		if (count >= m_attack_units_.size() / 2) break;
 		goAttack(u, rush_target_pos);
+		std::cout << u->getType() << " is rushing\n";
 		count++;
 	}
 
@@ -278,6 +285,14 @@ void CombatManager::startRushing()
 
 void CombatManager::retreatFromCombat()
 {
+	for (auto* u : m_attack_units_)
+	{
+		if (fighter_status_map[u] == Enums::attacking)
+		{
+			goRetreat(u);
+			std::cout << u->getType() << " retreats from combat\n";
+		}
+	}
 }
 
 // Get closest target from (visible/known?) targets
@@ -288,10 +303,7 @@ BWAPI::Unit CombatManager::chooseTarget(BWAPI::Unit unit, bool same_area)
 
 	// First try to find a target that has at most 2 other units assigned to it
 	BWAPI::Unitset available_targets = {};
-	if (targets.empty())
-	{
-		std::cout << "blup\n";
-	}
+
 	for (auto& t : targets)
 	{
 		if (target_attackers[t] > 2) continue;
