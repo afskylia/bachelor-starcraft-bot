@@ -12,6 +12,7 @@ namespace MiraBot
 	public:
 		WorkerData m_workerData;
 		WorkerManager();
+		bool must_defend = false; // If workers have to defend the base (we're under attack)
 
 		void updateWorkerStatus();
 		void activateIdleWorkers();

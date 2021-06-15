@@ -58,7 +58,12 @@ void StrategyManager::informationUpdate()
 
 bool StrategyManager::shouldStartRushing()
 {
+	// TODO only rush if offensive strategy?
+
 	auto enemy_units = Global::information().enemy_units;
+
+	if (enemy_units.empty()) return false;
+
 	std::vector<BWAPI::Unit> enemy_attack_units = {};
 
 	for (auto* u : enemy_units)
