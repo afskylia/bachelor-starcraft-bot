@@ -50,7 +50,11 @@ namespace MiraBot
 
 		bool attacking = false; // Whether we're currently rushing the enemy
 		bool under_attack = false; // Whether we're currently under attack in one of our bases
+		bool retreating = false;
+
 		BWAPI::Position rush_target_pos = BWAPI::Positions::None;
+		int initial_rush_count = 0; // How many attack units we started rushing with in this rush
+		int lost_rusher_count = 0; // How many of our attack units have died this rush
 
 		// Set of all our attack units
 		BWAPI::Unitset m_attack_units_ = BWAPI::Unitset::none;

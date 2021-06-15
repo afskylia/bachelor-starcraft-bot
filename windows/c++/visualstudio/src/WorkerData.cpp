@@ -202,7 +202,7 @@ BWAPI::Unit WorkerData::getMineralToMine(BWAPI::Unit unit)
 	for (auto mineral : minerals_in_base)
 	{
 		// We want at most 3 workers per mineral patch
-		if (m_workersOnMineralPatch[mineral->Unit()] >= 3) continue;
+		if (m_workersOnMineralPatch[mineral->Unit()] >= 3) continue; // TODO change to 3
 
 		// Set initially closest unit
 		if (!closest_mineral)
