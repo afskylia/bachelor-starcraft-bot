@@ -312,7 +312,7 @@ void CombatManager::startRushing()
 	// Turn half of our attack units into combat units
 	for (auto* u : m_attack_units_)
 	{
-		if (count >= m_attack_units_.size() / 2) break;
+		if (count >= m_attack_units_.size() * 0.75) break;
 		goAttack(u, rush_target_pos);
 		std::cout << u->getType() << " is rushing\n";
 		count++;
@@ -327,6 +327,7 @@ void CombatManager::retreatFromCombat()
 	{
 		if (fighter_status_map[u] == Enums::attacking)
 		{
+			u->stop();
 			goRetreat(u);
 			std::cout << u->getType() << " retreats from combat\n";
 		}
