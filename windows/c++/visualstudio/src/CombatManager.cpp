@@ -15,6 +15,7 @@ void CombatManager::onFrame()
 	// Clean up targets that have gone invisible (e.g. in fog of war)
 	cleanUpTargets();
 
+	// See if we are under attack/no longer under attack
 	updateAttackStatus();
 
 	// See if we should start rushing
@@ -88,13 +89,6 @@ void CombatManager::onUnitShow(BWAPI::Unit unit)
 	{
 		targets.insert(unit);
 		target_attackers[unit] = 0;
-
-		//auto area = Global::map().map.GetNearestArea(unit->getTilePosition());
-		//if (area == Global::map().main_area || area == Global::map().snd_area)
-		//{
-		//	// We are under attack! Unless it's just a scout.
-		//	if (!unit->getType().isWorker()) under_attack = true;
-		//}
 	}
 }
 
@@ -258,11 +252,12 @@ void CombatManager::goDefend(BWAPI::Unit unit)
 
 void CombatManager::updateAttackStatus()
 {
-	auto fst = Global::map().main_area->Minerals()[0]->Unit();
-	auto snd = Global::map().snd_area->Minerals()[0]->Unit();
+	const auto fst_pos = Global::map().main_area->Bases()[0].Center();
+	const auto snd_pos = Global::map().snd_area->Bases()[0].Center();
 
-	auto u1 = fst->getUnitsInRadius(600);
-	auto u2 = snd->getUnitsInRadius(600);
+	auto u1 = BWAPI::Broodwar->getUnitsInRadius(fst_pos, 600);
+	auto u2 = BWAPI::Broodwar->getUnitsInRadius(snd_pos, 600);
+
 	u1.insert(u2.begin(), u2.end());
 
 	if (under_attack)
@@ -339,6 +334,7 @@ BWAPI::Unit CombatManager::chooseTarget(BWAPI::Unit unit, bool same_area)
 {
 	// same_area: Whether target needs to be in same area as unit
 	const auto* area = Global::map().map.GetNearestArea(unit->getTilePosition());
+	auto neighbors = area->AccessibleNeighbours();
 
 	// First try to find a target that has at most 2 other units assigned to it
 	BWAPI::Unitset available_targets = {};
@@ -348,7 +344,11 @@ BWAPI::Unit CombatManager::chooseTarget(BWAPI::Unit unit, bool same_area)
 		if (target_attackers[t] > 4) continue;
 
 		const auto target_area = Global::map().map.GetNearestArea(t->getTilePosition());
-		if (same_area && area != target_area) continue;
+
+		if (same_area && area != target_area && std::find(neighbors.begin(), neighbors.end(), target_area) ==
+			neighbors.end())
+			continue;
+
 		available_targets.insert(t);
 	}
 
