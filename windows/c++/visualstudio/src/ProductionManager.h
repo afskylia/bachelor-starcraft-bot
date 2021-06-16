@@ -37,7 +37,6 @@ namespace MiraBot
 
 		ProductionManager();
 		void tryBuildOrTrainUnit();
-		bool addToBuildQueue(const BWAPI::UnitType& unit_type);
 		std::map<BWAPI::UnitType, int> getMapOfAllUnits();
 		std::map<BWAPI::UnitType, int> getMapOfRequiredUnits();
 		void compareUnitsAndBuild();
@@ -51,6 +50,7 @@ namespace MiraBot
 		void onFrame();
 		void onUnitDestroy(BWAPI::Unit unit);
 		void onUnitComplete(BWAPI::Unit unit);
+		void addToBuildQueue(BWAPI::UnitType unit_type);
 		void buildGateway();
 		void buildAttackUnits();
 		void buildAdditionalSupply();

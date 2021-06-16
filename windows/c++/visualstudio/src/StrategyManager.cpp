@@ -17,6 +17,29 @@ std::map<int, std::pair<BWAPI::UnitType, int>> StrategyManager::getBuildOrder(BW
                                                                               Enums::strategy_type enemy_strategy)
 {
 	std::cout << "Updating Build Order \n";
+	switch (enemy_strategy)
+	{
+	case Enums::offensive:
+
+		break;
+	case Enums::defensive:
+		break;
+	case Enums::expanding: break;
+	case Enums::none: break;
+	}
+	if (!m_added_defense_)
+	{
+		for (auto [unit_type, number_of_units] : m_build_order_data.defensive)
+		{
+			for (int i = 0; i <= number_of_units; ++i)
+			{
+				Global::production().addToBuildQueue(unit_type);
+			}
+		}
+		m_added_defense_ = true;
+	}
+
+
 	switch (enemy_race)
 	{
 	case BWAPI::Races::None:
@@ -47,13 +70,13 @@ void StrategyManager::informationUpdate()
 {
 	//std::cout << "Information is updated \n";
 	// do not update if supply > 20
-	if (BWAPI::Broodwar->self()->supplyUsed() <= 20)
-	{
-		m_build_order = getBuildOrder(Global::information().enemy_race,
-		                              Global::information().m_current_enemy_strategy);
-		// TODO: Update production (build queue, prev_supply and enqueued_items here!!)
-		// compare old build order to new one and set prev_supply, enqueued_items etc.
-	}
+	//if (BWAPI::Broodwar->self()->supplyUsed() <= 20)
+	//{
+	m_build_order = getBuildOrder(Global::information().enemy_race,
+	                              Global::information().m_current_enemy_strategy);
+	// TODO: Update production (build queue, prev_supply and enqueued_items here!!)
+	// compare old build order to new one and set prev_supply, enqueued_items etc.
+	//}
 }
 
 bool StrategyManager::shouldStartRushing()

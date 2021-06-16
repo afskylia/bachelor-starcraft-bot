@@ -53,10 +53,13 @@ void InformationManager::updateEnemyStrategy()
 	// Do not update if we do not know any enemies.
 	if (enemy_units.empty()) return;
 
+
 	for (BWAPI::UnitInterface* enemy_unit : enemy_units)
 	{
-		if (enemy_unit->getPosition().getApproxDistance(main_base->getPosition()) < 1000)
+		if (enemy_unit->getPosition().getApproxDistance(main_base->getPosition()) < 1000 && !enemy_unit->getType().
+			isWorker() && m_current_enemy_strategy != Enums::offensive)
 		{
+			std::cout << "enemy is attacking \n";
 			m_current_enemy_strategy = Enums::offensive;
 			return;
 		}

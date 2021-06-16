@@ -268,7 +268,7 @@ BWAPI::Position MapTools::getClosestCP(const BWAPI::TilePosition tile_pos) const
 }
 
 // Returns a vector of positions of chokepoints in given area
-std::vector<BWAPI::Position> MapTools::getChokepoints(const Area* area)
+std::vector<BWAPI::Position> MapTools::getChokePoints(const Area* area)
 {
 	std::vector<BWAPI::Position> chokepoint_positions = {};
 	for (const auto* cp : area->ChokePoints())

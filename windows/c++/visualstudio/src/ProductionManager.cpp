@@ -198,7 +198,37 @@ bool ProductionManager::buildBuilding(const BWAPI::UnitType type)
 	const auto builder_type = type.whatBuilds().first;
 
 	// Get a location that we want to build the building next to
-	const auto desired_pos = BWAPI::Broodwar->self()->getStartLocation();
+	auto desired_pos = BWAPI::Broodwar->self()->getStartLocation();
+
+	if (type == BWAPI::UnitTypes::Protoss_Photon_Cannon)
+	{
+		const auto* area = Global::map().main_area;
+		auto chokepoints = area->ChokePoints();
+		for (const auto* cp : chokepoints)
+		{
+			auto cp_center = BWAPI::Position(cp->Center());
+			auto units_in_radius = BWAPI::Broodwar->getUnitsInRadius(cp_center, 64, BWAPI::Filter::IsBuilding);
+			auto cannon_count = 0;
+			for (auto u : units_in_radius)
+			{
+				if (u->getType() == type)
+					cannon_count++;
+			}
+
+			// Use this CP if less than 2 cannons nearby
+			if (cannon_count < 2)
+			{
+				desired_pos = BWAPI::TilePosition(cp_center);
+				break;
+			}
+		}
+
+		if (desired_pos == BWAPI::Broodwar->self()->getStartLocation())
+		{
+			std::cout << "All chokepoints in main base are already guarded\n";
+			return true;
+		}
+	}
 
 	// Ask BWAPI for a building location near the desired position for the type
 	const auto max_build_range = 64;
@@ -351,6 +381,12 @@ void ProductionManager::onUnitComplete(BWAPI::Unit unit)
 {
 }
 
+void ProductionManager::addToBuildQueue(BWAPI::UnitType unit_type)
+{
+	int id = unit_type.getID();
+	m_build_queue_.push_back(unit_type);
+}
+
 /**
  * Try to compare units with required units and build difference.
  * This is not enforced on every frame of the game, since that would
@@ -406,29 +442,6 @@ void ProductionManager::compareUnitsAndBuild()
 	}
 
 	tryBuildOrTrainUnit();
-}
-
-[[deprecated]]
-bool ProductionManager::addToBuildQueue(const BWAPI::UnitType& unit_type)
-{
-	// TODO this is a hotfix
-	if (unit_type == BWAPI::Broodwar->self()->getRace().getWorker()) return true;
-
-	if (std::find(m_build_queue_.begin(), m_build_queue_.end(), unit_type) == m_build_queue_.end())
-	{
-		// Add unit to build queue and remove from build order
-		m_build_queue_.push_back(unit_type);
-
-		// TODO debug
-		for (auto build_queue : m_build_queue_)
-		{
-			//std::cout << build_queue;
-		}
-		//std::cout << "\n";
-		//std::cout << "Adding " << unit_type << " to build queue\n";
-		return true;
-	}
-	return false;
 }
 
 /**

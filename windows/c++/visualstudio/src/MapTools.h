@@ -36,7 +36,7 @@ namespace MiraBot
 		BWEM::Map& map = BWEM::Map::Instance();
 		const BWEM::Area* main_area = nullptr; // Main base area
 		const BWEM::Area* snd_area = nullptr; // Second area (extension)
-		std::vector<BWAPI::Position> getChokepoints(const BWEM::Area* area);
+		std::vector<BWAPI::Position> getChokePoints(const BWEM::Area* area);
 
 
 		void onStart();
@@ -63,7 +63,6 @@ namespace MiraBot
 		bool isDepotBuildableTile(int tile_x, int tile_y) const;
 		static void drawTile(int tile_x, int tile_y, const BWAPI::Color& color);
 
-		std::vector<BWEM::ChokePoint*> getChokePoints();
 		BWAPI::Position getClosestCP(BWAPI::TilePosition tile_pos) const;
 	};
 }

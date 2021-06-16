@@ -108,7 +108,7 @@ void CombatManager::onUnitHide(BWAPI::Unit unit)
 BWAPI::Position CombatManager::getChokepointToGuard(BWAPI::Unit unit)
 {
 	// Get chokepoint with fewest assigned units
-	auto chokepoints = Global::map().getChokepoints(Global::map().main_area);
+	auto chokepoints = Global::map().getChokePoints(Global::map().main_area);
 	auto closest_cp = BWAPI::Positions::None;
 	auto count_closest = INT_MAX;
 	for (auto cp : chokepoints)

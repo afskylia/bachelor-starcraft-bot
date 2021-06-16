@@ -1,6 +1,10 @@
 ﻿#pragma once
 
+#include <set>
+
 #include "BWAPI.h"
+#include "Global.h"
+#include "MapTools.h"
 
 namespace MiraBot
 {
@@ -8,6 +12,11 @@ namespace MiraBot
 	{
 	public:
 		BuildOrderData();
+
+		std::set<std::pair<BWAPI::UnitType, int>> defensive = {
+			std::make_pair(BWAPI::UnitTypes::Protoss_Photon_Cannon,
+			               Global::map().getChokePoints(Global::map().main_area).size()),
+		};
 
 		std::map<int, std::pair<BWAPI::UnitType, int>> starter_build_order = {
 			{4, std::make_pair(BWAPI::UnitTypes::Protoss_Nexus, 1)},
@@ -17,6 +26,7 @@ namespace MiraBot
 			// Tweaks by us
 			{40, std::make_pair(BWAPI::UnitTypes::Protoss_Forge, 1)},
 			{41, std::make_pair(BWAPI::UnitTypes::Protoss_Fleet_Beacon, 1)},
+			{42, std::make_pair(BWAPI::UnitTypes::Protoss_Photon_Cannon, 1)},
 		};
 
 		std::map<int, std::pair<BWAPI::UnitType, int>> protoss_v_terran = {

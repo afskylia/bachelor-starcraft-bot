@@ -11,6 +11,7 @@ namespace MiraBot
 	{
 		friend class Global;
 
+		bool m_added_defense_ = false;
 
 	public:
 		BuildOrderData m_build_order_data;
@@ -19,7 +20,7 @@ namespace MiraBot
 
 		std::map<int, std::pair<BWAPI::UnitType, int>> getBuildOrder(BWAPI::Race enemy_race = BWAPI::Races::None,
 		                                                             Enums::strategy_type enemy_strategy =
-			                                                             Enums::offensive);
+			                                                             Enums::none);
 
 		StrategyManager();
 		void onFrame();
