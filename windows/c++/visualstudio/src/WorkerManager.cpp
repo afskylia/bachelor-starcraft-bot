@@ -291,22 +291,33 @@ void WorkerManager::handleIdleScout(BWAPI::Unit worker)
 	const auto scout_position = getScoutPosition(worker);
 	if (!scout_position)
 	{
-		BWAPI::Position enemy_location = BWAPI::Position(Global::information().enemy_start_location);
-		auto enemy_area = Global::map().map.GetNearestArea(BWAPI::TilePosition(enemy_location));
+		auto enemy_area = Global::map().map.GetNearestArea(Global::information().enemy_start_location);
+		auto top_right = BWAPI::Position(BWAPI::TilePosition(enemy_area->BottomRight().x, enemy_area->TopLeft().y));
+		auto bottom_left = BWAPI::Position(BWAPI::TilePosition(enemy_area->TopLeft().x, enemy_area->BottomRight().y));
+		auto top_left = BWAPI::Position(enemy_area->TopLeft());
+		auto bottom_right = BWAPI::Position(enemy_area->BottomRight());
 
-
+		auto go_to_pos = top_left;
 		// All starting positions have been explored
-		// If worker is away from enemy base keep going in and out to attack nearest worker
-		if (worker->getTilePosition().getApproxDistance(enemy_area->TopLeft()) <= 5)
+		// If worker is away from enemy base keep going in and out
+		if (top_left.getApproxDistance(worker->getPosition()) <= 400)
 		{
-			m_workerData.setWorkerJob(worker, WorkerData::Scout,
-			                          BWAPI::Position(BWAPI::WalkPosition(enemy_area->BottomRight())));
+			go_to_pos = top_right;
 		}
-		else
+		else if (top_right.getApproxDistance(worker->getPosition()) <= 400)
 		{
-			m_workerData.setWorkerJob(worker, WorkerData::Scout,
-			                          BWAPI::Position(BWAPI::WalkPosition(enemy_area->TopLeft())));
+			go_to_pos = bottom_right;
 		}
+		else if (bottom_right.getApproxDistance(worker->getPosition()) <= 400)
+		{
+			go_to_pos = bottom_left;
+		}
+		else if (bottom_left.getApproxDistance(worker->getPosition()) <= 400)
+		{
+			go_to_pos = top_left;
+		}
+		m_workerData.setWorkerJob(worker, WorkerData::Scout,
+		                          BWAPI::Position(BWAPI::WalkPosition(go_to_pos)));
 	}
 	else
 	{
