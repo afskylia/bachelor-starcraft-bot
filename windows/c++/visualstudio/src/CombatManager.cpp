@@ -352,18 +352,18 @@ void CombatManager::goDefend(BWAPI::Unit unit)
 
 void CombatManager::updateAttackStatus()
 {
-	const auto fst_pos = Global::map().expos.front()->Bases()[0].Center();
-	//const auto snd_pos = Global::map().snd_area->Bases()[0].Center();
-
-	auto u1 = BWAPI::Broodwar->getUnitsInRadius(fst_pos, 600);
-	//auto u2 = BWAPI::Broodwar->getUnitsInRadius(snd_pos, 600);
-
-	//u1.insert(u2.begin(), u2.end());
+	auto units_nearby = BWAPI::Unitset::none;
+	for (auto base : Global::map().expos)
+	{
+		auto pos = base->Bases()[0].Center();
+		auto u = BWAPI::Broodwar->getUnitsInRadius(pos, 600);
+		units_nearby.insert(u.begin(), u.end());
+	}
 
 	if (under_attack)
 	{
 		auto has_enemy = false;
-		for (auto u : u1)
+		for (auto u : units_nearby)
 		{
 			if (u->getPlayer()->isEnemy(BWAPI::Broodwar->self()))
 			{
@@ -377,7 +377,7 @@ void CombatManager::updateAttackStatus()
 	}
 
 	// If not currently marked as under attack, check if we ARE under attack
-	for (auto u : u1)
+	for (auto u : units_nearby)
 	{
 		if (u->getPlayer()->isEnemy(BWAPI::Broodwar->self()))
 		{
