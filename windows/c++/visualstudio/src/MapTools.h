@@ -33,10 +33,12 @@ namespace MiraBot
 
 		MapTools();
 
+
 		BWEM::Map& map = BWEM::Map::Instance();
 		const BWEM::Area* main_area = nullptr; // Main base area
 		const BWEM::Area* snd_area = nullptr; // Second area (extension)
 		std::vector<BWAPI::Position> getChokepoints(const BWEM::Area* area);
+		const BWEM::Area* getClosestArea(const BWEM::Area* area, std::vector<const BWEM::Area*> areas);
 
 
 		void onStart();
@@ -65,5 +67,25 @@ namespace MiraBot
 
 		std::vector<BWEM::ChokePoint*> getChokePoints();
 		BWAPI::Position getClosestCP(BWAPI::TilePosition tile_pos) const;
+
+		// Helper functions for debugging/showing different positions on the map
+		std::vector<std::pair<BWAPI::Position, const char*>> circles;
+
+		void drawCircles()
+		{
+			auto color = BWAPI::Color(245, 66, 239);
+			auto white = BWAPI::Color(255, 255, 255);
+
+			for (auto [pos, text] : circles)
+			{
+				BWAPI::Broodwar->drawCircle(BWAPI::CoordinateType::Map, pos.x * 32, pos.y * 32, 200, color);
+				BWAPI::Broodwar->drawText(BWAPI::CoordinateType::Map, pos.x * 32, pos.y * 32, text);
+			}
+		}
+
+		void addCircle(BWAPI::Position pos, const char* text)
+		{
+			circles.emplace_back(pos, text);
+		}
 	};
 }

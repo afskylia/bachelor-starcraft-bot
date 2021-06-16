@@ -93,6 +93,9 @@ void InformationManager::logEnemyRaceAndStartLocation(BWAPI::Unit unit)
 			}
 		}
 		std::cout << "Enemy starting location: " << enemy_start_location << "\n";
+		Global::map().addCircle(BWAPI::Position(enemy_start_location), "ENEMY START LOCATION");
+		auto area = Global::map().map.GetNearestArea(enemy_start_location);
+		enemy_areas.push_back(area);
 
 		informationUpdateShouldHappen();
 	}
