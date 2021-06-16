@@ -188,9 +188,6 @@ void WorkerData::setWorkerJob(BWAPI::Unit unit, enum WorkerJob job, struct Build
 
 BWAPI::Unit WorkerData::getMineralToMine(BWAPI::Unit unit)
 {
-	// TODO get mineral in area, if no more in main area go to snd area
-	// TODO make sure at most 2 units are assigned to patch
-
 	auto minerals_in_base = m_workerAreaMap[unit]->Minerals();
 	if (minerals_in_base.empty()) return nullptr;
 
