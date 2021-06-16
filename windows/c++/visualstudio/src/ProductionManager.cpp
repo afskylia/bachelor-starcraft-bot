@@ -490,22 +490,37 @@ void ProductionManager::trainUnitInBuilding(BWAPI::UnitType unit_type, int units
 
 const BWEM::Area* ProductionManager::createNewExpo()
 {
-	auto b = Global::map().expos;
 	const BWEM::Area* new_area = nullptr;
+	auto dist = DBL_MAX;
+	const auto* main = Global::map().expos.front();
+	auto expos = Global::map().expos;
 
-	for (const auto* b : Global::map().expos)
+	for (const BWEM::Area& area : Global::map().map.Areas())
 	{
-		for (const auto* neighbor : b->AccessibleNeighbours())
+		if (area.Bases().empty() || area.Minerals().empty()) continue;
+		if (std::find(expos.begin(), expos.end(), &area) != expos.end()) continue;
+		auto _dist = main->Bases()[0].Center().getDistance(area.Bases()[0].Center());
+		if (_dist < dist)
 		{
-			if (std::find(Global::map().expos.begin(), Global::map().expos.end(), neighbor)
-				== Global::map().expos.end())
-			{
-				new_area = neighbor;
-				break;
-			}
+			new_area = &area;
+			dist = _dist;
 		}
-		if (new_area) break;
 	}
+
+
+	//for (const auto* b : Global::map().expos)
+	//{
+	//	for (const auto* neighbor : b->AccessibleNeighbours())
+	//	{
+	//		if (std::find(Global::map().expos.begin(), Global::map().expos.end(), neighbor)
+	//			== Global::map().expos.end())
+	//		{
+	//			new_area = neighbor;
+	//			break;
+	//		}
+	//	}
+	//	if (new_area) break;
+	//}
 
 	Global::map().expos.push_back(new_area);
 	m_build_queue_.push_back(BWAPI::UnitTypes::Protoss_Nexus);

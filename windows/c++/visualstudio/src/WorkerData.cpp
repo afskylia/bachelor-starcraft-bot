@@ -140,7 +140,9 @@ void WorkerData::setWorkerJob(BWAPI::Unit unit, enum WorkerJob job, BWAPI::Unit 
 
 			m_workerMineralMap[unit] = mineral_to_mine;
 			m_workersOnMineralPatch[mineral_to_mine]++;
-			unit->gather(mineral_to_mine);
+
+			if (!mineral_to_mine->isVisible()) unit->move(mineral_to_mine->getPosition());
+			else unit->gather(mineral_to_mine);
 			break;
 		}
 
