@@ -11,6 +11,7 @@ WorkerManager::WorkerManager()
 {
 }
 
+
 void WorkerManager::onFrame()
 {
 	// Update workers, e.g. set job as 'Idle' when job completed
@@ -18,6 +19,13 @@ void WorkerManager::onFrame()
 
 	// Send idle workers to gather resources
 	activateIdleWorkers();
+
+	if (BWAPI::Broodwar->getFrameCount() % 2500 == 0 && should_have_new_scout)
+	{
+		auto new_scout = getAnyWorker();
+		m_workerData.setWorkerJob(new_scout, WorkerData::Scout, scout_last_known_position);
+		should_have_new_scout = false;
+	}
 }
 
 void WorkerManager::updateWorkerStatus()

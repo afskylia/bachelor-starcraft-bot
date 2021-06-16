@@ -13,6 +13,8 @@ namespace MiraBot
 		WorkerData m_workerData;
 		WorkerManager();
 		bool must_defend = false; // If workers have to defend the base (we're under attack)
+		BWAPI::Position scout_last_known_position = BWAPI::Positions::None;
+		bool should_have_new_scout = false;
 
 		void updateWorkerStatus();
 		void activateIdleWorkers();
