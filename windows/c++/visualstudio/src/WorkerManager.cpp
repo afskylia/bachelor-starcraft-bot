@@ -292,17 +292,20 @@ void WorkerManager::handleIdleScout(BWAPI::Unit worker)
 	if (!scout_position)
 	{
 		BWAPI::Position enemy_location = BWAPI::Position(Global::information().enemy_start_location);
+		auto enemy_area = Global::map().map.GetNearestArea(BWAPI::TilePosition(enemy_location));
+
+
 		// All starting positions have been explored
 		// If worker is away from enemy base keep going in and out to attack nearest worker
-		if (50 < worker->getDistance(enemy_location))
+		if (worker->getTilePosition().getApproxDistance(enemy_area->TopLeft()) <= 5)
 		{
 			m_workerData.setWorkerJob(worker, WorkerData::Scout,
-			                          enemy_location);
+			                          BWAPI::Position(BWAPI::WalkPosition(enemy_area->BottomRight())));
 		}
 		else
 		{
 			m_workerData.setWorkerJob(worker, WorkerData::Scout,
-			                          BWAPI::Position(enemy_location.x, enemy_location.y - 500));
+			                          BWAPI::Position(BWAPI::WalkPosition(enemy_area->TopLeft())));
 		}
 	}
 	else

@@ -55,6 +55,13 @@ void WorkerData::workerDestroyed(BWAPI::Unit unit)
 		if (newWorker) setWorkerJob(newWorker, Build, BuildJob{pos, type});
 	}
 
+	// When scout dies
+	if (m_workerJobMap[unit] == Scout)
+	{
+		auto new_scout = Global::workers().getAnyWorker();
+		if (new_scout) setWorkerJob(new_scout, Scout, unit->getLastCommand().getTargetPosition());
+	}
+
 	resetJob(unit);
 	m_workers.erase(unit);
 }
