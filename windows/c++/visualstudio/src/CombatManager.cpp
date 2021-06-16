@@ -112,7 +112,7 @@ void CombatManager::onUnitHide(BWAPI::Unit unit)
 BWAPI::Position CombatManager::getChokepointToGuard(BWAPI::Unit unit)
 {
 	// Get chokepoint with fewest assigned units
-	auto chokepoints = Global::map().getChokepoints(Global::map().main_area);
+	auto chokepoints = Global::map().getChokepoints(Global::map().bases.front()); // TODO guard all bases
 	auto closest_cp = BWAPI::Positions::None;
 	auto count_closest = INT_MAX;
 	for (auto cp : chokepoints)
@@ -296,7 +296,7 @@ void CombatManager::setTarget(BWAPI::Unit unit, BWAPI::Unit target)
 void CombatManager::goRetreat(BWAPI::Unit unit)
 {
 	fighter_status_map[unit] = Enums::retreating;
-	unit->move(BWAPI::Position(Global::map().snd_area->BottomRight()));
+	unit->move(BWAPI::Position(Global::map().bases[0]->Bases()[0].Center()));
 }
 
 void CombatManager::goAttack(BWAPI::Unit unit)
@@ -352,18 +352,18 @@ void CombatManager::goDefend(BWAPI::Unit unit)
 
 void CombatManager::updateAttackStatus()
 {
-	const auto fst_pos = Global::map().main_area->Bases()[0].Center();
-	const auto snd_pos = Global::map().snd_area->Bases()[0].Center();
-
-	auto u1 = BWAPI::Broodwar->getUnitsInRadius(fst_pos, 600);
-	auto u2 = BWAPI::Broodwar->getUnitsInRadius(snd_pos, 600);
-
-	u1.insert(u2.begin(), u2.end());
+	auto units_nearby = BWAPI::Unitset::none;
+	for (auto base : Global::map().bases)
+	{
+		auto pos = base->Bases()[0].Center();
+		auto u = BWAPI::Broodwar->getUnitsInRadius(pos, 600);
+		units_nearby.insert(u.begin(), u.end());
+	}
 
 	if (under_attack)
 	{
 		auto has_enemy = false;
-		for (auto u : u1)
+		for (auto u : units_nearby)
 		{
 			if (u->getPlayer()->isEnemy(BWAPI::Broodwar->self()))
 			{
@@ -372,15 +372,20 @@ void CombatManager::updateAttackStatus()
 			}
 		}
 
-		if (!has_enemy) under_attack = false;
+		if (!has_enemy)
+		{
+			std::cout << "NOT under attack\n";
+			under_attack = false;
+		}
 		return;
 	}
 
 	// If not currently marked as under attack, check if we ARE under attack
-	for (auto u : u1)
+	for (auto u : units_nearby)
 	{
 		if (u->getPlayer()->isEnemy(BWAPI::Broodwar->self()))
 		{
+			std::cout << "UNDER ATTACK\n";
 			under_attack = true;
 			return;
 		}
@@ -492,11 +497,11 @@ void CombatManager::setRushTarget()
 	}
 
 	// TODO pick closest from enemy_areas
-	rush_target = Global::map().getClosestArea(Global::map().main_area, Global::information().enemy_areas);
+	rush_target = Global::map().getClosestArea(Global::map().bases.front(), Global::information().enemy_areas);
 
 	// Choose rally point
 	const auto target_neighbors = rush_target->AccessibleNeighbours();
-	rally_point = Global::map().getClosestArea(Global::map().main_area, target_neighbors);
+	rally_point = Global::map().getClosestArea(Global::map().bases.front(), target_neighbors);
 
 	auto target_pos = rush_target->Bases()[0].Center();
 	auto rally_pos = rally_point->Bases()[0].Center();

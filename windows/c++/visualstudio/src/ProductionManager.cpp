@@ -186,9 +186,19 @@ bool ProductionManager::trainUnit(const BWAPI::UnitType& unit_type)
 }
 
 
+bool ProductionManager::buildBuilding(const BWAPI::UnitType type)
+{
+	auto area = Global::map().bases.front();
+	if (type == BWAPI::UnitTypes::Protoss_Nexus)
+		area = Global::map().bases.back();
+
+	auto p = area->Bases();
+	return buildBuilding(type, area);
+}
+
 // Tries to build the desired building type
 // TODO: More strategic placement of buildings
-bool ProductionManager::buildBuilding(const BWAPI::UnitType type)
+bool ProductionManager::buildBuilding(BWAPI::UnitType type, const BWEM::Area* area)
 {
 	// If we have much less gas and minerals than required, it's not worth the wait
 	if (getTotalMinerals() < type.mineralPrice() * 0.9) return false;
@@ -198,7 +208,11 @@ bool ProductionManager::buildBuilding(const BWAPI::UnitType type)
 	const auto builder_type = type.whatBuilds().first;
 
 	// Get a location that we want to build the building next to
-	const auto desired_pos = BWAPI::Broodwar->self()->getStartLocation();
+	auto p = area->Bases();
+	//const auto desired_pos = BWAPI::TilePosition(area->Bases()[0].Center());
+	const auto desired_pos = BWAPI::TilePosition(area->Bases().front().Center());
+	//auto a = area->Bases().at(0);
+	//auto desired_pos = BWAPI::TilePosition(a.Center());
 
 	// Ask BWAPI for a building location near the desired position for the type
 	const auto max_build_range = 64;
@@ -378,6 +392,31 @@ bool ProductionManager::trainUnit(const BWAPI::UnitType& unit, BWAPI::Unit depot
 		return true;
 	}
 	return false;
+}
+
+const BWEM::Area* ProductionManager::createNewExpo()
+{
+	const BWEM::Area* new_area = nullptr;
+
+	for (auto b : Global::map().bases)
+	{
+		for (auto neighbor : b->AccessibleNeighbours())
+		{
+			if (std::find(Global::map().bases.begin(), Global::map().bases.end(), neighbor)
+				== Global::map().bases.end())
+			{
+				new_area = neighbor;
+				break;
+			}
+		}
+		if (new_area) break;
+	}
+
+	Global::map().bases.push_back(new_area);
+	m_build_queue_.push_back(BWAPI::UnitTypes::Protoss_Nexus);
+	// TODO: refactor build queue to contain <unittype, area> pairs
+
+	return new_area;
 }
 
 /**

@@ -3,6 +3,7 @@
 #include <BWAPI/Unit.h>
 #include <BWAPI.h>
 #include <queue>
+#include "BWEM/src/bwem.h"
 
 namespace MiraBot
 {
@@ -68,8 +69,11 @@ namespace MiraBot
 		int getTotalGas();
 
 		bool buildBuilding(BWAPI::UnitType type);
+		bool buildBuilding(BWAPI::UnitType type, const BWEM::Area* area);
 
 		bool trainUnit(const BWAPI::UnitType& unit_type);
 		bool trainUnit(const BWAPI::UnitType& unit, BWAPI::Unit depot);
+
+		const BWEM::Area* createNewExpo();
 	};
 }

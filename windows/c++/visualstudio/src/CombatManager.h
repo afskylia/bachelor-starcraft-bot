@@ -52,7 +52,7 @@ namespace MiraBot
 
 		bool attacking = false; // Whether we're currently rushing the enemy
 		bool rallying = false;
-		bool under_attack = false; // Whether we're currently under attack in one of our bases
+		bool under_attack = false; // Whether we're currently under attack in one of our our_bases
 		bool retreating = false;
 
 		// Variables used for rushing

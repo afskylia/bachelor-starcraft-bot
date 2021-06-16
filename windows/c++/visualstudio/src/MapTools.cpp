@@ -33,8 +33,9 @@ void MapTools::onStart()
 	utils::pathExample(map); // add to the printed map a path between two starting locations
 
 	const auto base = BWAPI::Broodwar->self()->getStartLocation();
-	main_area = map.GetNearestArea(base);
-	snd_area = main_area->AccessibleNeighbours()[0];
+	const auto* main_area = map.GetNearestArea(base);
+	map.GetNearestArea(base)->Bases();
+	bases.push_back(main_area);
 
 	std::cout << " complete!\n";
 
