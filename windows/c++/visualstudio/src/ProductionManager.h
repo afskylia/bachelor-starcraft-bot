@@ -3,6 +3,7 @@
 #include <BWAPI/Unit.h>
 #include <BWAPI.h>
 #include <queue>
+#include "BWEM/src/bwem.h"
 
 namespace MiraBot
 {
@@ -10,8 +11,6 @@ namespace MiraBot
 	{
 		friend class Global;
 
-		// The build queue: contains the items we need to build asap
-		std::deque<BWAPI::UnitType> m_build_queue_;
 
 		// units that should be built multiple times
 		std::deque<BWAPI::UnitType> m_build_queue_keep_building_;
@@ -34,6 +33,8 @@ namespace MiraBot
 		void pollBuildQueue();
 
 	public:
+		// The build queue: contains the items we need to build asap
+		std::deque<BWAPI::UnitType> m_build_queue_;
 
 		ProductionManager();
 		void tryBuildOrTrainUnit();
@@ -68,8 +69,10 @@ namespace MiraBot
 		int getTotalGas();
 
 		bool buildBuilding(BWAPI::UnitType type);
+		bool buildBuilding(BWAPI::UnitType type, const BWEM::Area* area);
 
 		bool trainUnit(const BWAPI::UnitType& unit_type);
 		bool trainUnit(const BWAPI::UnitType& unit, BWAPI::Unit depot);
+		const BWEM::Area* createNewExpo();
 	};
 }

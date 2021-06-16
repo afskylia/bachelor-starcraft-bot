@@ -112,7 +112,7 @@ void CombatManager::onUnitHide(BWAPI::Unit unit)
 BWAPI::Position CombatManager::getChokepointToGuard(BWAPI::Unit unit)
 {
 	// Get chokepoint with fewest assigned units
-	auto chokepoints = Global::map().getChokepoints(Global::map().main_area);
+	auto chokepoints = Global::map().getChokepoints(Global::map().expos.back());
 	auto closest_cp = BWAPI::Positions::None;
 	auto count_closest = INT_MAX;
 	for (auto cp : chokepoints)
@@ -172,15 +172,11 @@ void CombatManager::removeUnitTarget(BWAPI::Unit unit)
 
 void CombatManager::handleIdleDefender(BWAPI::Unit unit)
 {
-	if (unit->getLastCommand().getType() == BWAPI::UnitCommandTypes::Attack_Move)
-	{
-		std::cout << "BING\n";
-	}
 	// If last command was an attack, and we're no longer under attack, send to guard position again
 	auto was_attacking = unit->getLastCommand().getType() == BWAPI::UnitCommandTypes::Attack_Unit;
 	if (was_attacking && !under_attack)
 	{
-		std::cout << "yokes\n";
+		std::cout << "Going back to defenses\n";
 		removeUnitTarget(unit);
 		goDefend(unit);
 	}
@@ -196,8 +192,14 @@ void CombatManager::handleIdleRetreater(BWAPI::Unit unit)
 {
 	goDefend(unit);
 
+	auto idle_retreater_count = 0;
 	for (auto u : m_attack_units_)
-		if (fighter_status_map[u] == retreating) return;
+		if (fighter_status_map[u] == Enums::retreating)
+		{
+			idle_retreater_count++;
+			//return;
+		}
+	//if (idle_retreater_count > (total_rusher_count - lost_rusher_count) * 0.66) retreating = false;
 	retreating = false;
 }
 
@@ -212,7 +214,10 @@ void CombatManager::handleIdleAttacker(BWAPI::Unit unit)
 	auto* const target = chooseTarget(unit);
 	if (!target)
 	{
+		setRushTarget();
 		goAttack(unit);
+		// TODO set new target?
+
 		//goAttack(unit, rush_target_pos);
 		/*goRetreat(unit);
 		lost_rusher_count++;
@@ -235,9 +240,9 @@ void CombatManager::handleIdleRallyer(BWAPI::Unit unit)
 	{
 		rallying = false;
 		std::cout << "Rushers grouped up - start attacking!\n";
-		for (auto u : m_attack_units_)
+		for (auto* u : m_attack_units_)
 		{
-			if (fighter_status_map[u] == Enums::attacking)
+			if (fighter_status_map[u] == Enums::attacking || fighter_status_map[u] == Enums::rallying)
 			{
 				goAttack(u);
 			}
@@ -295,8 +300,9 @@ void CombatManager::setTarget(BWAPI::Unit unit, BWAPI::Unit target)
 
 void CombatManager::goRetreat(BWAPI::Unit unit)
 {
+	if (rallying == true) lost_rusher_count++;
 	fighter_status_map[unit] = Enums::retreating;
-	unit->move(BWAPI::Position(Global::map().snd_area->BottomRight()));
+	unit->move(BWAPI::Position(Global::map().expos.front()->Bases()[0].Center()));
 }
 
 void CombatManager::goAttack(BWAPI::Unit unit)
@@ -352,18 +358,29 @@ void CombatManager::goDefend(BWAPI::Unit unit)
 
 void CombatManager::updateAttackStatus()
 {
-	const auto fst_pos = Global::map().main_area->Bases()[0].Center();
-	const auto snd_pos = Global::map().snd_area->Bases()[0].Center();
+	auto units_nearby = BWAPI::Unitset::none;
+	for (const auto* base : Global::map().expos)
+	{
+		auto pos = base->Bases()[0].Center();
+		auto u = BWAPI::Broodwar->getUnitsInRadius(pos, 800);
+		units_nearby.insert(u.begin(), u.end());
 
-	auto u1 = BWAPI::Broodwar->getUnitsInRadius(fst_pos, 600);
-	auto u2 = BWAPI::Broodwar->getUnitsInRadius(snd_pos, 600);
+		// Also add units in neighboring areas
+		auto neighbors = base->AccessibleNeighbours();
+		for (const auto* neighbor : neighbors)
+		{
+			if (neighbor->Bases().empty()) continue;
+			pos = neighbor->Bases()[0].Center();
+			u = BWAPI::Broodwar->getUnitsInRadius(pos, 600);
+			units_nearby.insert(u.begin(), u.end());
+		}
+	}
 
-	u1.insert(u2.begin(), u2.end());
-
+	// See if we're no longer under attack
 	if (under_attack)
 	{
 		auto has_enemy = false;
-		for (auto u : u1)
+		for (auto* u : units_nearby)
 		{
 			if (u->getPlayer()->isEnemy(BWAPI::Broodwar->self()))
 			{
@@ -372,15 +389,20 @@ void CombatManager::updateAttackStatus()
 			}
 		}
 
-		if (!has_enemy) under_attack = false;
+		if (!has_enemy)
+		{
+			std::cout << "No longer under attack\n";
+			under_attack = false;
+		}
 		return;
 	}
 
 	// If not currently marked as under attack, check if we ARE under attack
-	for (auto u : u1)
+	for (auto* u : units_nearby)
 	{
-		if (u->getPlayer()->isEnemy(BWAPI::Broodwar->self()))
+		if (u->getPlayer()->isEnemy(BWAPI::Broodwar->self())) // TODO må godt være en worker
 		{
+			std::cout << "We're under attack!\n";
 			under_attack = true;
 			return;
 		}
@@ -420,8 +442,6 @@ void CombatManager::startRushing()
 		if (count >= m_attack_units_.size() * 0.75) break;
 		total_rusher_count++;
 		goRally(u);
-		//goAttack(u, rush_target_pos);
-		std::cout << u->getType() << " is rushing\n";
 		count++;
 	}
 
@@ -492,15 +512,15 @@ void CombatManager::setRushTarget()
 	}
 
 	// TODO pick closest from enemy_areas
-	rush_target = Global::map().getClosestArea(Global::map().main_area, Global::information().enemy_areas);
+	rush_target = Global::map().getClosestArea(Global::map().expos.front(), Global::information().enemy_areas);
 
 	// Choose rally point
 	const auto target_neighbors = rush_target->AccessibleNeighbours();
-	rally_point = Global::map().getClosestArea(Global::map().main_area, target_neighbors);
+	rally_point = Global::map().getClosestArea(Global::map().expos.front(), target_neighbors);
 
 	auto target_pos = rush_target->Bases()[0].Center();
 	auto rally_pos = rally_point->Bases()[0].Center();
 
 	Global::map().addCircle(target_pos, "TARGET");
-	Global::map().addCircle(target_pos, "RALLY POINT");
+	Global::map().addCircle(rally_pos, "RALLY POINT");
 }
