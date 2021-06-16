@@ -192,8 +192,14 @@ void CombatManager::handleIdleRetreater(BWAPI::Unit unit)
 {
 	goDefend(unit);
 
+	auto idle_retreater_count = 0;
 	for (auto u : m_attack_units_)
-		if (fighter_status_map[u] == retreating) return;
+		if (fighter_status_map[u] == Enums::retreating)
+		{
+			idle_retreater_count++;
+			//return;
+		}
+	//if (idle_retreater_count > (total_rusher_count - lost_rusher_count) * 0.66) retreating = false;
 	retreating = false;
 }
 
@@ -294,8 +300,9 @@ void CombatManager::setTarget(BWAPI::Unit unit, BWAPI::Unit target)
 
 void CombatManager::goRetreat(BWAPI::Unit unit)
 {
+	if (rallying == true) lost_rusher_count++;
 	fighter_status_map[unit] = Enums::retreating;
-	unit->move(BWAPI::Position(Global::map().expos.back()->Bases()[0].Center()));
+	unit->move(BWAPI::Position(Global::map().expos.front()->Bases()[0].Center()));
 }
 
 void CombatManager::goAttack(BWAPI::Unit unit)
@@ -362,6 +369,7 @@ void CombatManager::updateAttackStatus()
 		auto neighbors = base->AccessibleNeighbours();
 		for (const auto* neighbor : neighbors)
 		{
+			if (neighbor->Bases().empty()) continue;
 			pos = neighbor->Bases()[0].Center();
 			u = BWAPI::Broodwar->getUnitsInRadius(pos, 600);
 			units_nearby.insert(u.begin(), u.end());
@@ -434,8 +442,6 @@ void CombatManager::startRushing()
 		if (count >= m_attack_units_.size() * 0.75) break;
 		total_rusher_count++;
 		goRally(u);
-		//goAttack(u, rush_target_pos);
-		std::cout << u->getType() << " is rushing\n";
 		count++;
 	}
 
