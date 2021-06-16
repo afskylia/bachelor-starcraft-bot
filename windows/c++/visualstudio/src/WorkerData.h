@@ -45,7 +45,7 @@ namespace MiraBot
 		//MoveData		getWorkerMoveData(BWAPI::Unit unit);
 		BWAPI::UnitType getWorkerBuildingType(BWAPI::Unit unit);
 		BWAPI::Unit getWorkerDepot(BWAPI::Unit unit);
-		BWAPI::Unit getMineralToMine(BWAPI::Unit unit);
+		const BWEM::Mineral* getMineralToMine(BWAPI::Unit unit);
 		BWAPI::Unit getClosestRefinery(BWAPI::Unit unit);
 		BWAPI::Unit getBuilder(BWAPI::UnitType buildingType, BWAPI::Position position);
 
@@ -54,7 +54,7 @@ namespace MiraBot
 
 		std::map<BWAPI::Unit, enum WorkerJob> m_workerJobMap;
 		std::map<BWAPI::Unit, BWAPI::Unit> m_workerDepotMap;
-		std::map<BWAPI::Unit, BWAPI::Unit> m_workerMineralMap; // Mineral to be collected from by worker
+		std::map<BWAPI::Unit, const BWEM::Mineral*> m_workerMineralMap; // Mineral to be collected from by worker
 		std::map<BWAPI::Unit, BWAPI::Unit> m_workerRefineryMap; // Vespene gas geyser to be collected from by worker
 		std::map<BWAPI::Unit, BWAPI::Unit> m_workerRepairMap; // Unit that repairworker has to repair
 		std::map<BWAPI::Unit, BWAPI::Position> m_workerMoveMap;
@@ -64,7 +64,7 @@ namespace MiraBot
 		std::map<BWAPI::Unit, BWAPI::UnitType> m_workerBuildingTypeMap; // Type of building to be built by builder
 		std::map<BWAPI::Unit, const BWEM::Area*> m_workerAreaMap;
 
-		std::map<BWAPI::Unit, int> m_workersOnMineralPatch;
+		std::map<const BWEM::Mineral*, int> m_workersOnMineralPatch;
 
 		std::map<BWAPI::Unit, int> m_depotWorkerCount;
 		std::map<BWAPI::Unit, int> m_refineryWorkerCount;
