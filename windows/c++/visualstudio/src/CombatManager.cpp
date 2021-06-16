@@ -112,7 +112,7 @@ void CombatManager::onUnitHide(BWAPI::Unit unit)
 BWAPI::Position CombatManager::getChokepointToGuard(BWAPI::Unit unit)
 {
 	// Get chokepoint with fewest assigned units
-	auto chokepoints = Global::map().getChokepoints(Global::map().expos.front());
+	auto chokepoints = Global::map().getChokepoints(Global::map().expos.back());
 	auto closest_cp = BWAPI::Positions::None;
 	auto count_closest = INT_MAX;
 	for (auto cp : chokepoints)
@@ -208,7 +208,10 @@ void CombatManager::handleIdleAttacker(BWAPI::Unit unit)
 	auto* const target = chooseTarget(unit);
 	if (!target)
 	{
+		setRushTarget();
 		goAttack(unit);
+		// TODO set new target?
+
 		//goAttack(unit, rush_target_pos);
 		/*goRetreat(unit);
 		lost_rusher_count++;
@@ -233,7 +236,7 @@ void CombatManager::handleIdleRallyer(BWAPI::Unit unit)
 		std::cout << "Rushers grouped up - start attacking!\n";
 		for (auto* u : m_attack_units_)
 		{
-			if (fighter_status_map[u] == Enums::attacking || fighter_status_map[u] == rallying)
+			if (fighter_status_map[u] == Enums::attacking || fighter_status_map[u] == Enums::rallying)
 			{
 				goAttack(u);
 			}
@@ -292,7 +295,7 @@ void CombatManager::setTarget(BWAPI::Unit unit, BWAPI::Unit target)
 void CombatManager::goRetreat(BWAPI::Unit unit)
 {
 	fighter_status_map[unit] = Enums::retreating;
-	unit->move(BWAPI::Position(Global::map().expos.front()->BottomRight()));
+	unit->move(BWAPI::Position(Global::map().expos.back()->Bases()[0].Center()));
 }
 
 void CombatManager::goAttack(BWAPI::Unit unit)
@@ -351,9 +354,18 @@ void CombatManager::updateAttackStatus()
 	auto units_nearby = BWAPI::Unitset::none;
 	for (const auto* base : Global::map().expos)
 	{
-		const auto pos = base->Bases()[0].Center();
-		auto u = BWAPI::Broodwar->getUnitsInRadius(pos, 600);
+		auto pos = base->Bases()[0].Center();
+		auto u = BWAPI::Broodwar->getUnitsInRadius(pos, 800);
 		units_nearby.insert(u.begin(), u.end());
+
+		// Also add units in neighboring areas
+		auto neighbors = base->AccessibleNeighbours();
+		for (const auto* neighbor : neighbors)
+		{
+			pos = neighbor->Bases()[0].Center();
+			u = BWAPI::Broodwar->getUnitsInRadius(pos, 600);
+			units_nearby.insert(u.begin(), u.end());
+		}
 	}
 
 	// See if we're no longer under attack
@@ -504,5 +516,5 @@ void CombatManager::setRushTarget()
 	auto rally_pos = rally_point->Bases()[0].Center();
 
 	Global::map().addCircle(target_pos, "TARGET");
-	Global::map().addCircle(target_pos, "RALLY POINT");
+	Global::map().addCircle(rally_pos, "RALLY POINT");
 }
