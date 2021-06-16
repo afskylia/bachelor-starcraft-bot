@@ -30,6 +30,7 @@ namespace MiraBot
 		void handleIdleDefender(BWAPI::Unit unit);
 		void handleIdleRetreater(BWAPI::Unit unit);
 		void handleIdleAttacker(BWAPI::Unit unit);
+		void handleIdleRallyer(BWAPI::Unit unit);
 		void updateCombatStatus();
 		void removeUnitTarget(BWAPI::Unit unit);
 
@@ -38,6 +39,7 @@ namespace MiraBot
 		void goRetreat(BWAPI::Unit unit);
 		void goAttack(BWAPI::Unit unit);
 		void goAttack(BWAPI::Unit unit, BWAPI::Position target_pos);
+		void goRally(BWAPI::Unit unit);
 		void goDefend(BWAPI::Unit unit);
 
 		void updateAttackStatus();
@@ -49,12 +51,18 @@ namespace MiraBot
 		BWAPI::Unit chooseTarget(BWAPI::Unit unit, bool same_area = false); // Get closest target unit to unit
 
 		bool attacking = false; // Whether we're currently rushing the enemy
+		bool rallying = false;
 		bool under_attack = false; // Whether we're currently under attack in one of our bases
 		bool retreating = false;
 
-		BWAPI::Position rush_target_pos = BWAPI::Positions::None;
-		int initial_rush_count = 0; // How many attack units we started rushing with in this rush
+		// Variables used for rushing
+		//BWAPI::Position rush_target_pos = BWAPI::Positions::None;
+		const BWEM::Area* rush_target; // Target area of current rush
+		const BWEM::Area* rally_point; // Area in which to group up before rushing target
+		int rallied_rushers; // Number of rushers who arrived at rally point
+		int total_rusher_count = 0; // How many attack units we started rushing with in this rush
 		int lost_rusher_count = 0; // How many of our attack units have died this rush
+		void setRushTarget();
 
 		// Set of all our attack units
 		BWAPI::Unitset m_attack_units_ = BWAPI::Unitset::none;

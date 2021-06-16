@@ -277,6 +277,25 @@ std::vector<BWAPI::Position> MapTools::getChokepoints(const Area* area)
 	return chokepoint_positions;
 }
 
+const Area* MapTools::getClosestArea(const Area* area, std::vector<const Area*> areas)
+{
+	auto area_pos = area->Bases()[0].Center();
+	const Area* closest_area = nullptr;
+	auto closest_dist = INT_MAX;
+
+	for (const auto* a : areas)
+	{
+		auto pos = a->Bases()[0].Center();
+		auto dist = pos.getDistance(area_pos);
+		if (dist < closest_dist)
+		{
+			closest_area = a;
+			closest_dist = dist;
+		}
+	}
+	return closest_area;
+}
+
 bool MapTools::canWalk(const int tile_x, const int tile_y)
 {
 	for (auto i = 0; i < 4; ++i)

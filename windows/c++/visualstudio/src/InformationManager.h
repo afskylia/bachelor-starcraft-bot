@@ -3,6 +3,7 @@
 #include <BWAPI/Unitset.h>
 
 #include "Enums.h"
+#include "BWEM/src/bwem.h"
 
 namespace MiraBot
 {
@@ -14,6 +15,8 @@ namespace MiraBot
 
 	public:
 		bool found_enemy = false;
+		std::vector<const BWEM::Area*> enemy_areas;
+
 		std::vector<BWAPI::Position> base_chokepoints;
 
 		Enums::strategy_type m_current_enemy_strategy = Enums::strategy_type::none;

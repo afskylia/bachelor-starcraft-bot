@@ -23,6 +23,7 @@ void CombatManager::onFrame()
 	// Check status of current combat - can we win or should we retreat?
 	updateCombatStatus();
 
+
 	// Handle idle units
 	for (auto& u : m_attack_units_)
 	{
@@ -32,6 +33,9 @@ void CombatManager::onFrame()
 			{
 			case Enums::defending:
 				handleIdleDefender(u);
+				break;
+			case Enums::rallying:
+				handleIdleRallyer(u);
 				break;
 			case Enums::attacking:
 				handleIdleAttacker(u);
@@ -43,9 +47,8 @@ void CombatManager::onFrame()
 		}
 	}
 
-
 	// See if we should start rushing
-	if (!attacking && !retreating && Global::strategy().shouldStartRushing())
+	if (!attacking && !rallying && !retreating && Global::strategy().shouldStartRushing())
 		startRushing();
 }
 
@@ -71,7 +74,8 @@ void CombatManager::onUnitDestroy(BWAPI::Unit unit)
 		return;
 	}
 
-	if (attacking && fighter_status_map[unit] == Enums::attacking)
+	if ((attacking || rallying) && (fighter_status_map[unit] == Enums::attacking || fighter_status_map[unit] ==
+		Enums::rallying))
 		lost_rusher_count++;
 
 
@@ -199,6 +203,8 @@ void CombatManager::handleIdleRetreater(BWAPI::Unit unit)
 
 void CombatManager::handleIdleAttacker(BWAPI::Unit unit)
 {
+	if (rallying) return;
+
 	// Remove current target
 	removeUnitTarget(unit);
 
@@ -206,13 +212,37 @@ void CombatManager::handleIdleAttacker(BWAPI::Unit unit)
 	auto* const target = chooseTarget(unit);
 	if (!target)
 	{
-		goAttack(unit, rush_target_pos);
+		goAttack(unit);
+		//goAttack(unit, rush_target_pos);
 		/*goRetreat(unit);
 		lost_rusher_count++;
 		return;*/
 	}
 
 	setTarget(unit, target);
+}
+
+void CombatManager::handleIdleRallyer(BWAPI::Unit unit)
+{
+	if (Global::map().map.GetNearestArea(unit->getTilePosition()) == rally_point)
+	{
+		std::cout << unit->getType() << " idling (at rally point hopefully)\n";
+		rallied_rushers++;
+		fighter_status_map[unit] = Enums::attacking;
+	}
+
+	if (rallied_rushers == (total_rusher_count - lost_rusher_count))
+	{
+		rallying = false;
+		std::cout << "Rushers grouped up - start attacking!\n";
+		for (auto u : m_attack_units_)
+		{
+			if (fighter_status_map[u] == Enums::attacking)
+			{
+				goAttack(u);
+			}
+		}
+	}
 }
 
 void CombatManager::updateCombatStatus()
@@ -222,14 +252,16 @@ void CombatManager::updateCombatStatus()
 
 	// TODO: Check if we're outnumbered by enemy attack units (don't count workers)
 	/*auto t = targets
-	auto ratio = (initial_rush_count-lost_rusher_count)*/
+	auto ratio = (total_rusher_count-lost_rusher_count)*/
 
-	if (lost_rusher_count >= initial_rush_count * 0.4)
+	if (lost_rusher_count >= total_rusher_count * 0.33)
 	{
 		std::cout << "lost_rushers >= initial_rushers*0.4\n";
 		retreatFromCombat();
 		return;
 	}
+
+	if (rallying) return;
 
 	auto idle_count = 0;
 	for (auto u : m_attack_units_)
@@ -246,7 +278,7 @@ void CombatManager::updateCombatStatus()
 		std::cout << a << ", " << b << ", " << c << ", " << d << "\n";
 	}
 
-	if (idle_count >= (initial_rush_count - lost_rusher_count) / 2)
+	if (idle_count >= (total_rusher_count - lost_rusher_count) / 2)
 	{
 		std::cout << "idle_count >= rushers\n";
 		retreatFromCombat();
@@ -269,12 +301,17 @@ void CombatManager::goRetreat(BWAPI::Unit unit)
 
 void CombatManager::goAttack(BWAPI::Unit unit)
 {
+	fighter_status_map[unit] = Enums::attacking;
+
 	if (targets.empty())
 	{
-		goAttack(unit, rush_target_pos);
+		//std::cout << "TARGETS EMPTY\n";
+		//goAttack(unit, rush_target_pos);
+		unit->attack(rush_target->Bases()[0].Center());
+		//goRetreat(unit);
+		//return;
 		return;
 	}
-	fighter_status_map[unit] = Enums::attacking;
 	auto* const target = chooseTarget(unit);
 	setTarget(unit, target);
 }
@@ -283,6 +320,14 @@ void CombatManager::goAttack(BWAPI::Unit unit, BWAPI::Position target_pos)
 {
 	fighter_status_map[unit] = Enums::attacking;
 	unit->attack(target_pos);
+}
+
+void CombatManager::goRally(BWAPI::Unit unit)
+{
+	std::cout << unit->getType() << " going to rally point\n";
+	fighter_status_map[unit] = Enums::rallying;
+	auto pos = rally_point->Bases()[0].Center();
+	unit->attack(pos);
 }
 
 void CombatManager::goDefend(BWAPI::Unit unit)
@@ -357,9 +402,15 @@ void CombatManager::startRushing()
 	std::cout << "Start rushing!\n";
 
 	attacking = true;
-	auto enemy_base = Global::information().enemy_start_location;
-	rush_target_pos = BWAPI::Position(enemy_base);
-	initial_rush_count = 0;
+	rallying = true;
+	//rallying = true;
+	/*auto enemy_base = Global::information().enemy_start_location;
+	rush_target_pos = BWAPI::Position(enemy_base);*/
+
+	setRushTarget();
+	rallied_rushers = 0;
+	total_rusher_count = 0;
+	lost_rusher_count = 0;
 
 	std::vector<BWAPI::Unit> rush_squad = {};
 	auto count = 0;
@@ -367,28 +418,31 @@ void CombatManager::startRushing()
 	for (auto* u : m_attack_units_)
 	{
 		if (count >= m_attack_units_.size() * 0.75) break;
-		initial_rush_count++;
-		goAttack(u, rush_target_pos);
+		total_rusher_count++;
+		goRally(u);
+		//goAttack(u, rush_target_pos);
 		std::cout << u->getType() << " is rushing\n";
 		count++;
 	}
 
-	std::cout << "Rush start: " << initial_rush_count << ", " << lost_rusher_count << "\n";
+	std::cout << "Rush start: " << total_rusher_count << ", " << lost_rusher_count << "\n";
 
 	// TODO: re-position guards so chokepoints remain equally guarded
 }
+
 
 void CombatManager::retreatFromCombat()
 {
 	std::cout << "Start retreating\n";
 	attacking = false;
+	rallying = false;
 	retreating = true;
 	lost_rusher_count = 0;
-	initial_rush_count = 0;
+	total_rusher_count = 0;
 
 	for (auto* u : m_attack_units_)
 	{
-		if (fighter_status_map[u] == Enums::attacking)
+		if (fighter_status_map[u] == Enums::attacking || fighter_status_map[u] == Enums::rallying)
 		{
 			u->stop();
 			goRetreat(u);
@@ -425,4 +479,28 @@ BWAPI::Unit CombatManager::chooseTarget(BWAPI::Unit unit, bool same_area)
 	if (available_targets.empty() && !same_area) return Tools::getClosestUnitTo(unit->getPosition(), targets);
 	if (available_targets.empty()) return nullptr;
 	return Tools::getClosestUnitTo(unit->getPosition(), available_targets);
+}
+
+void CombatManager::setRushTarget()
+{
+	// TODO
+
+	if (Global::information().enemy_areas.empty())
+	{
+		std::cout << "Enemy areas empty\n";
+		return;
+	}
+
+	// TODO pick closest from enemy_areas
+	rush_target = Global::map().getClosestArea(Global::map().main_area, Global::information().enemy_areas);
+
+	// Choose rally point
+	const auto target_neighbors = rush_target->AccessibleNeighbours();
+	rally_point = Global::map().getClosestArea(Global::map().main_area, target_neighbors);
+
+	auto target_pos = rush_target->Bases()[0].Center();
+	auto rally_pos = rally_point->Bases()[0].Center();
+
+	Global::map().addCircle(target_pos, "TARGET");
+	Global::map().addCircle(target_pos, "RALLY POINT");
 }
