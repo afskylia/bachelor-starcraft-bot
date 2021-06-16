@@ -3,6 +3,7 @@
 #include <BWAPI/Unit.h>
 #include <BWAPI.h>
 #include <queue>
+#include "BWEM/src/bwem.h"
 
 namespace MiraBot
 {
@@ -71,5 +72,6 @@ namespace MiraBot
 
 		bool trainUnit(const BWAPI::UnitType& unit_type);
 		bool trainUnit(const BWAPI::UnitType& unit, BWAPI::Unit depot);
+		const BWEM::Area* createNewExpo();
 	};
 }

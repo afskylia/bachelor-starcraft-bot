@@ -487,3 +487,29 @@ void ProductionManager::trainUnitInBuilding(BWAPI::UnitType unit_type, int units
 		owned++;
 	}
 }
+
+const BWEM::Area* ProductionManager::createNewExpo()
+{
+	auto b = Global::map().expos;
+	const BWEM::Area* new_area = nullptr;
+
+	for (const auto* b : Global::map().expos)
+	{
+		for (const auto* neighbor : b->AccessibleNeighbours())
+		{
+			if (std::find(Global::map().expos.begin(), Global::map().expos.end(), neighbor)
+				== Global::map().expos.end())
+			{
+				new_area = neighbor;
+				break;
+			}
+		}
+		if (new_area) break;
+	}
+
+	Global::map().expos.push_back(new_area);
+	m_build_queue_.push_back(BWAPI::UnitTypes::Protoss_Nexus);
+	// TODO: refactor build queue to contain <unittype, area> pairs
+
+	return new_area;
+}

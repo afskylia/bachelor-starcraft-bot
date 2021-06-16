@@ -29,12 +29,13 @@ void MapTools::onStart()
 
 	utils::MapPrinter::Initialize(&map);
 
+#ifdef NDEBUG
 	utils::printMap(map); // will print the map into the file bin/map.bmp
 	utils::pathExample(map); // add to the printed map a path between two starting locations
+#endif
 
 	const auto base = BWAPI::Broodwar->self()->getStartLocation();
-	main_area = map.GetNearestArea(base);
-	snd_area = main_area->AccessibleNeighbours()[0];
+	expos.push_back(map.GetNearestArea(base));
 
 	std::cout << " complete!\n";
 
