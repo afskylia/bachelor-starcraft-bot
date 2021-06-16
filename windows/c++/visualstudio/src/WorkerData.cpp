@@ -195,14 +195,16 @@ BWAPI::Unit WorkerData::getMineralToMine(BWAPI::Unit unit)
 {
 	auto minerals_in_base = m_workerAreaMap[unit]->Minerals();
 	if (minerals_in_base.empty()) return nullptr;
+	auto base = m_workerAreaMap[unit];
+	auto a1 = base->Bases()[0].Center();
 
-	//auto minerals_near_base = Global::information().main_base->getUnitsInRadius(1024, BWAPI::Filter::IsMineralField);
-	//auto sorted_minerals = Tools::sortUnitsByClosest(unit, minerals_in_base);
 
 	BWAPI::Unit closest_mineral = nullptr;
 	auto closest_distance = INT_MAX;
-	for (auto mineral : minerals_in_base)
+	for (auto* mineral : minerals_in_base)
 	{
+		//std::cout << mineral->Unit()->getPosition() << ", " << mineral->Pos() << "\n";
+
 		// We want at most 3 workers per mineral patch
 		if (m_workersOnMineralPatch[mineral->Unit()] >= 1) continue; // TODO change to 3
 
@@ -222,6 +224,12 @@ BWAPI::Unit WorkerData::getMineralToMine(BWAPI::Unit unit)
 		closest_distance = distance;
 	}
 
+	if (closest_mineral)
+	{
+		auto a3 = closest_mineral->getPosition();
+		std::cout << "unknown: " << BWAPI::Positions::Unknown << "\n";
+		std::cout << a3 << ", " << closest_mineral->isVisible() << "\n";
+	}
 	return closest_mineral;
 }
 
