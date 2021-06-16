@@ -132,7 +132,7 @@ void WorkerData::setWorkerJob(BWAPI::Unit unit, enum WorkerJob job, BWAPI::Unit 
 				if (!mineral_to_mine)
 				{
 					// Expand!
-					std::cout << "expand boi\n";
+					std::cout << "Creating new expo\n";
 					m_workerAreaMap[unit] = Global::production().createNewExpo();
 					mineral_to_mine = getMineralToMine(unit);
 				}
@@ -202,8 +202,6 @@ const BWEM::Mineral* WorkerData::getMineralToMine(BWAPI::Unit unit)
 	auto closest_distance = FLT_MAX;
 	for (const auto* mineral : minerals_in_base)
 	{
-		//std::cout << mineral->Unit()->getPosition() << ", " << mineral->Pos() << "\n";
-
 		// We want at most 3 workers per mineral patch
 		if (m_workersOnMineralPatch[mineral] >= 3) continue;
 		//const auto distance = mineral->Unit()->getDistance(unit);
@@ -216,11 +214,6 @@ const BWEM::Mineral* WorkerData::getMineralToMine(BWAPI::Unit unit)
 		}
 	}
 
-	if (closest)
-	{
-		std::cout << closest->Pos() << ", " << closest->Unit()->getPosition() << ", " << closest->Unit()->isVisible() <<
-			"\n";
-	}
 	return closest;
 }
 

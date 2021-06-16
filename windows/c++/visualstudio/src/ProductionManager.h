@@ -69,6 +69,7 @@ namespace MiraBot
 		int getTotalGas();
 
 		bool buildBuilding(BWAPI::UnitType type);
+		bool buildBuilding(BWAPI::UnitType type, const BWEM::Area* area);
 
 		bool trainUnit(const BWAPI::UnitType& unit_type);
 		bool trainUnit(const BWAPI::UnitType& unit, BWAPI::Unit depot);

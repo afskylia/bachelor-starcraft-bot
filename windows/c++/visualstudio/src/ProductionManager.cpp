@@ -50,33 +50,6 @@ void ProductionManager::pollBuildOrder()
 	}
 
 	prev_supply = supply;
-
-
-	//// TODO: Check if we have built all the things required by the build order, otherwise enqueue those (using getrequiredunits?)
-	///*for (auto [lvl_, _] : Global::strategy().m_build_order)
-	//{
-	//	if (lvl_ == supply) break;
-	//	if (std::find(enqueued_levels.begin(), enqueued_levels.end(), lvl_) == enqueued_levels.end())
-	//	{
-	//		pushToBuildQueue(lvl_);
-	//		enqueued_levels.push_back(lvl_);
-	//	}
-	//}*/
-
-	//// If we built this last
-	//if (supply == prev_supply) return;
-
-	//// If supply lower than previously, i.e. after an attack by the enemy
-	//if (supply < prev_supply)
-	//{
-	//	// TODO figure out what to do there
-	//	std::cout << "***** supply < prev_supply ******\n";
-	//	return;
-	//}
-
-	//// Push to build queue and update prev_supply
-	//pushToBuildQueue(supply);
-	//prev_supply = supply;
 }
 
 // Push unit type at given supply lvl to build queue if not already enqueued
@@ -185,10 +158,18 @@ bool ProductionManager::trainUnit(const BWAPI::UnitType& unit_type)
 	return false;
 }
 
+bool ProductionManager::buildBuilding(BWAPI::UnitType type)
+{
+	const auto* area = Global::map().expos.front();
+	if (type == BWAPI::UnitTypes::Protoss_Nexus)
+		area = Global::map().expos.back();
+
+	return buildBuilding(type, area);
+}
 
 // Tries to build the desired building type
 // TODO: More strategic placement of buildings
-bool ProductionManager::buildBuilding(const BWAPI::UnitType type)
+bool ProductionManager::buildBuilding(const BWAPI::UnitType type, const BWEM::Area* area)
 {
 	// If we have much less gas and minerals than required, it's not worth the wait
 	if (getTotalMinerals() < type.mineralPrice() * 0.9) return false;
@@ -198,7 +179,7 @@ bool ProductionManager::buildBuilding(const BWAPI::UnitType type)
 	const auto builder_type = type.whatBuilds().first;
 
 	// Get a location that we want to build the building next to
-	const auto desired_pos = BWAPI::Broodwar->self()->getStartLocation();
+	const auto desired_pos = BWAPI::TilePosition(area->Bases().front().Center());
 
 	// Ask BWAPI for a building location near the desired position for the type
 	const auto max_build_range = 64;
@@ -213,6 +194,7 @@ bool ProductionManager::buildBuilding(const BWAPI::UnitType type)
 	Global::workers().setBuildingWorker(builder, WorkerData::BuildJob{build_pos, type});
 	return true;
 }
+
 
 // Builds additional supply if needed
 void ProductionManager::buildAdditionalSupply()
@@ -494,12 +476,14 @@ const BWEM::Area* ProductionManager::createNewExpo()
 	auto dist = DBL_MAX;
 	const auto* main = Global::map().expos.front();
 	auto expos = Global::map().expos;
-
+	std::cout << Global::map().map.Areas().size() << "\n";
 	for (const BWEM::Area& area : Global::map().map.Areas())
 	{
+		if (!area.AccessibleFrom(Global::map().expos.front()))continue;
 		if (area.Bases().empty() || area.Minerals().empty()) continue;
 		if (std::find(expos.begin(), expos.end(), &area) != expos.end()) continue;
-		auto _dist = main->Bases()[0].Center().getDistance(area.Bases()[0].Center());
+
+		const auto _dist = main->Bases()[0].Center().getDistance(area.Bases()[0].Center());
 		if (_dist < dist)
 		{
 			new_area = &area;

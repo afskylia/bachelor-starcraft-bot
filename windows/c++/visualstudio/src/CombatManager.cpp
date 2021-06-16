@@ -172,15 +172,11 @@ void CombatManager::removeUnitTarget(BWAPI::Unit unit)
 
 void CombatManager::handleIdleDefender(BWAPI::Unit unit)
 {
-	if (unit->getLastCommand().getType() == BWAPI::UnitCommandTypes::Attack_Move)
-	{
-		std::cout << "BING\n";
-	}
 	// If last command was an attack, and we're no longer under attack, send to guard position again
 	auto was_attacking = unit->getLastCommand().getType() == BWAPI::UnitCommandTypes::Attack_Unit;
 	if (was_attacking && !under_attack)
 	{
-		std::cout << "yokes\n";
+		std::cout << "Going back to defenses\n";
 		removeUnitTarget(unit);
 		goDefend(unit);
 	}
@@ -235,9 +231,9 @@ void CombatManager::handleIdleRallyer(BWAPI::Unit unit)
 	{
 		rallying = false;
 		std::cout << "Rushers grouped up - start attacking!\n";
-		for (auto u : m_attack_units_)
+		for (auto* u : m_attack_units_)
 		{
-			if (fighter_status_map[u] == Enums::attacking)
+			if (fighter_status_map[u] == Enums::attacking || fighter_status_map[u] == rallying)
 			{
 				goAttack(u);
 			}
@@ -353,17 +349,18 @@ void CombatManager::goDefend(BWAPI::Unit unit)
 void CombatManager::updateAttackStatus()
 {
 	auto units_nearby = BWAPI::Unitset::none;
-	for (auto base : Global::map().expos)
+	for (const auto* base : Global::map().expos)
 	{
-		auto pos = base->Bases()[0].Center();
+		const auto pos = base->Bases()[0].Center();
 		auto u = BWAPI::Broodwar->getUnitsInRadius(pos, 600);
 		units_nearby.insert(u.begin(), u.end());
 	}
 
+	// See if we're no longer under attack
 	if (under_attack)
 	{
 		auto has_enemy = false;
-		for (auto u : units_nearby)
+		for (auto* u : units_nearby)
 		{
 			if (u->getPlayer()->isEnemy(BWAPI::Broodwar->self()))
 			{
@@ -372,15 +369,20 @@ void CombatManager::updateAttackStatus()
 			}
 		}
 
-		if (!has_enemy) under_attack = false;
+		if (!has_enemy)
+		{
+			std::cout << "No longer under attack\n";
+			under_attack = false;
+		}
 		return;
 	}
 
 	// If not currently marked as under attack, check if we ARE under attack
-	for (auto u : units_nearby)
+	for (auto* u : units_nearby)
 	{
-		if (u->getPlayer()->isEnemy(BWAPI::Broodwar->self()))
+		if (u->getPlayer()->isEnemy(BWAPI::Broodwar->self())) // TODO må godt være en worker
 		{
+			std::cout << "We're under attack!\n";
 			under_attack = true;
 			return;
 		}
