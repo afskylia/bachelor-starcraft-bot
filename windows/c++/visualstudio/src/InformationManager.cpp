@@ -129,6 +129,13 @@ void InformationManager::onUnitShow(BWAPI::Unit unit)
 	// If we find an enemy, we should log the information
 	if (unit->getPlayer()->isEnemy(BWAPI::Broodwar->self()))
 	{
+		// Save all unit bases we find (if it has buildings, we consider it a base)
+		const auto* area = Global::map().map.GetNearestArea(unit->getTilePosition());
+		if (unit->getType().isBuilding() && !std::count(enemy_areas.begin(), enemy_areas.end(), area))
+		{
+			enemy_areas.push_back(area);
+		}
+
 		logEnemyRaceAndStartLocation(unit);
 		addOrRemoveEnemyUnit(unit);
 		informationUpdateShouldHappen();

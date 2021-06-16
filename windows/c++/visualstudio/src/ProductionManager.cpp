@@ -179,7 +179,13 @@ bool ProductionManager::buildBuilding(const BWAPI::UnitType type, const BWEM::Ar
 	const auto builder_type = type.whatBuilds().first;
 
 	// Get a location that we want to build the building next to
-	const auto desired_pos = BWAPI::TilePosition(area->Bases().front().Center());
+	auto desired_pos = BWAPI::TilePosition(area->Bases().front().Center());
+
+	if (type == BWAPI::UnitTypes::Protoss_Photon_Cannon)
+	{
+		auto chokepoints = Global::map().expos.front()->ChokePoints();
+		desired_pos = BWAPI::TilePosition(chokepoints.front()->Center());
+	}
 
 	// Ask BWAPI for a building location near the desired position for the type
 	const auto max_build_range = 64;

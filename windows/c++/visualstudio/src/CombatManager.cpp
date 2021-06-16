@@ -193,14 +193,14 @@ void CombatManager::handleIdleRetreater(BWAPI::Unit unit)
 	goDefend(unit);
 
 	auto idle_retreater_count = 0;
-	for (auto u : m_attack_units_)
-		if (fighter_status_map[u] == Enums::retreating)
+	for (auto* u : m_attack_units_)
+		if (fighter_status_map[u] == Enums::retreating || u->isIdle())
 		{
 			idle_retreater_count++;
 			//return;
 		}
-	//if (idle_retreater_count > (total_rusher_count - lost_rusher_count) * 0.66) retreating = false;
-	retreating = false;
+	if (idle_retreater_count >= (total_rusher_count - lost_rusher_count) * 0.8) retreating = false;
+	//retreating = false;
 }
 
 void CombatManager::handleIdleAttacker(BWAPI::Unit unit)
@@ -209,22 +209,28 @@ void CombatManager::handleIdleAttacker(BWAPI::Unit unit)
 
 	// Remove current target
 	removeUnitTarget(unit);
+	const auto* prev = rush_target;
+
 
 	// Set new target
 	auto* const target = chooseTarget(unit);
 	if (!target)
 	{
+		//Global::information().enemy_areas.erase(prev);
 		setRushTarget();
+		if (rush_target == prev)
+		{
+			// TODO remove enemy base from enemy_bases when all units in there are destroyed..
+			goRetreat(unit);
+			return;
+		}
+		// TODO if new target is same as old target, then we're at the end of the game most likely. what to do
 		goAttack(unit);
-		// TODO set new target?
-
-		//goAttack(unit, rush_target_pos);
-		/*goRetreat(unit);
-		lost_rusher_count++;
-		return;*/
 	}
-
-	setTarget(unit, target);
+	else
+	{
+		setTarget(unit, target);
+	}
 }
 
 void CombatManager::handleIdleRallyer(BWAPI::Unit unit)

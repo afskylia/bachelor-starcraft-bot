@@ -286,6 +286,7 @@ const Area* MapTools::getClosestArea(const Area* area, std::vector<const Area*> 
 
 	for (const auto* a : areas)
 	{
+		if (a->Bases().empty()) continue;
 		auto pos = a->Bases()[0].Center();
 		auto dist = pos.getDistance(area_pos);
 		if (dist < closest_dist)
