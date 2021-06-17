@@ -55,7 +55,11 @@ void InformationManager::updateEnemyStrategy()
 
 	for (BWAPI::UnitInterface* enemy_unit : enemy_units)
 	{
-		if (enemy_unit->getPosition().getApproxDistance(main_base->getPosition()) < 1000)
+		bool enemy_is_near_our_base = enemy_unit->getPosition().getApproxDistance(main_base->getPosition()) < 1000;
+		bool enemy_is_in_own_base = enemy_unit->getPosition().getApproxDistance(BWAPI::Position(enemy_start_location)) <
+			1000;
+		// Offensive if leaving base or near our base
+		if (enemy_is_near_our_base || enemy_is_in_own_base)
 		{
 			m_current_enemy_strategy = Enums::offensive;
 			return;
