@@ -30,9 +30,9 @@ void WorkerManager::onFrame()
 
 void WorkerManager::updateWorkerStatus()
 {
-	for (auto& worker : m_workerData.getWorkers())
+	for (const auto& worker : m_workerData.getWorkers())
 	{
-		auto job = m_workerData.getWorkerJob(worker);
+		const auto job = m_workerData.getWorkerJob(worker);
 		if (!worker->isCompleted()) continue;
 
 
@@ -94,7 +94,7 @@ void WorkerManager::activateIdleWorkers()
 
 			// We don't want more than 3 gas workers per refinery
 			if (refinery_count > 0 && gas_worker_count < mineral_worker_count / 4
-				&& gas_worker_count < refinery_count * 3)
+				&& gas_worker_count < 3) // TODO adjust gas worker count?
 				setGasWorker(worker);
 			else setMineralWorker(worker);
 		}
@@ -127,13 +127,25 @@ void WorkerManager::setBuildingWorker(BWAPI::Unit unit, WorkerData::BuildJob bui
 
 void WorkerManager::onUnitCreate(BWAPI::Unit unit)
 {
-	// TODO: Decide which job is needed right now
+	updateWorkerCounts();
 	m_workerData.addWorker(unit, WorkerData::Idle, nullptr);
 }
 
 void WorkerManager::onUnitDestroy(BWAPI::Unit unit)
 {
 	m_workerData.workerDestroyed(unit);
+}
+
+void WorkerManager::updateWorkerCounts()
+{
+	auto num_patches = 0;
+	auto num_geysers = 0;
+	for (const auto* base : Global::map().expos)
+	{
+		num_patches += base->Minerals().size();
+		num_geysers += base->Geysers().size();
+	}
+	max_workers = num_patches * 2 + m_workerData.getWorkers(WorkerData::Scout).size() + 5;
 }
 
 BWAPI::Unit WorkerManager::getClosestDepot(BWAPI::Unit worker)
@@ -259,6 +271,7 @@ BWAPI::Unit WorkerManager::getAnyWorker(BWAPI::Position pos)
 // Handles a build-worker who is idling
 void WorkerManager::handleIdleBuildWorker(BWAPI::Unit worker)
 {
+	if (worker->isConstructing()) return;
 	// Get build job assigned to worker
 	const auto building_type = m_workerData.m_workerBuildingTypeMap[worker];
 	auto building_pos = m_workerData.m_buildPosMap[worker];
@@ -275,28 +288,34 @@ void WorkerManager::handleIdleBuildWorker(BWAPI::Unit worker)
 		return;
 	if (building_type.gasPrice() > 0 && building_type.gasPrice() + 10 > BWAPI::Broodwar->self()->gas()) return;
 
+	// If not enough supply, we need more supply
+	//if (building_type.supplyRequired() > BWAPI::Broodwar->self()->supplyTotal)
 
 	// Try to place the building and generate new position if the first one fails
-	auto fail_count = 0;
-	auto id = building_type.getID(); // TODO debug info
-	while (!worker->build(building_type, building_pos) && fail_count < 4)
+	auto attempts = 0;
+	bool built = worker->build(building_type, building_pos);
+	while (!built && attempts < 5)
 	{
-		fail_count++;
-		const auto max_range = 64;
 		const auto creep = building_type.requiresCreep();
-		building_pos = BWAPI::Broodwar->getBuildLocation(building_type, building_pos, max_range, creep);
+		building_pos = BWAPI::Broodwar->getBuildLocation(building_type, building_pos, 100, creep);
+		built = worker->build(building_type, building_pos);
+		attempts++;
 	}
-	if (fail_count > 5)
+	if (!built)
 	{
+		// TODO figure out what to do in this case
+		// TODO det er fx når en bygning som er et requirement er ved at blive bygget men ikke er completed endnu
+		// TODO fx robotics/observatory
 		std::cout << "Failed to build " << building_type.getName() << "\n";
 		m_workerData.setWorkerJob(worker, WorkerData::Idle, nullptr);
-		Global::production().m_build_queue_.push_front(building_type);
+		//Global::production().m_build_queue_.push_front(building_type);
+		//Global::production().m_build_queue_.push_front(BWAPI::Broodwar->self()->getRace().getSupplyProvider());
 		return;
 	}
 
 	// Used in the beginning of the function next frame
 	m_workerData.m_workerBuildingTypeMap[worker] = BWAPI::UnitTypes::None;
-	std::cout << "Now building " << building_type.getName() << "\n";
+	std::cout << "Now building " << building_type.getName() << ", failcount: " << attempts << "\n";
 }
 
 // Send worker to unexplored scout position

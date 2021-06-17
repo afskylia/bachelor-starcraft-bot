@@ -16,7 +16,6 @@ using namespace MiraBot;
 std::map<int, std::pair<BWAPI::UnitType, int>> StrategyManager::getBuildOrder(BWAPI::Race enemy_race,
                                                                               Enums::strategy_type enemy_strategy)
 {
-	std::cout << "Updating Build Order \n";
 	switch (enemy_race)
 	{
 	case BWAPI::Races::None:
@@ -58,6 +57,7 @@ void StrategyManager::informationUpdate()
 
 bool StrategyManager::shouldStartRushing()
 {
+	if (Global::combat().under_attack) return false; // Don't start rushing while we ourselves are under attack
 	// TODO only rush if offensive strategy?
 
 	auto enemy_units = Global::information().enemy_units;

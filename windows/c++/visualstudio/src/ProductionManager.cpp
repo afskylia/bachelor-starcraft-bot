@@ -38,7 +38,16 @@ void ProductionManager::pollBuildOrder()
 		supply--;
 
 	if (supply == prev_supply) return;
-	if (prev_supply > supply) std::cout << "lvl > supply\n";
+	if (prev_supply > supply)
+	{
+		if (Global::strategy().m_build_order.count(supply))
+		{
+			std::cout << "sup\n";
+			pushToBuildQueue(supply);
+			prev_supply = supply;
+		}
+		std::cout << "lvl > supply\n";
+	}
 
 	// From prev_supply up to current supply, enqueue missing units
 	auto lvl = prev_supply + 1;
@@ -58,6 +67,8 @@ bool ProductionManager::pushToBuildQueue(int supply_lvl)
 	// TODO: Make null proof
 	const auto unit_type = Global::strategy().m_build_order[supply_lvl];
 
+	// TODO enqueue requirements if we don't already have them
+
 	const auto unit = unit_type.first;
 	const auto number_needed = unit_type.second;
 
@@ -70,7 +81,7 @@ bool ProductionManager::pushToBuildQueue(int supply_lvl)
 		std::cout << "Added " << unit << " to build queue\n";
 		if (number_needed > 1)
 		{
-			for (auto i = 0; i <= number_needed; i++)
+			for (auto i = 0; i < number_needed; i++)
 			{
 				m_build_queue_keep_building_.push_back(unit);
 			}
@@ -90,15 +101,25 @@ void ProductionManager::tryBuildOrTrainUnit()
 
 		const auto& unit = m_build_queue_keep_building_.front();
 		if (unit.isBuilding() && buildBuilding(unit) || trainUnit(unit))
+		{
+			std::cout << "Popping another " << unit << "\n";
 			m_build_queue_keep_building_.pop_front();
+		}
 	}
 	else
 	{
 		const auto& unit_type = m_build_queue_.front();
 
 		// Try to build or train unit, remove from queue upon success
-		if (unit_type.isBuilding() && buildBuilding(unit_type) || trainUnit(unit_type))
+		if ((unit_type.isBuilding() && buildBuilding(unit_type)) || trainUnit(unit_type))
+		{
+			std::cout << "Popping " << unit_type << " from build queue\n";
 			m_build_queue_.pop_front();
+		}
+		else
+		{
+			auto a = "bai\n";
+		}
 	}
 }
 
@@ -120,8 +141,10 @@ void ProductionManager::activateIdleBuildings()
 	 */
 
 	const auto worker_type = BWAPI::Broodwar->self()->getRace().getWorker();
-	const auto workers_wanted = 50;
-	trainUnitInBuilding(worker_type, workers_wanted);
+	auto num_workers = Global::workers().m_workerData.getWorkers(WorkerData::Minerals).size();
+	auto max_workers = Global::workers().max_workers;
+	if (num_workers < max_workers)
+		trainUnitInBuilding(worker_type, 1);
 
 	// TODO this seems bugged, only zealots are built
 
@@ -163,7 +186,7 @@ bool ProductionManager::trainUnit(const BWAPI::UnitType& unit_type)
 bool ProductionManager::buildBuilding(BWAPI::UnitType type)
 {
 	const auto* area = Global::map().expos.front();
-	if (type == BWAPI::UnitTypes::Protoss_Nexus)
+	if (type == BWAPI::UnitTypes::Protoss_Nexus || type == BWAPI::UnitTypes::Protoss_Photon_Cannon)
 		area = Global::map().expos.back();
 
 	return buildBuilding(type, area);
@@ -181,12 +204,22 @@ bool ProductionManager::buildBuilding(const BWAPI::UnitType type, const BWEM::Ar
 	const auto builder_type = type.whatBuilds().first;
 
 	// Get a location that we want to build the building next to
-	const auto desired_pos = BWAPI::TilePosition(area->Bases().front().Center());
+	auto desired_pos = BWAPI::TilePosition(area->Bases().front().Center());
 
 	// Ask BWAPI for a building location near the desired position for the type
-	const auto max_build_range = 64;
 	const auto building_on_creep = type.requiresCreep();
-	const auto build_pos = BWAPI::Broodwar->getBuildLocation(type, desired_pos, max_build_range, building_on_creep);
+	const auto build_pos = BWAPI::Broodwar->getBuildLocation(type, desired_pos, 100, building_on_creep);
+
+	if (!BWAPI::Broodwar->canBuildHere(BWAPI::TilePosition(build_pos), type))
+	{
+		if (type.requiresPsi())
+		{
+			std::cout << "we need pylons for this one fam\n";
+			//auto pylons = Tools::getUnitsOfType(BWAPI::UnitTypes::Protoss_Pylon);
+		}
+		std::cout << type << " NOT BUILDABLE\n";
+		return false;
+	}
 
 	// Try to build the structure
 	auto* builder = Global::workers().getBuilder(builder_type, BWAPI::Position(build_pos));
@@ -344,10 +377,10 @@ void ProductionManager::checkIfUpgradesAreAvailable()
 // Rebuild destroyed strategic units (units from build order)
 void ProductionManager::onUnitDestroy(BWAPI::Unit unit)
 {
-	// TODO: Enqueue only if unit type belongs to a level in enqueued_levels
 	if (unit->getPlayer() == BWAPI::Broodwar->self() && unit->getType().isBuilding())
 	{
-		m_build_queue_.push_back(unit->getType());
+		std::cout << "Re-adding destroyed " << unit->getType() << " to build queue\n";
+		m_build_queue_.push_front(unit->getType());
 	}
 }
 
@@ -362,13 +395,12 @@ void ProductionManager::trainUnitInBuilding(BWAPI::UnitType unit_type, int units
 	auto idle_buildings = Tools::getUnitsOfType(unit_type.whatBuilds().first, true);
 	auto owned = Tools::countUnitsOfType(unit_type);
 
-	while (owned <= units_wanted && !idle_buildings.empty())
+	while (!idle_buildings.empty()) //&& owned <= units_wanted
 	{
 		auto* idle_building = idle_buildings.back();
 		if (!idle_building) return;
 		if (idle_building->train(unit_type)) return;
 		idle_buildings.pop_back();
-		owned++;
 	}
 }
 
@@ -376,16 +408,23 @@ const BWEM::Area* ProductionManager::createNewExpo()
 {
 	const BWEM::Area* new_area = nullptr;
 	auto dist = DBL_MAX;
-	const auto* main = Global::map().expos.front();
 	auto expos = Global::map().expos;
-	std::cout << Global::map().map.Areas().size() << "\n";
+	const auto* prev = expos.back();
+
 	for (const BWEM::Area& area : Global::map().map.Areas())
 	{
 		if (!area.AccessibleFrom(Global::map().expos.front()))continue;
 		if (area.Bases().empty() || area.Minerals().empty()) continue;
+
+		// Check if we already expanded here
 		if (std::find(expos.begin(), expos.end(), &area) != expos.end()) continue;
 
-		const auto _dist = main->Bases()[0].Center().getDistance(area.Bases()[0].Center());
+		// Check if this is an enemy base // TODO what if we don't know yet?
+		if (std::find(Global::information().enemy_areas.begin(), Global::information().enemy_areas.end(), &area) !=
+			Global::information().enemy_areas.end())
+			continue;
+
+		const auto _dist = prev->Bases()[0].Center().getDistance(area.Bases()[0].Center());
 		if (_dist < dist)
 		{
 			new_area = &area;
@@ -394,8 +433,10 @@ const BWEM::Area* ProductionManager::createNewExpo()
 	}
 
 	Global::map().expos.push_back(new_area);
-	m_build_queue_.push_back(BWAPI::UnitTypes::Protoss_Nexus);
-	// TODO: refactor build queue to contain <unittype, area> pairs
+	m_build_queue_.push_front(BWAPI::UnitTypes::Protoss_Nexus);
+	// TODO: Cannons require a pylon, so it will glitch out if the pylon hasn't been built yet... find a way to fix this bug
+	//m_build_queue_.push_front(BWAPI::UnitTypes::Protoss_Photon_Cannon);
+	m_build_queue_.push_front(BWAPI::UnitTypes::Protoss_Pylon);
 
 	return new_area;
 }

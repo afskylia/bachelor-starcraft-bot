@@ -81,8 +81,8 @@ namespace MiraBot
 
 			for (auto [pos, text] : circles)
 			{
-				BWAPI::Broodwar->drawCircle(BWAPI::CoordinateType::Map, pos.x * 32, pos.y * 32, 200, color);
-				BWAPI::Broodwar->drawText(BWAPI::CoordinateType::Map, pos.x * 32, pos.y * 32, text);
+				BWAPI::Broodwar->drawCircle(BWAPI::CoordinateType::Map, pos.x, pos.y, 200, color);
+				BWAPI::Broodwar->drawText(BWAPI::CoordinateType::Map, pos.x, pos.y, text);
 			}
 		}
 

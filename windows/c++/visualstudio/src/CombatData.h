@@ -11,7 +11,6 @@ public:
 		BWAPI::UnitTypes::Protoss_Archon,
 		BWAPI::UnitTypes::Protoss_Dark_Templar,
 		BWAPI::UnitTypes::Protoss_Dragoon,
-		BWAPI::UnitTypes::Protoss_Photon_Cannon,
 		BWAPI::UnitTypes::Protoss_Reaver,
 		BWAPI::UnitTypes::Protoss_Scout,
 		BWAPI::UnitTypes::Protoss_Zealot

@@ -16,12 +16,15 @@ namespace MiraBot
 		BWAPI::Position scout_last_known_position = BWAPI::Positions::None;
 		bool should_have_new_scout = false;
 
+		int max_workers; // How many workers we should produce
+
 		void updateWorkerStatus();
 		void activateIdleWorkers();
 		void trainAdditionalWorkers();
 		void onFrame();
 		void onUnitCreate(BWAPI::Unit unit);
 		void onUnitDestroy(BWAPI::Unit unit);
+		void updateWorkerCounts();
 
 		void setScout(BWAPI::Unit unit);
 		void setMineralWorker(BWAPI::Unit unit);
