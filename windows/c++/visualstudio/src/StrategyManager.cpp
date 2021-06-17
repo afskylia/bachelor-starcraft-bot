@@ -16,7 +16,6 @@ using namespace MiraBot;
 std::map<int, std::pair<BWAPI::UnitType, int>> StrategyManager::getBuildOrder(BWAPI::Race enemy_race,
                                                                               Enums::strategy_type enemy_strategy)
 {
-	std::cout << "Updating Build Order \n";
 	switch (enemy_race)
 	{
 	case BWAPI::Races::None:
@@ -51,6 +50,7 @@ void StrategyManager::informationUpdate()
 	{
 		m_build_order = getBuildOrder(Global::information().enemy_race,
 		                              Global::information().m_current_enemy_strategy);
+		Global::production().printDebugData();
 		// TODO: Update production (build queue, prev_supply and enqueued_items here!!)
 		// compare old build order to new one and set prev_supply, enqueued_items etc.
 	}

@@ -58,6 +58,8 @@ bool ProductionManager::pushToBuildQueue(int supply_lvl)
 	// TODO: Make null proof
 	const auto unit_type = Global::strategy().m_build_order[supply_lvl];
 
+	// TODO enqueue requirements if we don't already have them
+
 	const auto unit = unit_type.first;
 	const auto number_needed = unit_type.second;
 
@@ -70,7 +72,7 @@ bool ProductionManager::pushToBuildQueue(int supply_lvl)
 		std::cout << "Added " << unit << " to build queue\n";
 		if (number_needed > 1)
 		{
-			for (auto i = 0; i <= number_needed; i++)
+			for (auto i = 0; i < number_needed; i++)
 			{
 				m_build_queue_keep_building_.push_back(unit);
 			}
@@ -90,7 +92,10 @@ void ProductionManager::tryBuildOrTrainUnit()
 
 		const auto& unit = m_build_queue_keep_building_.front();
 		if (unit.isBuilding() && buildBuilding(unit) || trainUnit(unit))
+		{
+			std::cout << "Popping another " << unit << "\n";
 			m_build_queue_keep_building_.pop_front();
+		}
 	}
 	else
 	{
@@ -98,7 +103,14 @@ void ProductionManager::tryBuildOrTrainUnit()
 
 		// Try to build or train unit, remove from queue upon success
 		if ((unit_type.isBuilding() && buildBuilding(unit_type)) || trainUnit(unit_type))
+		{
+			std::cout << "Popping " << unit_type << " from build queue\n";
 			m_build_queue_.pop_front();
+		}
+		else
+		{
+			auto a = "bai\n";
+		}
 	}
 }
 
@@ -328,10 +340,10 @@ void ProductionManager::checkIfUpgradesAreAvailable()
 // Rebuild destroyed strategic units (units from build order)
 void ProductionManager::onUnitDestroy(BWAPI::Unit unit)
 {
-	// TODO: Enqueue only if unit type belongs to a level in enqueued_levels
 	if (unit->getPlayer() == BWAPI::Broodwar->self() && unit->getType().isBuilding())
 	{
-		m_build_queue_.push_back(unit->getType());
+		std::cout << "Re-adding destroyed " << unit->getType() << " to build queue\n";
+		m_build_queue_.push_front(unit->getType());
 	}
 }
 

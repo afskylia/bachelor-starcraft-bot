@@ -14,12 +14,15 @@ namespace MiraBot
 		WorkerManager();
 		bool must_defend = false; // If workers have to defend the base (we're under attack)
 
+		int max_workers; // How many workers we should produce
+
 		void updateWorkerStatus();
 		void activateIdleWorkers();
 		void trainAdditionalWorkers();
 		void onFrame();
 		void onUnitCreate(BWAPI::Unit unit);
 		void onUnitDestroy(BWAPI::Unit unit);
+		void updateWorkerCounts();
 
 		void setScout(BWAPI::Unit unit);
 		void setMineralWorker(BWAPI::Unit unit);

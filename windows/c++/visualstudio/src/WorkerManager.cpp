@@ -22,9 +22,9 @@ void WorkerManager::onFrame()
 
 void WorkerManager::updateWorkerStatus()
 {
-	for (auto& worker : m_workerData.getWorkers())
+	for (const auto& worker : m_workerData.getWorkers())
 	{
-		auto job = m_workerData.getWorkerJob(worker);
+		const auto job = m_workerData.getWorkerJob(worker);
 		if (!worker->isCompleted()) continue;
 
 
@@ -117,13 +117,25 @@ void WorkerManager::setBuildingWorker(BWAPI::Unit unit, WorkerData::BuildJob bui
 
 void WorkerManager::onUnitCreate(BWAPI::Unit unit)
 {
-	// TODO: Decide which job is needed right now
+	updateWorkerCounts();
 	m_workerData.addWorker(unit, WorkerData::Idle, nullptr);
 }
 
 void WorkerManager::onUnitDestroy(BWAPI::Unit unit)
 {
 	m_workerData.workerDestroyed(unit);
+}
+
+void WorkerManager::updateWorkerCounts()
+{
+	auto num_patches = 0;
+	auto num_geysers = 0;
+	for (const auto* base : Global::map().expos)
+	{
+		num_patches += base->Minerals().size();
+		num_geysers += base->Geysers().size();
+	}
+	max_workers = num_patches * 2 + m_workerData.getWorkers(WorkerData::Scout).size() + 1;
 }
 
 BWAPI::Unit WorkerManager::getClosestDepot(BWAPI::Unit worker)
@@ -263,28 +275,31 @@ void WorkerManager::handleIdleBuildWorker(BWAPI::Unit worker)
 		return;
 	if (building_type.gasPrice() > 0 && building_type.gasPrice() + 10 > BWAPI::Broodwar->self()->gas()) return;
 
+	// If not enough supply, we need more supply
+	//if (building_type.supplyRequired() > BWAPI::Broodwar->self()->supplyTotal)
 
 	// Try to place the building and generate new position if the first one fails
-	auto fail_count = 0;
-	auto id = building_type.getID(); // TODO debug info
-	while (!worker->build(building_type, building_pos) && fail_count < 4)
+	auto attempts = 0;
+	bool built = worker->build(building_type, building_pos);
+	while (!built && attempts < 5)
 	{
-		fail_count++;
-		const auto max_range = 64;
 		const auto creep = building_type.requiresCreep();
-		building_pos = BWAPI::Broodwar->getBuildLocation(building_type, building_pos, max_range, creep);
+		building_pos = BWAPI::Broodwar->getBuildLocation(building_type, building_pos, 64, creep);
+		built = worker->build(building_type, building_pos);
+		attempts++;
 	}
-	if (fail_count > 5)
+	if (!built)
 	{
 		std::cout << "Failed to build " << building_type.getName() << "\n";
 		m_workerData.setWorkerJob(worker, WorkerData::Idle, nullptr);
 		Global::production().m_build_queue_.push_front(building_type);
+		//Global::production().m_build_queue_.push_front(BWAPI::Broodwar->self()->getRace().getSupplyProvider());
 		return;
 	}
 
 	// Used in the beginning of the function next frame
 	m_workerData.m_workerBuildingTypeMap[worker] = BWAPI::UnitTypes::None;
-	std::cout << "Now building " << building_type.getName() << "\n";
+	std::cout << "Now building " << building_type.getName() << ", failcount: " << attempts << "\n";
 }
 
 // Send worker to unexplored scout position

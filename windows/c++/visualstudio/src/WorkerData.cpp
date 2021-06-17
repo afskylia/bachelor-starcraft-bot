@@ -203,7 +203,7 @@ const BWEM::Mineral* WorkerData::getMineralToMine(BWAPI::Unit unit)
 	for (const auto* mineral : minerals_in_base)
 	{
 		// We want at most 3 workers per mineral patch
-		if (m_workersOnMineralPatch[mineral] >= 3) continue;
+		if (m_workersOnMineralPatch[mineral] >= 2) continue;
 		//const auto distance = mineral->Unit()->getDistance(unit);
 		const auto distance = mineral->Pos().getDistance(unit->getPosition());
 

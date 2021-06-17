@@ -285,7 +285,7 @@ void CombatManager::updateCombatStatus()
 			if (u->isStuck())
 			{
 				std::cout << "HALP\n";
-				u->stop();
+				u->stop(); // ikke sikker på om det virker
 			}
 		}
 
@@ -527,20 +527,19 @@ BWAPI::Unit CombatManager::chooseTarget(BWAPI::Unit unit, bool same_area)
 
 void CombatManager::setRushTarget()
 {
-	// TODO
-
 	if (Global::information().enemy_areas.empty())
 	{
 		std::cout << "Enemy areas empty\n";
 		return;
 	}
 
-	// TODO pick closest from enemy_areas
+	// Pick closest enemy base to our main base
 	rush_target = Global::map().getClosestArea(Global::map().expos.front(), Global::information().enemy_areas);
 
 	// Choose rally point
-	const auto target_neighbors = rush_target->AccessibleNeighbours();
-	rally_point = Global::map().getClosestArea(Global::map().expos.front(), target_neighbors);
+	//const auto target_neighbors = rush_target->AccessibleNeighbours();
+	//rally_point = Global::map().getClosestArea(Global::map().expos.front(), target_neighbors);
+	rally_point = Global::map().expos.back(); // Rally at our furthest base
 
 	auto target_pos = rush_target->Bases()[0].Center();
 	auto rally_pos = rally_point->Bases()[0].Center();
