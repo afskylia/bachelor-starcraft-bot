@@ -290,9 +290,12 @@ void WorkerManager::handleIdleBuildWorker(BWAPI::Unit worker)
 	}
 	if (!built)
 	{
+		// TODO figure out what to do in this case
+		// TODO det er fx når en bygning som er et requirement er ved at blive bygget men ikke er completed endnu
+		// TODO fx robotics/observatory
 		std::cout << "Failed to build " << building_type.getName() << "\n";
 		m_workerData.setWorkerJob(worker, WorkerData::Idle, nullptr);
-		Global::production().m_build_queue_.push_front(building_type);
+		//Global::production().m_build_queue_.push_front(building_type);
 		//Global::production().m_build_queue_.push_front(BWAPI::Broodwar->self()->getRace().getSupplyProvider());
 		return;
 	}
