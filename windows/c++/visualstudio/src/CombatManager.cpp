@@ -209,22 +209,12 @@ void CombatManager::handleIdleAttacker(BWAPI::Unit unit)
 
 	// Remove current target
 	removeUnitTarget(unit);
-	const auto* prev = rush_target;
 
 
 	// Set new target
 	auto* const target = chooseTarget(unit);
 	if (!target)
 	{
-		//Global::information().enemy_areas.erase(prev);
-		setRushTarget();
-		if (rush_target == prev)
-		{
-			// TODO remove enemy base from enemy_bases when all units in there are destroyed..
-			goRetreat(unit);
-			return;
-		}
-		// TODO if new target is same as old target, then we're at the end of the game most likely. what to do
 		goAttack(unit);
 	}
 	else
@@ -525,6 +515,7 @@ BWAPI::Unit CombatManager::chooseTarget(BWAPI::Unit unit, bool same_area)
 
 void CombatManager::setRushTarget()
 {
+	std::cout << "Setting rush targets\n";
 	if (Global::information().enemy_areas.empty())
 	{
 		std::cout << "Enemy areas empty\n";
@@ -532,12 +523,16 @@ void CombatManager::setRushTarget()
 	}
 
 	// Pick closest enemy base to our main base
-	rush_target = Global::map().getClosestArea(Global::map().expos.front(), Global::information().enemy_areas);
+	//rush_target = Global::map().getClosestArea(Global::map().expos.front(), Global::information().enemy_areas);
+	//rush_target = Global::map().getClosestArea(Global::map().expos.front(), enemy_areas);
+	rush_target = Global::map().map.GetNearestArea(Global::information().enemy_start_location);
+
 
 	// Choose rally point
 	//const auto target_neighbors = rush_target->AccessibleNeighbours();
 	//rally_point = Global::map().getClosestArea(Global::map().expos.front(), target_neighbors);
-	rally_point = Global::map().expos.front(); // Rally at our base
+	//rally_point = Global::map().expos.front(); // Rally at our base
+	rally_point = Global::map().getClosestArea(rush_target, Global::map().expos);
 
 	auto target_pos = rush_target->Bases()[0].Center();
 	auto rally_pos = rally_point->Bases()[0].Center();
