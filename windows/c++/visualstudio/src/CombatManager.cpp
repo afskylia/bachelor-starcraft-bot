@@ -25,7 +25,7 @@ void CombatManager::onFrame()
 
 
 	// Handle idle units
-	for (auto& u : m_attack_units_)
+	for (auto& u : m_attack_units)
 	{
 		if (u->isIdle())
 		{
@@ -82,8 +82,8 @@ void CombatManager::onUnitDestroy(BWAPI::Unit unit)
 	// Erase unit from maps and unit sets
 	guard_map.erase(unit);
 
-	auto it = m_attack_units_.find(unit);
-	if (it != m_attack_units_.end()) m_attack_units_.erase(it);
+	auto it = m_attack_units.find(unit);
+	if (it != m_attack_units.end()) m_attack_units.erase(it);
 
 	it = m_defensive_units_.find(unit);
 	if (it != m_defensive_units_.end()) m_defensive_units_.erase(it);
@@ -134,7 +134,7 @@ BWAPI::Position CombatManager::getChokepointToGuard(BWAPI::Unit unit)
 
 void CombatManager::addCombatUnit(BWAPI::Unit unit)
 {
-	m_attack_units_.insert(unit);
+	m_attack_units.insert(unit);
 	goDefend(unit);
 }
 
@@ -145,7 +145,7 @@ void CombatManager::resetTarget(BWAPI::Unit target)
 	targets.erase(target);
 
 	// Remove as target for units currently targeting it
-	for (auto& u : m_attack_units_)
+	for (auto& u : m_attack_units)
 	{
 		if (fighter_target_map[u] == target)
 		{
@@ -193,7 +193,7 @@ void CombatManager::handleIdleRetreater(BWAPI::Unit unit)
 	goDefend(unit);
 
 	auto idle_retreater_count = 0;
-	for (auto u : m_attack_units_)
+	for (auto u : m_attack_units)
 		if (fighter_status_map[u] == Enums::retreating)
 		{
 			idle_retreater_count++;
@@ -240,7 +240,7 @@ void CombatManager::handleIdleRallyer(BWAPI::Unit unit)
 	{
 		rallying = false;
 		std::cout << "Rushers grouped up - start attacking!\n";
-		for (auto* u : m_attack_units_)
+		for (auto* u : m_attack_units)
 		{
 			if (fighter_status_map[u] == Enums::attacking || fighter_status_map[u] == Enums::rallying)
 			{
@@ -269,7 +269,7 @@ void CombatManager::updateCombatStatus()
 	if (rallying) return;
 
 	auto idle_count = 0;
-	for (auto u : m_attack_units_)
+	for (auto u : m_attack_units)
 	{
 		if (fighter_status_map[u] != Enums::attacking) continue;
 		if (!u->isIdle()) continue;
@@ -400,7 +400,7 @@ void CombatManager::updateAttackStatus()
 	// If not currently marked as under attack, check if we ARE under attack
 	for (auto* u : units_nearby)
 	{
-		if (u->getPlayer()->isEnemy(BWAPI::Broodwar->self())) // TODO må godt være en worker
+		if (u->getPlayer()->isEnemy(BWAPI::Broodwar->self())) // TODO mï¿½ godt vï¿½re en worker
 		{
 			std::cout << "We're under attack!\n";
 			under_attack = true;
@@ -437,9 +437,9 @@ void CombatManager::startRushing()
 	std::vector<BWAPI::Unit> rush_squad = {};
 	auto count = 0;
 	// Turn half of our attack units into combat units
-	for (auto* u : m_attack_units_)
+	for (auto* u : m_attack_units)
 	{
-		if (count >= m_attack_units_.size() * 0.75) break;
+		if (count >= m_attack_units.size() * 0.75) break;
 		total_rusher_count++;
 		goRally(u);
 		count++;
@@ -460,7 +460,7 @@ void CombatManager::retreatFromCombat()
 	lost_rusher_count = 0;
 	total_rusher_count = 0;
 
-	for (auto* u : m_attack_units_)
+	for (auto* u : m_attack_units)
 	{
 		if (fighter_status_map[u] == Enums::attacking || fighter_status_map[u] == Enums::rallying)
 		{

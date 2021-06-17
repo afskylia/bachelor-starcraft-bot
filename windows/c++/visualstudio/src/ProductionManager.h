@@ -5,6 +5,8 @@
 #include <queue>
 #include "BWEM/src/bwem.h"
 
+#include "BuildOrderData.h"
+
 namespace MiraBot
 {
 	class ProductionManager
@@ -31,6 +33,8 @@ namespace MiraBot
 
 		// Pop from build queue if we can start building it
 		void pollBuildQueue();
+
+		BuildOrderData m_build_order_data;
 
 	public:
 		// The build queue: contains the items we need to build asap
