@@ -145,7 +145,7 @@ void WorkerManager::updateWorkerCounts()
 		num_patches += base->Minerals().size();
 		num_geysers += base->Geysers().size();
 	}
-	max_workers = num_patches * 2 + m_workerData.getWorkers(WorkerData::Scout).size() + 1;
+	max_workers = num_patches * 2 + m_workerData.getWorkers(WorkerData::Scout).size() + 5;
 }
 
 BWAPI::Unit WorkerManager::getClosestDepot(BWAPI::Unit worker)
@@ -297,7 +297,7 @@ void WorkerManager::handleIdleBuildWorker(BWAPI::Unit worker)
 	while (!built && attempts < 5)
 	{
 		const auto creep = building_type.requiresCreep();
-		building_pos = BWAPI::Broodwar->getBuildLocation(building_type, building_pos, 64, creep);
+		building_pos = BWAPI::Broodwar->getBuildLocation(building_type, building_pos, 100, creep);
 		built = worker->build(building_type, building_pos);
 		attempts++;
 	}

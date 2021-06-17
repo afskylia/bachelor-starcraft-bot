@@ -138,10 +138,20 @@ void WorkerData::setWorkerJob(BWAPI::Unit unit, enum WorkerJob job, BWAPI::Unit 
 
 				if (!mineral_to_mine)
 				{
-					// Expand!
-					std::cout << "Creating new expo\n";
-					m_workerAreaMap[unit] = Global::production().createNewExpo();
-					mineral_to_mine = getMineralToMine(unit);
+					// Build at most 3 expos
+					if (Global::map().expos.size() >= 3)
+					{
+						std::cout << "Limit for expos reached - sending unit to existing mineral patch\n";
+						auto mineral_unit = unit->getClosestUnit(BWAPI::Filter::IsMineralField);
+						mineral_to_mine = Global::map().map.GetMineral(mineral_unit);
+					}
+					else
+					{
+						// Expand!
+						std::cout << "Creating new expo\n";
+						m_workerAreaMap[unit] = Global::production().createNewExpo();
+						mineral_to_mine = getMineralToMine(unit);
+					}
 				}
 			}
 

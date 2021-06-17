@@ -141,8 +141,10 @@ void ProductionManager::activateIdleBuildings()
 	 */
 
 	const auto worker_type = BWAPI::Broodwar->self()->getRace().getWorker();
-	const auto workers_wanted = 50;
-	trainUnitInBuilding(worker_type, workers_wanted);
+	auto num_workers = Global::workers().m_workerData.getWorkers(WorkerData::Minerals).size();
+	auto max_workers = Global::workers().max_workers;
+	if (num_workers < max_workers)
+		trainUnitInBuilding(worker_type, 1);
 
 	// TODO this seems bugged, only zealots are built
 
@@ -204,17 +206,20 @@ bool ProductionManager::buildBuilding(const BWAPI::UnitType type, const BWEM::Ar
 	// Get a location that we want to build the building next to
 	auto desired_pos = BWAPI::TilePosition(area->Bases().front().Center());
 
-	if (type == BWAPI::UnitTypes::Protoss_Photon_Cannon)
-	{
-		// TODO chokepoint closest to enemy base
-		auto chokepoints = Global::map().expos.front()->ChokePoints();
-		desired_pos = BWAPI::TilePosition(chokepoints.front()->Center());
-	}
-
 	// Ask BWAPI for a building location near the desired position for the type
-	const auto max_build_range = 64;
 	const auto building_on_creep = type.requiresCreep();
-	const auto build_pos = BWAPI::Broodwar->getBuildLocation(type, desired_pos, max_build_range, building_on_creep);
+	const auto build_pos = BWAPI::Broodwar->getBuildLocation(type, desired_pos, 100, building_on_creep);
+
+	if (!BWAPI::Broodwar->canBuildHere(BWAPI::TilePosition(build_pos), type))
+	{
+		if (type.requiresPsi())
+		{
+			std::cout << "we need pylons for this one fam\n";
+			//auto pylons = Tools::getUnitsOfType(BWAPI::UnitTypes::Protoss_Pylon);
+		}
+		std::cout << type << " NOT BUILDABLE\n";
+		return false;
+	}
 
 	// Try to build the structure
 	auto* builder = Global::workers().getBuilder(builder_type, BWAPI::Position(build_pos));
@@ -390,13 +395,12 @@ void ProductionManager::trainUnitInBuilding(BWAPI::UnitType unit_type, int units
 	auto idle_buildings = Tools::getUnitsOfType(unit_type.whatBuilds().first, true);
 	auto owned = Tools::countUnitsOfType(unit_type);
 
-	while (owned <= units_wanted && !idle_buildings.empty())
+	while (!idle_buildings.empty()) //&& owned <= units_wanted
 	{
 		auto* idle_building = idle_buildings.back();
 		if (!idle_building) return;
 		if (idle_building->train(unit_type)) return;
 		idle_buildings.pop_back();
-		owned++;
 	}
 }
 
@@ -429,8 +433,10 @@ const BWEM::Area* ProductionManager::createNewExpo()
 	}
 
 	Global::map().expos.push_back(new_area);
-	m_build_queue_.push_front(BWAPI::UnitTypes::Protoss_Photon_Cannon);
 	m_build_queue_.push_front(BWAPI::UnitTypes::Protoss_Nexus);
+	// TODO: Cannons require a pylon, so it will glitch out if the pylon hasn't been built yet... find a way to fix this bug
+	//m_build_queue_.push_front(BWAPI::UnitTypes::Protoss_Photon_Cannon);
+	m_build_queue_.push_front(BWAPI::UnitTypes::Protoss_Pylon);
 
 	return new_area;
 }
