@@ -18,7 +18,7 @@ namespace MiraBot
 		Grid<int> m_buildable; // whether a tile is buildable (includes static resources)
 		Grid<int> m_depotBuildable;
 		// whether a depot is buildable on a tile (illegal within 3 tiles of static resource)
-		Grid<int> m_lastSeen; // the last time any of our units has seen this position on the map
+		Grid<int> last_seen; // the last time any of our units has seen this position on the map
 		int m_width = 0;
 		int m_height = 0;
 		int m_frame = 0;
@@ -30,6 +30,7 @@ namespace MiraBot
 
 
 	public:
+
 
 		MapTools();
 
@@ -63,6 +64,7 @@ namespace MiraBot
 		bool isDepotBuildableTile(int tile_x, int tile_y) const;
 		static void drawTile(int tile_x, int tile_y, const BWAPI::Color& color);
 
+		int MapTools::lastSeen(BWAPI::TilePosition pos);
 		std::vector<BWEM::ChokePoint*> getChokePoints();
 		BWAPI::Position getClosestCP(BWAPI::TilePosition tile_pos) const;
 	};

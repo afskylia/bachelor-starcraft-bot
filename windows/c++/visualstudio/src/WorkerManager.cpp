@@ -20,7 +20,7 @@ void WorkerManager::onFrame()
 	// Send idle workers to gather resources
 	activateIdleWorkers();
 
-	if (BWAPI::Broodwar->getFrameCount() % 2500 == 0 && should_have_new_scout)
+	if (BWAPI::Broodwar->getFrameCount() % 7919 == 0 && should_have_new_scout)
 	{
 		auto new_scout = getAnyWorker();
 		m_workerData.setWorkerJob(new_scout, WorkerData::Scout, scout_last_known_position);
@@ -37,7 +37,9 @@ void WorkerManager::updateWorkerStatus()
 
 
 		// Workers can be idle for various reasons, e.g. a builder waiting to build
-		if (worker->isIdle())
+		if (worker->isIdle()
+			//|| worker->isStuck() || !worker->isAccelerating()
+		)
 		{
 			switch (job)
 			{
@@ -159,7 +161,7 @@ BWAPI::Unit WorkerManager::getClosestDepot(BWAPI::Unit worker)
 BWAPI::Position WorkerManager::getScoutPosition(BWAPI::Unit scout)
 {
 	// if we found enemy, we don't have more positions
-	if (Global::information().enemy_start_location) return BWAPI::Positions::None;
+	//if (Global::information().enemy_start_location) return BWAPI::Positions::None;
 
 	auto& startLocations = BWAPI::Broodwar->getStartLocations();
 
@@ -168,7 +170,9 @@ BWAPI::Position WorkerManager::getScoutPosition(BWAPI::Unit scout)
 
 	for (BWAPI::TilePosition position : startLocations)
 	{
-		if (!BWAPI::Broodwar->isExplored(position))
+		auto pos = BWAPI::Position(position);
+		if (!BWAPI::Broodwar->isExplored(position) || (Global::map().lastSeen(position) > 5000 && !BWAPI::Broodwar->
+			isVisible(position)))
 		{
 			const BWAPI::Position pos(position);
 			const double distance = scout->getDistance(pos);

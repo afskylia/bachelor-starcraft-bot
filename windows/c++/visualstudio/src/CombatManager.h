@@ -57,7 +57,7 @@ namespace MiraBot
 		int lost_rusher_count = 0; // How many of our attack units have died this rush
 
 		// Set of all our attack units
-		BWAPI::Unitset m_attack_units_ = BWAPI::Unitset::none;
+		BWAPI::Unitset m_attack_units = BWAPI::Unitset::none;
 
 		// Map of units and the position of the chokepoint the unit is defending
 		std::map<BWAPI::Unit, BWAPI::Position> guard_map = {};

@@ -45,7 +45,7 @@ void MapTools::onStart()
 	m_walkable = Grid<int>(m_width, m_height, 1);
 	m_buildable = Grid<int>(m_width, m_height, 0);
 	m_depotBuildable = Grid<int>(m_width, m_height, 0);
-	m_lastSeen = Grid<int>(m_width, m_height, 0);
+	last_seen = Grid<int>(m_width, m_height, 0);
 
 	// Set the boolean grid data from the Map
 	for (auto x(0); x < m_width; ++x)
@@ -101,7 +101,7 @@ void MapTools::onFrame()
 		for (auto y = 0; y < m_height; ++y)
 		{
 			if (isVisible(x, y))
-				m_lastSeen.set(x, y, BWAPI::Broodwar->getFrameCount());
+				last_seen.set(x, y, BWAPI::Broodwar->getFrameCount());
 		}
 	}
 
@@ -112,6 +112,11 @@ void MapTools::onFrame()
 	utils::gridMapExample(map);
 	utils::drawMap(map);
 #endif
+}
+
+int MapTools::lastSeen(BWAPI::TilePosition pos)
+{
+	return last_seen.get(pos.x, pos.y);
 }
 
 void MapTools::toggleDraw()

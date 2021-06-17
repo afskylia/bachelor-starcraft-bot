@@ -4,6 +4,8 @@
 #include <BWAPI.h>
 #include <queue>
 
+#include "BuildOrderData.h"
+
 namespace MiraBot
 {
 	class ProductionManager
@@ -32,6 +34,8 @@ namespace MiraBot
 
 		// Pop from build queue if we can start building it
 		void pollBuildQueue();
+
+		BuildOrderData m_build_order_data;
 
 	public:
 

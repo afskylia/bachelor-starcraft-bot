@@ -151,10 +151,12 @@ void ProductionManager::activateIdleBuildings()
 	trainUnitInBuilding(worker_type, workers_wanted);
 
 	// TODO this seems bugged, only zealots are built
-	auto zealot_type = BWAPI::UnitTypes::Protoss_Zealot;
+
+	buildAttackUnits();
+	/*auto zealot_type = BWAPI::UnitTypes::Protoss_Zealot;
 	auto zealots_wanted = 30;
 	trainUnitInBuilding(zealot_type, zealots_wanted);
-	trainUnitInBuilding(BWAPI::UnitTypes::Protoss_Dragoon, 30);
+	trainUnitInBuilding(BWAPI::UnitTypes::Protoss_Dragoon, 30);*/
 }
 
 
@@ -212,6 +214,27 @@ bool ProductionManager::buildBuilding(const BWAPI::UnitType type)
 	// Assign job to builder unit
 	Global::workers().setBuildingWorker(builder, WorkerData::BuildJob{build_pos, type});
 	return true;
+}
+
+void ProductionManager::buildAttackUnits()
+{
+	auto units = Global::combat().m_attack_units;
+	for (auto [percentage_of_units_needed, unit_type] : m_build_order_data.attack_unit_list)
+	{
+		double owned = Tools::countUnitsOfType(unit_type);
+		if (units.empty())
+		{
+			trainUnitInBuilding(unit_type, owned + 5);
+			break;
+		}
+		double units_size = units.size();
+		double percentage_owned = owned / units_size;
+		// Should we train more units if percentage is not met
+		if (percentage_of_units_needed > percentage_owned)
+		{
+			trainUnitInBuilding(unit_type, owned + 1);
+		}
+	}
 }
 
 // Builds additional supply if needed
@@ -349,126 +372,6 @@ void ProductionManager::onUnitDestroy(BWAPI::Unit unit)
 
 void ProductionManager::onUnitComplete(BWAPI::Unit unit)
 {
-}
-
-/**
- * Try to compare units with required units and build difference.
- * This is not enforced on every frame of the game, since that would
- * lead to buildings being enqueued multiple times due to delays.
- */
-[[deprecated]]
-void ProductionManager::tryCompareUnitsAndBuild()
-{
-	const int frame_count = BWAPI::Broodwar->getFrameCount();
-	if (frame_count == m_last_build_frame_ + 20)
-	{
-		compareUnitsAndBuild();
-	}
-}
-
-[[deprecated]]
-bool ProductionManager::trainUnit(const BWAPI::UnitType& unit, BWAPI::Unit depot)
-{
-	if (unit.mineralPrice() > Global::production().getTotalMinerals()) { return false; }
-	if (unit.gasPrice() > Global::production().getTotalGas()) { return false; }
-
-	if (depot && !depot->isTraining())
-	{
-		depot->train(unit);
-		return true;
-	}
-	return false;
-}
-
-/**
- * Compare units with required units and build difference
- */
-[[deprecated]]
-void ProductionManager::compareUnitsAndBuild()
-{
-	auto all_units = getMapOfAllUnits();
-	auto required_units = getMapOfRequiredUnits();
-
-	// TODO if maps are the same, return
-
-	for (auto [req_type, req_amount] : required_units)
-	{
-		auto owned_units = Tools::getUnitsOfType(req_type, false, false);
-		auto amount_owned = owned_units.size();
-
-		//if (owned_units.size() < req_amount) continue;
-
-		while (amount_owned < req_amount)
-		{
-			addToBuildQueue(req_type);
-			amount_owned++;
-		}
-	}
-
-	tryBuildOrTrainUnit();
-}
-
-[[deprecated]]
-bool ProductionManager::addToBuildQueue(const BWAPI::UnitType& unit_type)
-{
-	// TODO this is a hotfix
-	if (unit_type == BWAPI::Broodwar->self()->getRace().getWorker()) return true;
-
-	if (std::find(m_build_queue_.begin(), m_build_queue_.end(), unit_type) == m_build_queue_.end())
-	{
-		// Add unit to build queue and remove from build order
-		m_build_queue_.push_back(unit_type);
-
-		// TODO debug
-		for (auto build_queue : m_build_queue_)
-		{
-			//std::cout << build_queue;
-		}
-		//std::cout << "\n";
-		//std::cout << "Adding " << unit_type << " to build queue\n";
-		return true;
-	}
-	return false;
-}
-
-/**
- * @return map of all built units <number of units, UnitType>
- */
-[[deprecated]]
-std::map<BWAPI::UnitType, int> ProductionManager::getMapOfAllUnits()
-{
-	std::map<BWAPI::UnitType, int> all_units;
-
-	auto units = BWAPI::Broodwar->self()->getUnits();
-	for (auto* unit : units)
-	{
-		all_units[unit->getType()]++;
-	}
-	return all_units;
-}
-
-/**
- * @return map of required units <number of units, UnitType>
- */
-[[deprecated]]
-std::map<BWAPI::UnitType, int> ProductionManager::getMapOfRequiredUnits()
-{
-	std::map<BWAPI::UnitType, int> required_units;
-
-	// Get next supply
-	const int supply = (Tools::getTotalUsedSupply(true) / 2);
-
-	// Iterate build order
-	for (auto [supply_lvl, unit_type] : Global::strategy().m_build_order)
-	{
-		// If unit needed to be build, add it to required_units
-		if (supply_lvl <= supply)
-		{
-			required_units[unit_type.first]++;
-		}
-	}
-
-	return required_units;
 }
 
 
