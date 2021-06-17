@@ -259,6 +259,7 @@ BWAPI::Unit WorkerManager::getAnyWorker(BWAPI::Position pos)
 // Handles a build-worker who is idling
 void WorkerManager::handleIdleBuildWorker(BWAPI::Unit worker)
 {
+	if (worker->isConstructing()) return;
 	// Get build job assigned to worker
 	const auto building_type = m_workerData.m_workerBuildingTypeMap[worker];
 	auto building_pos = m_workerData.m_buildPosMap[worker];

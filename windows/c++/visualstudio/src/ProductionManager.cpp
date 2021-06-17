@@ -38,7 +38,16 @@ void ProductionManager::pollBuildOrder()
 		supply--;
 
 	if (supply == prev_supply) return;
-	if (prev_supply > supply) std::cout << "lvl > supply\n";
+	if (prev_supply > supply)
+	{
+		if (Global::strategy().m_build_order.count(supply))
+		{
+			std::cout << "sup\n";
+			pushToBuildQueue(supply);
+			prev_supply = supply;
+		}
+		std::cout << "lvl > supply\n";
+	}
 
 	// From prev_supply up to current supply, enqueue missing units
 	auto lvl = prev_supply + 1;
@@ -173,7 +182,7 @@ bool ProductionManager::trainUnit(const BWAPI::UnitType& unit_type)
 bool ProductionManager::buildBuilding(BWAPI::UnitType type)
 {
 	const auto* area = Global::map().expos.front();
-	if (type == BWAPI::UnitTypes::Protoss_Nexus)
+	if (type == BWAPI::UnitTypes::Protoss_Nexus || type == BWAPI::UnitTypes::Protoss_Photon_Cannon)
 		area = Global::map().expos.back();
 
 	return buildBuilding(type, area);
@@ -195,6 +204,7 @@ bool ProductionManager::buildBuilding(const BWAPI::UnitType type, const BWEM::Ar
 
 	if (type == BWAPI::UnitTypes::Protoss_Photon_Cannon)
 	{
+		// TODO chokepoint closest to enemy base
 		auto chokepoints = Global::map().expos.front()->ChokePoints();
 		desired_pos = BWAPI::TilePosition(chokepoints.front()->Center());
 	}
@@ -499,7 +509,14 @@ const BWEM::Area* ProductionManager::createNewExpo()
 	{
 		if (!area.AccessibleFrom(Global::map().expos.front()))continue;
 		if (area.Bases().empty() || area.Minerals().empty()) continue;
+
+		// Check if we already expanded here
 		if (std::find(expos.begin(), expos.end(), &area) != expos.end()) continue;
+
+		// Check if this is an enemy base // TODO what if we don't know yet?
+		if (std::find(Global::information().enemy_areas.begin(), Global::information().enemy_areas.end(), &area) !=
+			Global::information().enemy_areas.end())
+			continue;
 
 		const auto _dist = prev->Bases()[0].Center().getDistance(area.Bases()[0].Center());
 		if (_dist < dist)
@@ -510,8 +527,8 @@ const BWEM::Area* ProductionManager::createNewExpo()
 	}
 
 	Global::map().expos.push_back(new_area);
+	m_build_queue_.push_front(BWAPI::UnitTypes::Protoss_Photon_Cannon);
 	m_build_queue_.push_front(BWAPI::UnitTypes::Protoss_Nexus);
-	// TODO: refactor build queue to contain <unittype, area> pairs
 
 	return new_area;
 }

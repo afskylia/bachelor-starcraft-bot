@@ -288,11 +288,9 @@ void CombatManager::updateCombatStatus()
 				u->stop(); // ikke sikker på om det virker
 			}
 		}
-
-		return;
 	}
 
-	auto idle_count = 0;
+	/*auto idle_count = 0;
 	for (auto u : m_attack_units_)
 	{
 		if (fighter_status_map[u] != Enums::attacking) continue;
@@ -311,7 +309,7 @@ void CombatManager::updateCombatStatus()
 	{
 		std::cout << "idle_count >= rushers\n";
 		retreatFromCombat();
-	}
+	}*/
 }
 
 void CombatManager::setTarget(BWAPI::Unit unit, BWAPI::Unit target)
@@ -539,7 +537,7 @@ void CombatManager::setRushTarget()
 	// Choose rally point
 	//const auto target_neighbors = rush_target->AccessibleNeighbours();
 	//rally_point = Global::map().getClosestArea(Global::map().expos.front(), target_neighbors);
-	rally_point = Global::map().expos.back(); // Rally at our furthest base
+	rally_point = Global::map().expos.front(); // Rally at our base
 
 	auto target_pos = rush_target->Bases()[0].Center();
 	auto rally_pos = rally_point->Bases()[0].Center();
