@@ -279,7 +279,13 @@ void CombatManager::updateCombatStatus()
 	{
 		for (auto u : m_attack_units)
 		{
-			if (fighter_status_map[u] != Enums::rallying) continue;
+			if (fighter_status_map[u] != Enums::rallying || fighter_status_map[u] != Enums::attacking) continue;
+			if (!Global::map().isWalkable(u->getTilePosition()))
+			{
+				std::cout << "NOT WALKABLE\n";
+				u->stop();
+			}
+
 			if (u->isStuck())
 			{
 				std::cout << "HALP\n";

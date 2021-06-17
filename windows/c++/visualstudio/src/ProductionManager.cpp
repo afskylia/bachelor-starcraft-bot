@@ -42,11 +42,9 @@ void ProductionManager::pollBuildOrder()
 	{
 		if (Global::strategy().m_build_order.count(supply))
 		{
-			std::cout << "sup\n";
 			pushToBuildQueue(supply);
 			prev_supply = supply;
 		}
-		std::cout << "lvl > supply\n";
 	}
 
 	// From prev_supply up to current supply, enqueue missing units
@@ -64,10 +62,9 @@ void ProductionManager::pollBuildOrder()
 // Push unit type at given supply lvl to build queue if not already enqueued
 bool ProductionManager::pushToBuildQueue(int supply_lvl)
 {
-	// TODO: Make null proof
 	const auto unit_type = Global::strategy().m_build_order[supply_lvl];
 
-	// TODO enqueue requirements if we don't already have them
+	// TODO enqueue requirements if we don't already have them?
 
 	const auto unit = unit_type.first;
 	const auto number_needed = unit_type.second;
@@ -101,26 +98,15 @@ void ProductionManager::tryBuildOrTrainUnit()
 
 		const auto& unit = m_build_queue_keep_building_.front();
 		if (unit.isBuilding() && buildBuilding(unit) || trainUnit(unit))
-		{
-			std::cout << "Popping another " << unit << "\n";
 			m_build_queue_keep_building_.pop_front();
-		}
-	}
-	else
-	{
-		const auto& unit_type = m_build_queue_.front();
 
-		// Try to build or train unit, remove from queue upon success
-		if ((unit_type.isBuilding() && buildBuilding(unit_type)) || trainUnit(unit_type))
-		{
-			std::cout << "Popping " << unit_type << " from build queue\n";
-			m_build_queue_.pop_front();
-		}
-		else
-		{
-			auto a = "bai\n";
-		}
+		return;
 	}
+
+	// Try to build or train unit, remove from queue upon success
+	const auto& unit_type = m_build_queue_.front();
+	if ((unit_type.isBuilding() && buildBuilding(unit_type)) || trainUnit(unit_type))
+		m_build_queue_.pop_front();
 }
 
 
@@ -144,7 +130,7 @@ void ProductionManager::activateIdleBuildings()
 	auto num_workers = Global::workers().m_workerData.getWorkers(WorkerData::Minerals).size();
 	auto max_workers = Global::workers().max_workers;
 	if (num_workers < max_workers)
-		trainUnitInBuilding(worker_type, 1);
+		trainUnitInBuilding(worker_type, max_workers);
 
 	// TODO this seems bugged, only zealots are built
 
@@ -186,7 +172,7 @@ bool ProductionManager::trainUnit(const BWAPI::UnitType& unit_type)
 bool ProductionManager::buildBuilding(BWAPI::UnitType type)
 {
 	const auto* area = Global::map().expos.front();
-	if (type == BWAPI::UnitTypes::Protoss_Nexus || type == BWAPI::UnitTypes::Protoss_Photon_Cannon)
+	if (type == BWAPI::UnitTypes::Protoss_Nexus) // || type == BWAPI::UnitTypes::Protoss_Photon_Cannon
 		area = Global::map().expos.back();
 
 	return buildBuilding(type, area);
@@ -424,7 +410,7 @@ const BWEM::Area* ProductionManager::createNewExpo()
 			Global::information().enemy_areas.end())
 			continue;
 
-		const auto _dist = prev->Bases()[0].Center().getDistance(area.Bases()[0].Center());
+		const auto _dist = prev->Minerals()[0]->Pos().getDistance(area.Minerals()[0]->Pos());
 		if (_dist < dist)
 		{
 			new_area = &area;

@@ -145,7 +145,7 @@ void WorkerManager::updateWorkerCounts()
 		num_patches += base->Minerals().size();
 		num_geysers += base->Geysers().size();
 	}
-	max_workers = num_patches * 2 + m_workerData.getWorkers(WorkerData::Scout).size() + 5;
+	max_workers = num_patches * 3 + m_workerData.getWorkers(WorkerData::Scout).size() + 5;
 }
 
 BWAPI::Unit WorkerManager::getClosestDepot(BWAPI::Unit worker)
@@ -271,7 +271,6 @@ BWAPI::Unit WorkerManager::getAnyWorker(BWAPI::Position pos)
 // Handles a build-worker who is idling
 void WorkerManager::handleIdleBuildWorker(BWAPI::Unit worker)
 {
-	if (worker->isConstructing()) return;
 	// Get build job assigned to worker
 	const auto building_type = m_workerData.m_workerBuildingTypeMap[worker];
 	auto building_pos = m_workerData.m_buildPosMap[worker];
@@ -288,34 +287,31 @@ void WorkerManager::handleIdleBuildWorker(BWAPI::Unit worker)
 		return;
 	if (building_type.gasPrice() > 0 && building_type.gasPrice() + 10 > BWAPI::Broodwar->self()->gas()) return;
 
-	// If not enough supply, we need more supply
-	//if (building_type.supplyRequired() > BWAPI::Broodwar->self()->supplyTotal)
 
 	// Try to place the building and generate new position if the first one fails
 	auto attempts = 0;
+	auto canbuild = BWAPI::Broodwar->canBuildHere(building_pos, building_type);
 	bool built = worker->build(building_type, building_pos);
 	while (!built && attempts < 5)
 	{
 		const auto creep = building_type.requiresCreep();
 		building_pos = BWAPI::Broodwar->getBuildLocation(building_type, building_pos, 100, creep);
+		canbuild = BWAPI::Broodwar->canBuildHere(building_pos, building_type);
 		built = worker->build(building_type, building_pos);
 		attempts++;
 	}
 	if (!built)
 	{
-		// TODO figure out what to do in this case
 		// TODO det er fx når en bygning som er et requirement er ved at blive bygget men ikke er completed endnu
 		// TODO fx robotics/observatory
 		std::cout << "Failed to build " << building_type.getName() << "\n";
 		m_workerData.setWorkerJob(worker, WorkerData::Idle, nullptr);
-		//Global::production().m_build_queue_.push_front(building_type);
-		//Global::production().m_build_queue_.push_front(BWAPI::Broodwar->self()->getRace().getSupplyProvider());
 		return;
 	}
 
 	// Used in the beginning of the function next frame
 	m_workerData.m_workerBuildingTypeMap[worker] = BWAPI::UnitTypes::None;
-	std::cout << "Now building " << building_type.getName() << ", failcount: " << attempts << "\n";
+	std::cout << "Now building " << building_type.getName() << ", failcount: " << attempts << ", " << canbuild << "\n";
 }
 
 // Send worker to unexplored scout position
