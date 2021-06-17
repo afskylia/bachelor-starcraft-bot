@@ -97,7 +97,7 @@ void ProductionManager::tryBuildOrTrainUnit()
 		const auto& unit_type = m_build_queue_.front();
 
 		// Try to build or train unit, remove from queue upon success
-		if (unit_type.isBuilding() && buildBuilding(unit_type) || trainUnit(unit_type))
+		if ((unit_type.isBuilding() && buildBuilding(unit_type)) || trainUnit(unit_type))
 			m_build_queue_.pop_front();
 	}
 }
@@ -480,16 +480,16 @@ const BWEM::Area* ProductionManager::createNewExpo()
 {
 	const BWEM::Area* new_area = nullptr;
 	auto dist = DBL_MAX;
-	const auto* main = Global::map().expos.front();
 	auto expos = Global::map().expos;
-	std::cout << Global::map().map.Areas().size() << "\n";
+	const auto* prev = expos.back();
+
 	for (const BWEM::Area& area : Global::map().map.Areas())
 	{
 		if (!area.AccessibleFrom(Global::map().expos.front()))continue;
 		if (area.Bases().empty() || area.Minerals().empty()) continue;
 		if (std::find(expos.begin(), expos.end(), &area) != expos.end()) continue;
 
-		const auto _dist = main->Bases()[0].Center().getDistance(area.Bases()[0].Center());
+		const auto _dist = prev->Bases()[0].Center().getDistance(area.Bases()[0].Center());
 		if (_dist < dist)
 		{
 			new_area = &area;
@@ -498,7 +498,7 @@ const BWEM::Area* ProductionManager::createNewExpo()
 	}
 
 	Global::map().expos.push_back(new_area);
-	m_build_queue_.push_back(BWAPI::UnitTypes::Protoss_Nexus);
+	m_build_queue_.push_front(BWAPI::UnitTypes::Protoss_Nexus);
 	// TODO: refactor build queue to contain <unittype, area> pairs
 
 	return new_area;

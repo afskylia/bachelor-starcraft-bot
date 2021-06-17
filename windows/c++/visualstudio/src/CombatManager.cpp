@@ -241,6 +241,11 @@ void CombatManager::handleIdleRallyer(BWAPI::Unit unit)
 		rallied_rushers++;
 		fighter_status_map[unit] = Enums::attacking;
 	}
+	else
+	{
+		goRally(unit);
+		return;
+	}
 
 	if (rallied_rushers == (total_rusher_count - lost_rusher_count))
 	{
@@ -272,7 +277,20 @@ void CombatManager::updateCombatStatus()
 		return;
 	}
 
-	if (rallying) return;
+	if (rallying && rallied_rushers > (total_rusher_count - lost_rusher_count) / 2)
+	{
+		for (auto u : m_attack_units_)
+		{
+			if (fighter_status_map[u] != Enums::rallying) continue;
+			if (u->isStuck())
+			{
+				std::cout << "HALP\n";
+				u->stop();
+			}
+		}
+
+		return;
+	}
 
 	auto idle_count = 0;
 	for (auto u : m_attack_units_)
