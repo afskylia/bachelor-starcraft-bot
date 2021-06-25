@@ -186,16 +186,12 @@ void MiraBotMain::onSendText(std::string text)
 // so this will trigger when you issue the build command for most units
 void MiraBotMain::onUnitCreate(Unit unit)
 {
-	// TODO: Worker manager and combat manager have to decide which job to assign new units
-	if (unit->getType().isWorker()) Global::workers().onUnitCreate(unit);
-	// TODO: else combatmanager.onunitcreate()
-
-	Global::production().onUnitComplete(unit);
 }
 
 // Called whenever a unit finished construction, with a pointer to the unit
 void MiraBotMain::onUnitComplete(Unit unit)
 {
+	Global::workers().onUnitComplete(unit);
 	Global::production().onUnitComplete(unit);
 	Global::combat().onUnitComplete(unit);
 }

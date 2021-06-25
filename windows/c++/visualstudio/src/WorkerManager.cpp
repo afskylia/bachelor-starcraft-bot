@@ -125,8 +125,9 @@ void WorkerManager::setBuildingWorker(BWAPI::Unit unit, WorkerData::BuildJob bui
 }
 
 
-void WorkerManager::onUnitCreate(BWAPI::Unit unit)
+void WorkerManager::onUnitComplete(BWAPI::Unit unit)
 {
+	if (!unit->getType().isWorker()) return;
 	updateWorkerCounts();
 	m_workerData.addWorker(unit, WorkerData::Idle, nullptr);
 }

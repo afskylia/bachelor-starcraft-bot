@@ -22,7 +22,7 @@ namespace MiraBot
 		void activateIdleWorkers();
 		void trainAdditionalWorkers();
 		void onFrame();
-		void onUnitCreate(BWAPI::Unit unit);
+		void onUnitComplete(BWAPI::Unit unit);
 		void onUnitDestroy(BWAPI::Unit unit);
 		void updateWorkerCounts();
 
