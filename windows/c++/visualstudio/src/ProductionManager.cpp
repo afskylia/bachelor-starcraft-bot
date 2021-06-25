@@ -315,12 +315,12 @@ void ProductionManager::buildAdditionalSupply()
 	const auto supplyProviderType = BWAPI::Broodwar->self()->getRace().getSupplyProvider();
 
 	// Only build one supply depot at a time
-	if (pendingBuildingsCount(supplyProviderType) > 0) return;
+	//if (pendingBuildingsCount(supplyProviderType) > 0) return;
 
 	// If we have a sufficient amount of supply, we don't need to do anything TODO Still builds past supply 200, but we might need psi
 	/*if (BWAPI::Broodwar->self()->supplyTotal() != 200 && BWAPI::Broodwar->self()->supplyUsed() * 1.3 >=
 		Tools::getTotalSupply(true))*/
-	if (BWAPI::Broodwar->self()->supplyUsed() + 10 >= Tools::getTotalSupply(true))
+	if (BWAPI::Broodwar->self()->supplyUsed() + 20 >= Tools::getTotalSupply(true))
 	{
 		// Otherwise, we are going to build a supply provider
 		buildBuilding(supplyProviderType);
@@ -475,35 +475,18 @@ const BWEM::Area* ProductionManager::createNewExpo()
 		auto top_y = area.Top().y * 32;
 		auto top_pos = BWAPI::Position(top_x, top_y);
 
-		if (!area.AccessibleFrom(Global::map().expos.front()))
-		{
-			Global::map().addCircle(top_pos, "INACCESSIBLE");
-			std::cout << top_pos << "-> !area.AccessibleFrom(expos.front()\n";
-			continue;
-		}
-		if (area.Bases().empty() || area.Minerals().empty())
-		{
-			if (area.Bases().empty()) Global::map().addCircle(top_pos, "NO BASES");
-			else if (area.Minerals().empty()) Global::map().addCircle(top_pos, "NO MINERALS");
-			std::cout << top_pos << " -> area.Bases().empty(): " << area.Bases().empty() <<
-				", area.Minerals().empty(): " << area.Minerals().empty() << "\n";
-			continue;
-		}
+		if (!area.AccessibleFrom(Global::map().expos.front()))continue;
+
+		if (area.Bases().empty() || area.Minerals().empty()) continue;
 
 		// Check if we already expanded here
-		if (std::find(expos.begin(), expos.end(), &area) != expos.end())
-		{
-			std::cout << top_pos << "-> already expanded here\n";
-			continue;
-		}
+		if (std::find(expos.begin(), expos.end(), &area) != expos.end()) continue;
+
 
 		// Check if this is an enemy base // TODO what if we don't know yet?
 		if (std::find(Global::information().enemy_areas.begin(), Global::information().enemy_areas.end(), &area) !=
 			Global::information().enemy_areas.end())
-		{
-			std::cout << top_pos << " -> is enemy base\n";
 			continue;
-		}
 
 		//const auto _dist = prev->Minerals()[0]->Pos().getDistance(area.Minerals()[0]->Pos());
 		const auto _dist = Global::map().map.GetPath(prev->Bases()[0].Center(), area.Bases()[0].Center()).size();

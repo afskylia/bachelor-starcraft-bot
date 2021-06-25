@@ -414,6 +414,7 @@ void CombatManager::updateAttackStatus()
 			units_nearby.insert(u.begin(), u.end());
 		}
 	}
+	targets.insert(units_nearby.begin(), units_nearby.end());
 
 	// See if we're no longer under attack
 	if (under_attack)

@@ -19,10 +19,8 @@ namespace MiraBot
 		std::deque<BWAPI::UnitType> m_build_queue_keep_building_;
 
 		// The last supply level we enqueued
-		int prev_supply = 4;
 
 		// Units built/enqueued from build order (used when checking onUnitDestroy), initially contains the nexus (lvl 4)
-		std::vector<int> enqueued_levels = {4};
 		std::vector<BWAPI::UnitType> built_units;
 
 		std::map<int, BWAPI::UnitType> m_try_built_or_trained_;
@@ -42,6 +40,8 @@ namespace MiraBot
 		// The build queue: contains the items we need to build asap
 		std::deque<BWAPI::UnitType> m_build_queue_;
 		BuildingPlacer m_building_placer_;
+		std::vector<int> enqueued_levels = {4};
+		int prev_supply = 4;
 
 		ProductionManager();
 		void tryBuildOrTrainUnit();

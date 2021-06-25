@@ -16,18 +16,37 @@ using namespace MiraBot;
 std::map<int, std::pair<BWAPI::UnitType, int>> StrategyManager::getBuildOrder(BWAPI::Race enemy_race,
                                                                               Enums::strategy_type enemy_strategy)
 {
+	auto prev_build_order = m_build_order;
+	auto new_build_order = prev_build_order;
+
 	switch (enemy_race)
 	{
 	case BWAPI::Races::None:
-		return m_build_order_data.starter_build_order;
+		new_build_order = m_build_order_data.starter_build_order;
 	case BWAPI::Races::Terran:
-		return m_build_order_data.protoss_v_terran;
+		new_build_order = m_build_order_data.protoss_v_terran;
 	case BWAPI::Races::Protoss:
-		return m_build_order_data.protoss_v_protoss;
+		new_build_order = m_build_order_data.protoss_v_protoss;
 	case BWAPI::Races::Zerg:
-		return m_build_order_data.protoss_v_zerg;
-	default: return m_build_order_data.starter_build_order;
+		new_build_order = m_build_order_data.protoss_v_zerg;
+	default: new_build_order = m_build_order_data.starter_build_order;
 	}
+
+	if (prev_build_order != m_build_order)
+	{
+		// Reset build order information in production manager
+		Global::production().enqueued_levels = {4};
+		for (auto [lvl, pair] : prev_build_order)
+		{
+			if (new_build_order[lvl].first == pair.first)
+			{
+				std::cout << lvl << " SAME\n";
+				Global::production().enqueued_levels.push_back(lvl);
+				Global::production().prev_supply = lvl;
+			}
+		}
+	}
+	return new_build_order;
 }
 
 StrategyManager::StrategyManager()
