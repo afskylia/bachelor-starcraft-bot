@@ -93,7 +93,7 @@ bool StrategyManager::shouldStartRushing()
 
 	const auto our_attack_units = Global::combat().m_attack_units;
 
-	if (our_attack_units.size() >= 20 && enemy_attack_units.size() < our_attack_units.size())
+	if (our_attack_units.size() >= 15 && enemy_attack_units.size() < our_attack_units.size())
 		return true;
 
 	return false;

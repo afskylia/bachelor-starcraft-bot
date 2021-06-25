@@ -23,7 +23,7 @@ namespace MiraBot
 		std::set<std::pair<double, BWAPI::UnitType>, Cmp> attack_unit_list = {
 			{0.35, BWAPI::UnitTypes::Protoss_Zealot},
 			{0.55, BWAPI::UnitTypes::Protoss_Dragoon},
-			{0.1, BWAPI::UnitTypes::Protoss_High_Templar},
+			//{0.1, BWAPI::UnitTypes::Protoss_High_Templar},
 		};
 
 		std::map<int, std::pair<BWAPI::UnitType, int>> starter_build_order = {
@@ -32,9 +32,9 @@ namespace MiraBot
 			{11, std::make_pair(BWAPI::UnitTypes::Protoss_Forge, 1)},
 			{12, std::make_pair(BWAPI::UnitTypes::Protoss_Assimilator, 1)},
 			{13, std::make_pair(BWAPI::UnitTypes::Protoss_Cybernetics_Core, 1)},
-			{14, std::make_pair(BWAPI::UnitTypes::Protoss_Citadel_of_Adun, 1)},
+			//{14, std::make_pair(BWAPI::UnitTypes::Protoss_Citadel_of_Adun, 1)},
 			{15, std::make_pair(BWAPI::UnitTypes::Protoss_Photon_Cannon, 6)},
-			{20, std::make_pair(BWAPI::UnitTypes::Protoss_Templar_Archives, 1)},
+			//{20, std::make_pair(BWAPI::UnitTypes::Protoss_Templar_Archives, 1)},
 			// Tweaks by us
 			//{41, std::make_pair(BWAPI::UnitTypes::Protoss_Fleet_Beacon, 1)},
 		};
@@ -47,10 +47,10 @@ namespace MiraBot
 			{13, std::make_pair(BWAPI::UnitTypes::Protoss_Cybernetics_Core, 1)},
 			{15, std::make_pair(BWAPI::UnitTypes::Protoss_Photon_Cannon, 6)},
 			//{18, std::make_pair(BWAPI::UnitTypes::Protoss_Dragoon, 20)},
-			{26, std::make_pair(BWAPI::UnitTypes::Protoss_Robotics_Facility, 1)},
-			{30, std::make_pair(BWAPI::UnitTypes::Protoss_Citadel_of_Adun, 1)},
-			{40, std::make_pair(BWAPI::UnitTypes::Protoss_Templar_Archives, 1)},
-			{45, std::make_pair(BWAPI::UnitTypes::Protoss_Observatory, 1)},
+			//{26, std::make_pair(BWAPI::UnitTypes::Protoss_Robotics_Facility, 1)},
+			//{30, std::make_pair(BWAPI::UnitTypes::Protoss_Citadel_of_Adun, 1)},
+			//{40, std::make_pair(BWAPI::UnitTypes::Protoss_Templar_Archives, 1)},
+			//{45, std::make_pair(BWAPI::UnitTypes::Protoss_Observatory, 1)},
 			// Tweaks by us
 			//{41, std::make_pair(BWAPI::UnitTypes::Protoss_Fleet_Beacon, 1)},
 		};
@@ -61,9 +61,9 @@ namespace MiraBot
 			{11, std::make_pair(BWAPI::UnitTypes::Protoss_Forge, 1)},
 			{12, std::make_pair(BWAPI::UnitTypes::Protoss_Assimilator, 1)},
 			{13, std::make_pair(BWAPI::UnitTypes::Protoss_Cybernetics_Core, 1)},
-			{14, std::make_pair(BWAPI::UnitTypes::Protoss_Citadel_of_Adun, 1)},
+			//{14, std::make_pair(BWAPI::UnitTypes::Protoss_Citadel_of_Adun, 1)},
 			{15, std::make_pair(BWAPI::UnitTypes::Protoss_Photon_Cannon, 6)},
-			{20, std::make_pair(BWAPI::UnitTypes::Protoss_Templar_Archives, 1)},
+			//{20, std::make_pair(BWAPI::UnitTypes::Protoss_Templar_Archives, 1)},
 			// Tweaks by us
 			//{41, std::make_pair(BWAPI::UnitTypes::Protoss_Fleet_Beacon, 1)},
 		};
@@ -75,8 +75,8 @@ namespace MiraBot
 			{14, std::make_pair(BWAPI::UnitTypes::Protoss_Assimilator, 1)},
 			{15, std::make_pair(BWAPI::UnitTypes::Protoss_Cybernetics_Core, 1)},
 			{16, std::make_pair(BWAPI::UnitTypes::Protoss_Photon_Cannon, 6)},
-			{17, std::make_pair(BWAPI::UnitTypes::Protoss_Citadel_of_Adun, 1)},
-			{20, std::make_pair(BWAPI::UnitTypes::Protoss_Templar_Archives, 1)},
+			//{17, std::make_pair(BWAPI::UnitTypes::Protoss_Citadel_of_Adun, 1)},
+			//{20, std::make_pair(BWAPI::UnitTypes::Protoss_Templar_Archives, 1)},
 			// Tweaks by us
 			//{41, std::make_pair(BWAPI::UnitTypes::Protoss_Fleet_Beacon, 1)},
 		};

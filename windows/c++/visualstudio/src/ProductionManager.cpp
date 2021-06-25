@@ -177,8 +177,7 @@ void ProductionManager::activateIdleBuildings()
 	const auto worker_type = BWAPI::Broodwar->self()->getRace().getWorker();
 	auto num_workers = Global::workers().m_workerData.getWorkers(WorkerData::Minerals).size();
 	auto max_workers = Global::workers().max_workers;
-	if (num_workers < max_workers)
-		trainUnitInBuilding(worker_type, max_workers);
+	if (num_workers < max_workers) trainUnitInBuilding(worker_type, 1);
 
 	// TODO this seems bugged, only zealots are built
 
