@@ -94,7 +94,7 @@ void WorkerManager::activateIdleWorkers()
 
 			// We don't want more than 3 gas workers per refinery
 			if (refinery_count > 0 && gas_worker_count < mineral_worker_count / 4
-				&& gas_worker_count < 3) // TODO adjust gas worker count?
+				&& gas_worker_count < Tools::countUnitsOfType(refinery_type) * 4) // TODO adjust gas worker count?
 				setGasWorker(worker);
 			else setMineralWorker(worker);
 		}

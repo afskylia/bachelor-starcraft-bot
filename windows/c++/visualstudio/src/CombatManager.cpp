@@ -277,6 +277,7 @@ void CombatManager::updateCombatStatus()
 
 	if (rallying && rallied_rushers > (total_rusher_count - lost_rusher_count) / 2)
 	{
+		std::cout << "RALLIED!\n";
 		for (auto u : m_attack_units)
 		{
 			if (fighter_status_map[u] != Enums::rallying || fighter_status_map[u] != Enums::attacking) continue;
@@ -292,6 +293,17 @@ void CombatManager::updateCombatStatus()
 				u->stop(); // ikke sikker på om det virker
 			}
 		}
+	}
+
+	if (rallying)
+	{
+		const auto rally_pos = rally_point->Bases()[0].Center();
+		for (auto* u : m_attack_units)
+			if (u->getPosition().getDistance(rally_pos) > 200 && rally_point != Global::map().map.GetNearestArea(
+				BWAPI::TilePosition(u->getPosition()))) return;
+
+		// Start rushing is everyone is within 200 pixels of rallying point or in area
+		startRushing();
 	}
 
 	/*auto idle_count = 0;
@@ -546,7 +558,10 @@ void CombatManager::setRushTarget()
 	//const auto target_neighbors = rush_target->AccessibleNeighbours();
 	//rally_point = Global::map().getClosestArea(Global::map().expos.front(), target_neighbors);
 	//rally_point = Global::map().expos.front(); // Rally at our base
-	rally_point = Global::map().getClosestArea(rush_target, Global::map().expos);
+
+	//rally_point = Global::map().getClosestArea(rush_target, Global::map().expos);
+	auto closest_expo = Global::map().getClosestArea(rush_target, Global::map().expos);
+	rally_point = Global::map().getClosestArea(rush_target, closest_expo->AccessibleNeighbours());
 
 	auto target_pos = rush_target->Bases()[0].Center();
 	auto rally_pos = rally_point->Bases()[0].Center();

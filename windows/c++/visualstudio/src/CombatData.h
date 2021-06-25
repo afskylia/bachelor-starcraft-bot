@@ -10,6 +10,7 @@ public:
 		BWAPI::UnitTypes::Protoss_Arbiter,
 		BWAPI::UnitTypes::Protoss_Archon,
 		BWAPI::UnitTypes::Protoss_Dark_Templar,
+		BWAPI::UnitTypes::Protoss_High_Templar,
 		BWAPI::UnitTypes::Protoss_Dragoon,
 		BWAPI::UnitTypes::Protoss_Reaver,
 		BWAPI::UnitTypes::Protoss_Scout,

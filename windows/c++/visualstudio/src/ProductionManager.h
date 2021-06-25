@@ -30,6 +30,7 @@ namespace MiraBot
 
 		// Push the unit type at given supply lvl to build queue
 		bool pushToBuildQueue(int supply_lvl);
+		bool pushToBuildQueue(BWAPI::UnitType unit_type);
 
 		// Pop from build queue if we can start building it
 		void pollBuildQueue();

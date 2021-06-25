@@ -262,12 +262,13 @@ BWAPI::Position MapTools::getClosestCP(const BWAPI::TilePosition tile_pos) const
 	auto chokepoints = area->ChokePoints();
 	for (const auto* cp : chokepoints)
 	{
+		if (cp->Blocked()) continue;
+
 		auto cp_pos = BWAPI::Position(cp->Center());
 		closest_cp = cp_pos;
+
 		if (closest_cp == BWAPI::Positions::None || closest_cp.getDistance(pos) > cp_pos.getDistance(pos))
-		{
 			closest_cp = cp_pos;
-		}
 	}
 
 	return closest_cp;

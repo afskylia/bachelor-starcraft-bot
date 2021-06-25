@@ -139,7 +139,7 @@ void WorkerData::setWorkerJob(BWAPI::Unit unit, enum WorkerJob job, BWAPI::Unit 
 				if (!mineral_to_mine)
 				{
 					// Build at most 3 expos
-					if (Global::map().expos.size() >= 3)
+					if (Global::map().expos.size() >= 10)
 					{
 						std::cout << "Limit for expos reached - sending unit to existing mineral patch\n";
 						auto mineral_unit = unit->getClosestUnit(BWAPI::Filter::IsMineralField);
@@ -155,11 +155,25 @@ void WorkerData::setWorkerJob(BWAPI::Unit unit, enum WorkerJob job, BWAPI::Unit 
 				}
 			}
 
+			const auto p = Global::map().getClosestCP(BWAPI::TilePosition(mineral_to_mine->Pos()));
+			if (!mineral_to_mine->Unit()->isVisible() || m_workerMineralMap[unit] != nullptr)
+				unit->attack(p);
+
+			unit->gather(mineral_to_mine->Unit(), true);
+
 			m_workerMineralMap[unit] = mineral_to_mine;
 			m_workersOnMineralPatch[mineral_to_mine]++;
 
-			if (!mineral_to_mine->Unit()->isVisible()) unit->move(mineral_to_mine->Pos());
-			else unit->gather(mineral_to_mine->Unit());
+			////if (!mineral_to_mine->Unit()->isVisible()) unit->move(mineral_to_mine->Pos());
+			//	//if (!mineral_to_mine->Unit()->isVisible()) unit->attack(p);
+			//else
+			//{
+			//	// First send unit to position
+			//	unit->attack(p);
+
+			//	// Next start mining the mineral
+			//	unit->gather(mineral_to_mine->Unit(), true);
+			//}
 			break;
 		}
 

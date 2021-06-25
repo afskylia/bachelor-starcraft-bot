@@ -40,11 +40,16 @@ void ProductionManager::pollBuildOrder()
 	if (supply == prev_supply) return;
 	if (prev_supply > supply)
 	{
+		std::cout << "prev > supply\n";
+
 		if (Global::strategy().m_build_order.count(supply))
 		{
 			pushToBuildQueue(supply);
 			prev_supply = supply;
 		}
+
+		/*prev_supply = supply;
+		return;*/
 	}
 
 	// From prev_supply up to current supply, enqueue missing units
@@ -52,7 +57,13 @@ void ProductionManager::pollBuildOrder()
 	while (lvl <= supply)
 	{
 		if (Global::strategy().m_build_order.count(lvl))
-			pushToBuildQueue(lvl);
+		{
+			if (!pushToBuildQueue(lvl))
+			{
+				std::cout << "!pushToBuildQueue(lvl), " << Global::strategy().m_build_order[lvl].first << "\n";
+				break;
+			}
+		}
 		lvl++;
 	}
 
@@ -63,9 +74,6 @@ void ProductionManager::pollBuildOrder()
 bool ProductionManager::pushToBuildQueue(int supply_lvl)
 {
 	const auto unit_type = Global::strategy().m_build_order[supply_lvl];
-
-	// TODO enqueue requirements if we don't already have them?
-
 	const auto unit = unit_type.first;
 	const auto number_needed = unit_type.second;
 
@@ -73,7 +81,7 @@ bool ProductionManager::pushToBuildQueue(int supply_lvl)
 	if (std::find(enqueued_levels.begin(), enqueued_levels.end(), supply_lvl) == enqueued_levels.end())
 	{
 		// Push to build queue and save in enqueued levels for future checks
-		m_build_queue_.push_back(unit);
+		pushToBuildQueue(unit);
 		enqueued_levels.push_back(supply_lvl);
 		std::cout << "Added " << unit << " to build queue\n";
 		if (number_needed > 1)
@@ -85,7 +93,47 @@ bool ProductionManager::pushToBuildQueue(int supply_lvl)
 		}
 		return true;
 	}
+
+	std::cout << "already enqueued " << unit << "\n";
 	return false;
+}
+
+bool ProductionManager::pushToBuildQueue(BWAPI::UnitType unit_type)
+{
+	// Check if requirements are met - push them otherwise
+	for (auto [req_type, req_num] : unit_type.requiredUnits())
+	{
+		if (req_type == BWAPI::UnitTypes::None) continue;
+		auto is_active_buildjob = false;
+
+		for (auto b : Global::workers().getActiveBuildJobs())
+		{
+			if (b.unitType == req_type) is_active_buildjob = true;
+			break;
+		}
+
+		if (std::count(m_build_queue_.begin(), m_build_queue_.end(), req_type) ||
+			Tools::countUnitsOfType(req_type, false) || is_active_buildjob)
+			continue;
+
+		std::cout << "Enqueueing missing requirement for " << unit_type << ", " << req_type << "\n";
+		pushToBuildQueue(req_type);
+		//// Count number of enqueued units + number of completed units
+		//auto req_count = Tools::countUnitsOfType(req_type);
+		//for (auto type : m_build_queue_)
+		//	if (type == req_type) req_count++;
+
+		//// Enqueue missing 
+		//while (req_count < req_num)
+		//{
+		//	std::cout << "Enqueueing missing requirement for " << unit_type << ", " << req_type << "\n";
+		//	pushToBuildQueue(req_type);
+		//	req_count++;
+		//}
+	}
+
+	m_build_queue_.push_back(unit_type);
+	return true;
 }
 
 
@@ -193,8 +241,22 @@ bool ProductionManager::buildBuilding(const BWAPI::UnitType type, const BWEM::Ar
 	auto desired_pos = BWAPI::TilePosition(area->Bases().front().Center());
 
 	// Ask BWAPI for a building location near the desired position for the type
+
+	auto range = 200;
 	const auto building_on_creep = type.requiresCreep();
-	const auto build_pos = BWAPI::Broodwar->getBuildLocation(type, desired_pos, 100, building_on_creep);
+	auto build_pos = BWAPI::TilePositions::Invalid;
+	while (build_pos == BWAPI::TilePositions::Invalid)
+	{
+		if (range > 200) std::cout << "Couldn't find a build location, increasing range to " << range << "\n";
+		if (range > 3000)
+		{
+			std::cout << "NO BUILD LOCATION CAN BE FOUND ANYWHERE\n";
+			return false;
+		}
+		build_pos = BWAPI::Broodwar->getBuildLocation(type, desired_pos, range, building_on_creep);
+		range += 100;
+	}
+
 
 	if (!BWAPI::Broodwar->canBuildHere(BWAPI::TilePosition(build_pos), type))
 	{
@@ -397,20 +459,45 @@ const BWEM::Area* ProductionManager::createNewExpo()
 	auto expos = Global::map().expos;
 	const auto* prev = expos.back();
 
+
 	for (const BWEM::Area& area : Global::map().map.Areas())
 	{
-		if (!area.AccessibleFrom(Global::map().expos.front()))continue;
-		if (area.Bases().empty() || area.Minerals().empty()) continue;
+		auto top_x = area.Top().x * 32;
+		auto top_y = area.Top().y * 32;
+		auto top_pos = BWAPI::Position(top_x, top_y);
+
+		if (!area.AccessibleFrom(Global::map().expos.front()))
+		{
+			Global::map().addCircle(top_pos, "INACCESSIBLE");
+			std::cout << top_pos << "-> !area.AccessibleFrom(expos.front()\n";
+			continue;
+		}
+		if (area.Bases().empty() || area.Minerals().empty())
+		{
+			if (area.Bases().empty()) Global::map().addCircle(top_pos, "NO BASES");
+			else if (area.Minerals().empty()) Global::map().addCircle(top_pos, "NO MINERALS");
+			std::cout << top_pos << " -> area.Bases().empty(): " << area.Bases().empty() <<
+				", area.Minerals().empty(): " << area.Minerals().empty() << "\n";
+			continue;
+		}
 
 		// Check if we already expanded here
-		if (std::find(expos.begin(), expos.end(), &area) != expos.end()) continue;
+		if (std::find(expos.begin(), expos.end(), &area) != expos.end())
+		{
+			std::cout << top_pos << "-> already expanded here\n";
+			continue;
+		}
 
 		// Check if this is an enemy base // TODO what if we don't know yet?
 		if (std::find(Global::information().enemy_areas.begin(), Global::information().enemy_areas.end(), &area) !=
 			Global::information().enemy_areas.end())
+		{
+			std::cout << top_pos << " -> is enemy base\n";
 			continue;
+		}
 
-		const auto _dist = prev->Minerals()[0]->Pos().getDistance(area.Minerals()[0]->Pos());
+		//const auto _dist = prev->Minerals()[0]->Pos().getDistance(area.Minerals()[0]->Pos());
+		const auto _dist = Global::map().map.GetPath(prev->Bases()[0].Center(), area.Bases()[0].Center()).size();
 		if (_dist < dist)
 		{
 			new_area = &area;
