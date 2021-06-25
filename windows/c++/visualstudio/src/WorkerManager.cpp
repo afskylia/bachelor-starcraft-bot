@@ -146,7 +146,8 @@ void WorkerManager::updateWorkerCounts()
 		num_patches += base->Minerals().size();
 		num_geysers += base->Geysers().size();
 	}
-	max_workers = num_patches * 3 + m_workerData.getWorkers(WorkerData::Scout).size() + 5;
+	//max_workers = num_patches * 3 + m_workerData.getWorkers(WorkerData::Scout).size() + 5;
+	max_workers = 65;
 }
 
 BWAPI::Unit WorkerManager::getClosestDepot(BWAPI::Unit worker)

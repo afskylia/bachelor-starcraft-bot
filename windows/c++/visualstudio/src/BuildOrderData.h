@@ -33,7 +33,7 @@ namespace MiraBot
 			{12, std::make_pair(BWAPI::UnitTypes::Protoss_Assimilator, 1)},
 			{13, std::make_pair(BWAPI::UnitTypes::Protoss_Cybernetics_Core, 1)},
 			{14, std::make_pair(BWAPI::UnitTypes::Protoss_Citadel_of_Adun, 1)},
-			{15, std::make_pair(BWAPI::UnitTypes::Protoss_Photon_Cannon, 3)},
+			{15, std::make_pair(BWAPI::UnitTypes::Protoss_Photon_Cannon, 6)},
 			{20, std::make_pair(BWAPI::UnitTypes::Protoss_Templar_Archives, 1)},
 			// Tweaks by us
 			//{41, std::make_pair(BWAPI::UnitTypes::Protoss_Fleet_Beacon, 1)},
@@ -45,7 +45,7 @@ namespace MiraBot
 			{11, std::make_pair(BWAPI::UnitTypes::Protoss_Forge, 1)},
 			{12, std::make_pair(BWAPI::UnitTypes::Protoss_Assimilator, 1)},
 			{13, std::make_pair(BWAPI::UnitTypes::Protoss_Cybernetics_Core, 1)},
-			{15, std::make_pair(BWAPI::UnitTypes::Protoss_Photon_Cannon, 3)},
+			{15, std::make_pair(BWAPI::UnitTypes::Protoss_Photon_Cannon, 6)},
 			//{18, std::make_pair(BWAPI::UnitTypes::Protoss_Dragoon, 20)},
 			{26, std::make_pair(BWAPI::UnitTypes::Protoss_Robotics_Facility, 1)},
 			{30, std::make_pair(BWAPI::UnitTypes::Protoss_Citadel_of_Adun, 1)},
@@ -62,7 +62,7 @@ namespace MiraBot
 			{12, std::make_pair(BWAPI::UnitTypes::Protoss_Assimilator, 1)},
 			{13, std::make_pair(BWAPI::UnitTypes::Protoss_Cybernetics_Core, 1)},
 			{14, std::make_pair(BWAPI::UnitTypes::Protoss_Citadel_of_Adun, 1)},
-			{15, std::make_pair(BWAPI::UnitTypes::Protoss_Photon_Cannon, 3)},
+			{15, std::make_pair(BWAPI::UnitTypes::Protoss_Photon_Cannon, 6)},
 			{20, std::make_pair(BWAPI::UnitTypes::Protoss_Templar_Archives, 1)},
 			// Tweaks by us
 			//{41, std::make_pair(BWAPI::UnitTypes::Protoss_Fleet_Beacon, 1)},
@@ -74,7 +74,7 @@ namespace MiraBot
 			{11, std::make_pair(BWAPI::UnitTypes::Protoss_Forge, 1)},
 			{14, std::make_pair(BWAPI::UnitTypes::Protoss_Assimilator, 1)},
 			{15, std::make_pair(BWAPI::UnitTypes::Protoss_Cybernetics_Core, 1)},
-			{16, std::make_pair(BWAPI::UnitTypes::Protoss_Photon_Cannon, 3)},
+			{16, std::make_pair(BWAPI::UnitTypes::Protoss_Photon_Cannon, 6)},
 			{17, std::make_pair(BWAPI::UnitTypes::Protoss_Citadel_of_Adun, 1)},
 			{20, std::make_pair(BWAPI::UnitTypes::Protoss_Templar_Archives, 1)},
 			// Tweaks by us

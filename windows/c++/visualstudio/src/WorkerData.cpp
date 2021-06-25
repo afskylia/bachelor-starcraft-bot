@@ -139,7 +139,7 @@ void WorkerData::setWorkerJob(BWAPI::Unit unit, enum WorkerJob job, BWAPI::Unit 
 				if (!mineral_to_mine)
 				{
 					// Build at most 3 expos
-					if (Global::map().expos.size() >= 10)
+					if (Global::map().expos.size() >= 3)
 					{
 						std::cout << "Limit for expos reached - sending unit to existing mineral patch\n";
 						auto mineral_unit = unit->getClosestUnit(BWAPI::Filter::IsMineralField);
