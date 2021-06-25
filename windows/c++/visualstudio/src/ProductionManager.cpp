@@ -240,9 +240,15 @@ bool ProductionManager::buildBuilding(const BWAPI::UnitType type, const BWEM::Ar
 	// Get a location that we want to build the building next to
 	auto desired_pos = BWAPI::TilePosition(area->Bases().front().Center());
 
-	// Ask BWAPI for a building location near the desired position for the type
+	// Get building location near the desired position for the type, using BuildingPlacer from bwsal
+	auto build_pos = m_building_placer_.getBuildLocationNear(desired_pos, type);
+	if (!m_building_placer_.canBuildHereWithSpace(build_pos, type))
+	{
+		std::cout << "no space here!\n";
+		return false;
+	}
 
-	auto range = 200;
+	/*auto range = 200;
 	const auto building_on_creep = type.requiresCreep();
 	auto build_pos = BWAPI::TilePositions::Invalid;
 	while (build_pos == BWAPI::TilePositions::Invalid)
@@ -255,7 +261,7 @@ bool ProductionManager::buildBuilding(const BWAPI::UnitType type, const BWEM::Ar
 		}
 		build_pos = BWAPI::Broodwar->getBuildLocation(type, desired_pos, range, building_on_creep);
 		range += 100;
-	}
+	}*/
 
 
 	if (!BWAPI::Broodwar->canBuildHere(BWAPI::TilePosition(build_pos), type))

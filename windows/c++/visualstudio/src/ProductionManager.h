@@ -6,6 +6,7 @@
 #include "BWEM/src/bwem.h"
 
 #include "BuildOrderData.h"
+#include "BuildingPlacer.h"
 
 namespace MiraBot
 {
@@ -16,6 +17,7 @@ namespace MiraBot
 
 		// units that should be built multiple times
 		std::deque<BWAPI::UnitType> m_build_queue_keep_building_;
+		BuildingPlacer m_building_placer_;
 
 		// The last supply level we enqueued
 		int prev_supply = 4;
