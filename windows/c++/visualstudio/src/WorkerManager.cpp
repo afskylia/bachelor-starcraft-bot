@@ -295,8 +295,8 @@ void WorkerManager::handleIdleBuildWorker(BWAPI::Unit worker)
 	bool built = worker->build(building_type, building_pos);
 	while (!built && attempts < 5)
 	{
-		const auto creep = building_type.requiresCreep();
-		building_pos = BWAPI::Broodwar->getBuildLocation(building_type, building_pos, 100, creep);
+		//building_pos = BWAPI::Broodwar->getBuildLocation(building_type, building_pos, 100, creep);
+		building_pos = Global::production().m_building_placer_.getBuildLocationNear(building_pos, building_type);
 		canbuild = BWAPI::Broodwar->canBuildHere(building_pos, building_type);
 		built = worker->build(building_type, building_pos);
 		attempts++;

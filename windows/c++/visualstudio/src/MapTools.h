@@ -71,6 +71,7 @@ namespace MiraBot
 		std::vector<BWEM::ChokePoint*> getChokePoints();
 		BWAPI::Position getClosestCP(BWAPI::TilePosition tile_pos) const;
 
+		const BWEM::ChokePoint* getClosestCP(const BWEM::Area* in_area, const BWEM::Area* to_area = nullptr);
 		// Helper functions for debugging/showing different positions on the map
 		std::vector<std::pair<BWAPI::Position, const char*>> circles;
 

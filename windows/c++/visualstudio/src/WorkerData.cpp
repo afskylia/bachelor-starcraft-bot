@@ -155,9 +155,12 @@ void WorkerData::setWorkerJob(BWAPI::Unit unit, enum WorkerJob job, BWAPI::Unit 
 				}
 			}
 
-			const auto p = Global::map().getClosestCP(BWAPI::TilePosition(mineral_to_mine->Pos()));
-			if (!mineral_to_mine->Unit()->isVisible() || m_workerMineralMap[unit] != nullptr)
+			if (!mineral_to_mine->Unit()->isVisible()) unit->attack(mineral_to_mine->Pos());
+			else if (m_workerMineralMap[unit] != nullptr)
+			{
+				const auto p = Global::map().getClosestCP(BWAPI::TilePosition(mineral_to_mine->Pos()));
 				unit->attack(p);
+			}
 
 			unit->gather(mineral_to_mine->Unit(), true);
 

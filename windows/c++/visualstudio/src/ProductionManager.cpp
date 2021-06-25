@@ -230,6 +230,7 @@ bool ProductionManager::buildBuilding(BWAPI::UnitType type)
 // TODO: More strategic placement of buildings
 bool ProductionManager::buildBuilding(const BWAPI::UnitType type, const BWEM::Area* area)
 {
+	//m_building_placer_.setBuildDistance(1);
 	// If we have much less gas and minerals than required, it's not worth the wait
 	if (getTotalMinerals() < type.mineralPrice() * 0.9) return false;
 	if (getTotalGas() < type.gasPrice() * 0.9) return false;
@@ -240,29 +241,31 @@ bool ProductionManager::buildBuilding(const BWAPI::UnitType type, const BWEM::Ar
 	// Get a location that we want to build the building next to
 	auto desired_pos = BWAPI::TilePosition(area->Bases().front().Center());
 
+	//// If pylon, build near chokepoint if none there
+	//if (type == BWAPI::UnitTypes::Protoss_Pylon)
+	//{
+	//	m_building_placer_.setBuildDistance(3);
+
+	//	/*const auto closest_cp = BWAPI::Position(Global::map().getClosestCP(area)->Center());
+	//	auto num_pylons = 0;
+	//	for (auto u : BWAPI::Broodwar->getUnitsInRadius(closest_cp, 200))
+	//	{
+	//		if (u->getType() == type) num_pylons++;
+	//	}
+	//	if (num_pylons < 1) desired_pos = BWAPI::TilePosition(closest_cp);*/
+	//}
+
+	// If unit is e.g. a cannon, place near chokepoint closest to enemy starting location
+	if (type.canAttack()) desired_pos = BWAPI::TilePosition(Global::map().getClosestCP(area)->Center());
+
 	// Get building location near the desired position for the type, using BuildingPlacer from bwsal
 	auto build_pos = m_building_placer_.getBuildLocationNear(desired_pos, type);
 	if (!m_building_placer_.canBuildHereWithSpace(build_pos, type))
 	{
-		std::cout << "no space here!\n";
-		return false;
+		std::cout << type << ": no space here!\n";
+		build_pos = m_building_placer_.getBuildLocation(type);
+		//build_pos = m_building_placer_.getBuildLocationNear(desired_pos, type);
 	}
-
-	/*auto range = 200;
-	const auto building_on_creep = type.requiresCreep();
-	auto build_pos = BWAPI::TilePositions::Invalid;
-	while (build_pos == BWAPI::TilePositions::Invalid)
-	{
-		if (range > 200) std::cout << "Couldn't find a build location, increasing range to " << range << "\n";
-		if (range > 3000)
-		{
-			std::cout << "NO BUILD LOCATION CAN BE FOUND ANYWHERE\n";
-			return false;
-		}
-		build_pos = BWAPI::Broodwar->getBuildLocation(type, desired_pos, range, building_on_creep);
-		range += 100;
-	}*/
-
 
 	if (!BWAPI::Broodwar->canBuildHere(BWAPI::TilePosition(build_pos), type))
 	{

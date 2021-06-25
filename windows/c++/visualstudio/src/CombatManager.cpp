@@ -300,7 +300,8 @@ void CombatManager::updateCombatStatus()
 		const auto rally_pos = rally_point->Bases()[0].Center();
 		for (auto* u : m_attack_units)
 			if (u->getPosition().getDistance(rally_pos) > 200 && rally_point != Global::map().map.GetNearestArea(
-				BWAPI::TilePosition(u->getPosition()))) return;
+				BWAPI::TilePosition(u->getPosition())))
+				return;
 
 		// Start rushing is everyone is within 200 pixels of rallying point or in area
 		startRushing();
@@ -562,10 +563,4 @@ void CombatManager::setRushTarget()
 	//rally_point = Global::map().getClosestArea(rush_target, Global::map().expos);
 	auto closest_expo = Global::map().getClosestArea(rush_target, Global::map().expos);
 	rally_point = Global::map().getClosestArea(rush_target, closest_expo->AccessibleNeighbours());
-
-	auto target_pos = rush_target->Bases()[0].Center();
-	auto rally_pos = rally_point->Bases()[0].Center();
-
-	Global::map().addCircle(target_pos, "TARGET");
-	Global::map().addCircle(rally_pos, "RALLY POINT");
 }

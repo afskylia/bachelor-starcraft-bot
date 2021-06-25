@@ -17,7 +17,6 @@ namespace MiraBot
 
 		// units that should be built multiple times
 		std::deque<BWAPI::UnitType> m_build_queue_keep_building_;
-		BuildingPlacer m_building_placer_;
 
 		// The last supply level we enqueued
 		int prev_supply = 4;
@@ -42,6 +41,7 @@ namespace MiraBot
 	public:
 		// The build queue: contains the items we need to build asap
 		std::deque<BWAPI::UnitType> m_build_queue_;
+		BuildingPlacer m_building_placer_;
 
 		ProductionManager();
 		void tryBuildOrTrainUnit();

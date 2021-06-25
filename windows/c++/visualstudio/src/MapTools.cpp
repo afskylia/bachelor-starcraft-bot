@@ -274,6 +274,35 @@ BWAPI::Position MapTools::getClosestCP(const BWAPI::TilePosition tile_pos) const
 	return closest_cp;
 }
 
+const ChokePoint* MapTools::getClosestCP(const Area* in_area, const Area* to_area)
+{
+	if (!to_area && Global::information().enemy_areas.empty())
+		return in_area->ChokePoints().front();
+
+
+	if (!to_area)
+	{
+		//to_area = Global::map().map.GetNearestArea(Global::information().enemy_start_location);
+		to_area = Global::information().enemy_areas.front();
+	}
+
+	const auto e = BWAPI::Position(to_area->Top());
+
+	const ChokePoint* closest_cp = nullptr;
+	auto closest_dist = DBL_MAX;
+	for (const auto* cp : in_area->ChokePoints())
+	{
+		const auto dist = BWAPI::Position(cp->Center()).getDistance(e);
+		if (dist < closest_dist)
+		{
+			closest_cp = cp;
+			closest_dist = dist;
+		}
+	}
+
+	return closest_cp;
+}
+
 // Returns a vector of positions of chokepoints in given area
 std::vector<BWAPI::Position> MapTools::getChokepoints(const Area* area)
 {
