@@ -17,7 +17,7 @@ namespace MiraBot
 		std::map<int, std::pair<BWAPI::UnitType, int>> m_build_order;
 		int prev_supply{};
 
-		std::map<int, std::pair<BWAPI::UnitType, int>> getBuildOrder(BWAPI::Race enemy_race = BWAPI::Races::None,
+		std::map<int, std::pair<BWAPI::UnitType, int>> setBuildOrder(BWAPI::Race enemy_race = BWAPI::Races::None,
 		                                                             Enums::strategy_type enemy_strategy =
 			                                                             Enums::offensive);
 

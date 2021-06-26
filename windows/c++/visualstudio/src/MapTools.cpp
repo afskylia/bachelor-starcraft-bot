@@ -108,7 +108,7 @@ void MapTools::onFrame()
 
 	if (m_drawMap) draw();
 
-	// BWEM drawing functions are super slow in debug mode
+	// Disable slow BWEM drawing functions in debug mode
 #ifdef NDEBUG
 	utils::gridMapExample(map);
 	utils::drawMap(map);

@@ -11,18 +11,16 @@ ProductionManager::ProductionManager() = default;
 
 void ProductionManager::onFrame()
 {
-	// Add units to build queue
+	// Add units to build queue if possible
 	pollBuildOrder();
 
-	// Build unit from build queue
+	// Try to build unit from build queue
 	tryBuildOrTrainUnit();
 
-	// Make idle buildings produce units if needed
-	/*TODO: when training something in trybuildortrainunit, does the building then become
-	 * non-idle in the same frame? if not that is an issue because it will be overridden!*/
+	// Make idle buildings produce units if possible
 	activateIdleBuildings();
 
-	// TODO: Instead, automatically add supply depots to build order when about to run out?
+	// Build new supply depots when about to run out
 	buildAdditionalSupply();
 
 	// Checks all buildings if they can be upgraded.
@@ -45,8 +43,10 @@ void ProductionManager::pollBuildOrder()
 		if (Global::strategy().m_build_order.count(supply))
 		{
 			pushToBuildQueue(supply);
-			prev_supply = supply;
 		}
+
+		prev_supply = supply;
+		return;
 
 		/*prev_supply = supply;
 		return;*/
@@ -61,7 +61,9 @@ void ProductionManager::pollBuildOrder()
 			if (!pushToBuildQueue(lvl))
 			{
 				std::cout << "!pushToBuildQueue(lvl), " << Global::strategy().m_build_order[lvl].first << "\n";
-				break;
+				//break;
+				prev_supply = lvl;
+				return;
 			}
 		}
 		lvl++;
@@ -140,21 +142,27 @@ bool ProductionManager::pushToBuildQueue(BWAPI::UnitType unit_type)
 // Try to build/train the oldest element of the build queue
 void ProductionManager::tryBuildOrTrainUnit()
 {
-	if (m_build_queue_.empty())
+	// Try to build or train unit, remove from queue upon success
+	if (!m_build_queue_.empty())
 	{
-		if (m_build_queue_keep_building_.empty()) return;
-
-		const auto& unit = m_build_queue_keep_building_.front();
-		if (unit.isBuilding() && buildBuilding(unit) || trainUnit(unit))
-			m_build_queue_keep_building_.pop_front();
-
-		return;
+		const auto& unit_type = m_build_queue_.front();
+		if ((unit_type.isBuilding() && buildBuilding(unit_type)) || trainUnit(unit_type))
+		{
+			m_build_queue_.pop_front();
+			return;
+		}
 	}
 
-	// Try to build or train unit, remove from queue upon success
-	const auto& unit_type = m_build_queue_.front();
-	if ((unit_type.isBuilding() && buildBuilding(unit_type)) || trainUnit(unit_type))
-		m_build_queue_.pop_front();
+
+	// Build repeated units
+	if (!m_build_queue_keep_building_.empty())
+	{
+		const auto& unit = m_build_queue_keep_building_.front();
+		if (unit.isBuilding() && buildBuilding(unit) || trainUnit(unit))
+		{
+			m_build_queue_keep_building_.pop_front();
+		}
+	}
 }
 
 
@@ -174,19 +182,13 @@ void ProductionManager::activateIdleBuildings()
 	 * (I.e. it won't make us too poor to afford higher priority units/upgrades.)
 	 */
 
+	buildAttackUnits();
+
 	const auto worker_type = BWAPI::Broodwar->self()->getRace().getWorker();
-	auto num_workers = Global::workers().m_workerData.getWorkers(WorkerData::Minerals).size();
-	auto max_workers = Global::workers().max_workers;
+	const auto num_workers = Global::workers().m_workerData.getWorkers(WorkerData::Minerals).size();
+	const auto max_workers = Global::workers().max_workers;
 	if (num_workers < max_workers)
 		trainUnitInBuilding(worker_type, max_workers);
-
-	// TODO this seems bugged, only zealots are built
-
-	buildAttackUnits();
-	/*auto zealot_type = BWAPI::UnitTypes::Protoss_Zealot;
-	auto zealots_wanted = 30;
-	trainUnitInBuilding(zealot_type, zealots_wanted);
-	trainUnitInBuilding(BWAPI::UnitTypes::Protoss_Dragoon, 30);*/
 }
 
 
@@ -219,10 +221,14 @@ bool ProductionManager::trainUnit(const BWAPI::UnitType& unit_type)
 
 bool ProductionManager::buildBuilding(BWAPI::UnitType type)
 {
+	// Default to placing buildings in the main base
 	const auto* area = Global::map().expos.front();
+
+	// Nexuses are built in the last expo that was created
 	if (type == BWAPI::UnitTypes::Protoss_Nexus)
 		area = Global::map().expos.back();
 
+	// Evenly distributes the areas where pylons are built
 	if (type == BWAPI::UnitTypes::Protoss_Pylon)
 	{
 		const BWEM::Area* fewest_pylons = nullptr;
@@ -245,11 +251,12 @@ bool ProductionManager::buildBuilding(BWAPI::UnitType type)
 	return buildBuilding(type, area);
 }
 
-// Tries to build the desired building type
-// TODO: More strategic placement of buildings
 bool ProductionManager::buildBuilding(const BWAPI::UnitType type, const BWEM::Area* area)
 {
-	//m_building_placer_.setBuildDistance(1);
+	// Check that all requirements are met for this unit type
+	for (const auto req : type.requiredUnits())
+		if (!Tools::countUnitsOfType(req.first)) return false;
+
 	// If we have much less gas and minerals than required, it's not worth the wait
 	if (getTotalMinerals() < type.mineralPrice() * 0.9) return false;
 	if (getTotalGas() < type.gasPrice() * 0.9) return false;
@@ -257,22 +264,8 @@ bool ProductionManager::buildBuilding(const BWAPI::UnitType type, const BWEM::Ar
 	// Get the type of unit that is required to build the desired building
 	const auto builder_type = type.whatBuilds().first;
 
-	// Get a location that we want to build the building next to
+	// Get a location that we want to build the building near
 	auto desired_pos = BWAPI::TilePosition(area->Bases().front().Center());
-
-	//// If pylon, build near chokepoint if none there
-	//if (type == BWAPI::UnitTypes::Protoss_Pylon)
-	//{
-	//	m_building_placer_.setBuildDistance(3);
-
-	//	/*const auto closest_cp = BWAPI::Position(Global::map().getClosestCP(area)->Center());
-	//	auto num_pylons = 0;
-	//	for (auto u : BWAPI::Broodwar->getUnitsInRadius(closest_cp, 200))
-	//	{
-	//		if (u->getType() == type) num_pylons++;
-	//	}
-	//	if (num_pylons < 1) desired_pos = BWAPI::TilePosition(closest_cp);*/
-	//}
 
 	// If unit is e.g. a cannon, place near chokepoint closest to enemy starting location
 	if (type.canAttack()) desired_pos = BWAPI::TilePosition(Global::map().getClosestCP(area)->Center());
@@ -281,21 +274,13 @@ bool ProductionManager::buildBuilding(const BWAPI::UnitType type, const BWEM::Ar
 	auto build_pos = m_building_placer_.getBuildLocationNear(desired_pos, type);
 	if (!m_building_placer_.canBuildHereWithSpace(build_pos, type))
 	{
-		std::cout << type << ": no space here!\n";
+		// Pick any valid build location if the found one doesn't work
 		build_pos = m_building_placer_.getBuildLocation(type);
-		//build_pos = m_building_placer_.getBuildLocationNear(desired_pos, type);
 	}
 
+	// Return false if this can't be built for whatever reason
 	if (!BWAPI::Broodwar->canBuildHere(BWAPI::TilePosition(build_pos), type))
-	{
-		if (type.requiresPsi())
-		{
-			std::cout << "we need pylons for this one fam\n";
-			//auto pylons = Tools::getUnitsOfType(BWAPI::UnitTypes::Protoss_Pylon);
-		}
-		std::cout << type << " NOT BUILDABLE\n";
 		return false;
-	}
 
 	// Try to build the structure
 	auto* builder = Global::workers().getBuilder(builder_type, BWAPI::Position(build_pos));
@@ -311,7 +296,7 @@ void ProductionManager::buildAttackUnits()
 	auto units = Global::combat().m_attack_units;
 	for (auto [percentage_of_units_needed, unit_type] : m_build_order_data.attack_unit_list)
 	{
-		double owned = Tools::countUnitsOfType(unit_type);
+		int owned = Tools::countUnitsOfType(unit_type);
 		if (units.empty())
 		{
 			trainUnitInBuilding(unit_type, owned + 5);
@@ -453,6 +438,13 @@ void ProductionManager::checkIfUpgradesAreAvailable()
 // Rebuild destroyed strategic units (units from build order)
 void ProductionManager::onUnitDestroy(BWAPI::Unit unit)
 {
+	if (unit->getType() == BWAPI::UnitTypes::Resource_Vespene_Geyser)
+	{
+		std::cout << "GAS DEPLETED\n";
+		m_build_queue_.push_front(BWAPI::Broodwar->self()->getRace().getRefinery());
+		return;
+	}
+
 	if (unit->getPlayer() == BWAPI::Broodwar->self() && unit->getType().isBuilding())
 	{
 		std::cout << "Re-adding destroyed " << unit->getType() << " to build queue\n";
@@ -471,7 +463,7 @@ void ProductionManager::trainUnitInBuilding(BWAPI::UnitType unit_type, int units
 	auto idle_buildings = Tools::getUnitsOfType(unit_type.whatBuilds().first, true);
 	auto owned = Tools::countUnitsOfType(unit_type);
 
-	while (!idle_buildings.empty()) //&& owned <= units_wanted
+	while (!idle_buildings.empty() && owned <= units_wanted) //&& owned <= units_wanted
 	{
 		auto* idle_building = idle_buildings.back();
 		if (!idle_building) return;

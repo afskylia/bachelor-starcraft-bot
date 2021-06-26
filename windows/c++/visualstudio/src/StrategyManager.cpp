@@ -13,7 +13,7 @@ using namespace MiraBot;
 /// <param name="enemy_race"></param>
 /// <param name="enemy_strategy"></param>
 /// <returns></returns>
-std::map<int, std::pair<BWAPI::UnitType, int>> StrategyManager::getBuildOrder(BWAPI::Race enemy_race,
+std::map<int, std::pair<BWAPI::UnitType, int>> StrategyManager::setBuildOrder(BWAPI::Race enemy_race,
                                                                               Enums::strategy_type enemy_strategy)
 {
 	auto prev_build_order = m_build_order;
@@ -22,14 +22,25 @@ std::map<int, std::pair<BWAPI::UnitType, int>> StrategyManager::getBuildOrder(BW
 	switch (enemy_race)
 	{
 	case BWAPI::Races::None:
-		new_build_order = m_build_order_data.starter_build_order;
+		{
+			new_build_order = m_build_order_data.starter_build_order;
+			break;
+		}
 	case BWAPI::Races::Terran:
-		new_build_order = m_build_order_data.protoss_v_terran;
+		{
+			new_build_order = m_build_order_data.protoss_v_terran;
+			break;
+		}
 	case BWAPI::Races::Protoss:
-		new_build_order = m_build_order_data.protoss_v_protoss;
+		{
+			new_build_order = m_build_order_data.protoss_v_protoss;
+			break;
+		}
 	case BWAPI::Races::Zerg:
-		new_build_order = m_build_order_data.protoss_v_zerg;
-	default: new_build_order = m_build_order_data.starter_build_order;
+		{
+			new_build_order = m_build_order_data.protoss_v_zerg;
+			break;
+		}
 	}
 
 	if (prev_build_order != m_build_order)
@@ -51,7 +62,7 @@ std::map<int, std::pair<BWAPI::UnitType, int>> StrategyManager::getBuildOrder(BW
 
 StrategyManager::StrategyManager()
 {
-	m_build_order = getBuildOrder();
+	m_build_order = setBuildOrder();
 };
 
 void StrategyManager::onFrame()
@@ -63,14 +74,12 @@ void StrategyManager::onFrame()
 /// </summary>
 void StrategyManager::informationUpdate()
 {
-	//std::cout << "Information is updated \n";
-	// do not update if supply > 20
+	// Do not update if supply > 20
 	if (BWAPI::Broodwar->self()->supplyUsed() <= 20)
 	{
-		m_build_order = getBuildOrder(Global::information().enemy_race,
+		// Update build order
+		m_build_order = setBuildOrder(Global::information().enemy_race,
 		                              Global::information().m_current_enemy_strategy);
-		// TODO: Update production (build queue, prev_supply and enqueued_items here!!)
-		// compare old build order to new one and set prev_supply, enqueued_items etc.
 	}
 }
 
