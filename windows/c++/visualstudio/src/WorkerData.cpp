@@ -74,8 +74,6 @@ void WorkerData::resetJob(BWAPI::Unit unit)
 	{
 	case Minerals:
 		{
-			//m_depotWorkerCount[m_workerDepotMap[unit]] -= 1; // TODO depots??
-
 			const auto* mineral = m_workerMineralMap[unit];
 			m_workersOnMineralPatch[mineral]--;
 
@@ -246,8 +244,8 @@ BWAPI::Unit WorkerData::getClosestRefinery(BWAPI::Unit unit)
 	auto sorted_units = Tools::sortUnitsByClosest(unit, all_units);
 	for (auto u : sorted_units)
 	{
-		if (u->getType().isRefinery() &&)
-			// TODO: Check number of workers on the refinery?
+		// TODO: Check number of workers on the refinery?
+		if (u->getType().isRefinery())
 		{
 			return u;
 		}

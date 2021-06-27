@@ -20,7 +20,6 @@ void ProductionManager::onFrame()
 	// Make idle buildings produce units if possible
 	activateIdleBuildings();
 
-	// Build new supply depots when about to run out
 	buildAdditionalSupply();
 
 	// Checks all buildings if they can be upgraded.
@@ -169,11 +168,6 @@ void ProductionManager::tryBuildOrTrainUnit()
 void ProductionManager::activateIdleBuildings()
 {
 	/**
-	 * TODO: Make this better and less hardcoded
-	 * Should count number of units w. certain job, not just all units.
-	 * E.g. "we need 30 mineral workers, 20 gas workers" and so on.
-	 * Also the number of units we need should dynamically be adjusted if needed.
-	 *
 	 * TODO: Maybe make a class (InformationManager?) that stores relevant information
 	 * Such as all the races and their unit types, how many of each type/job we want etc.
 	 * Then this function can iterate the list of needed units in a smart way.
@@ -193,7 +187,6 @@ void ProductionManager::activateIdleBuildings()
 
 
 // Try to train unit_type
-// TODO: Optional "depot/building" parameter: the building in which to train unit (or in an overload)
 bool ProductionManager::trainUnit(const BWAPI::UnitType& unit_type)
 {
 	// Return if we cannot afford the unit
@@ -251,6 +244,7 @@ bool ProductionManager::buildBuilding(BWAPI::UnitType type)
 	return buildBuilding(type, area);
 }
 
+// Tries to build the desired building type
 bool ProductionManager::buildBuilding(const BWAPI::UnitType type, const BWEM::Area* area)
 {
 	// Check that all requirements are met for this unit type
@@ -321,7 +315,7 @@ void ProductionManager::buildAdditionalSupply()
 	// Only build one supply depot at a time
 	//if (pendingBuildingsCount(supplyProviderType) > 0) return;
 
-	// If we have a sufficient amount of supply, we don't need to do anything TODO Still builds past supply 200, but we might need psi
+	// If we have a sufficient amount of supply, we don't need to do anything
 	/*if (BWAPI::Broodwar->self()->supplyTotal() != 200 && BWAPI::Broodwar->self()->supplyUsed() * 1.3 >=
 		Tools::getTotalSupply(true))*/
 	if (BWAPI::Broodwar->self()->supplyUsed() + 20 >= Tools::getTotalSupply(true))
@@ -494,7 +488,7 @@ const BWEM::Area* ProductionManager::createNewExpo()
 		if (std::find(expos.begin(), expos.end(), &area) != expos.end()) continue;
 
 
-		// Check if this is an enemy base // TODO what if we don't know yet?
+		// Check if this is an enemy base
 		if (std::find(Global::information().enemy_areas.begin(), Global::information().enemy_areas.end(), &area) !=
 			Global::information().enemy_areas.end())
 			continue;
