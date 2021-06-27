@@ -471,28 +471,24 @@ const BWEM::Area* ProductionManager::createNewExpo()
 	auto expos = Global::map().expos;
 	const auto* prev = expos.back();
 
-
+	// Iterate over all areas in the map
 	for (const BWEM::Area& area : Global::map().map.Areas())
 	{
-		auto top_x = area.Top().x * 32;
-		auto top_y = area.Top().y * 32;
-		auto top_pos = BWAPI::Position(top_x, top_y);
-
+		// Don't use area if unreachable from the main base, or if it has no bases or minerals
 		if (!area.AccessibleFrom(Global::map().expos.front()))continue;
-
 		if (area.Bases().empty() || area.Minerals().empty()) continue;
 
-		// Check if we already expanded here
+		// Check if we already expanded to here
 		if (std::find(expos.begin(), expos.end(), &area) != expos.end()) continue;
-
 
 		// Check if this is an enemy base
 		if (std::find(Global::information().enemy_areas.begin(), Global::information().enemy_areas.end(), &area) !=
 			Global::information().enemy_areas.end())
 			continue;
 
-		//const auto _dist = prev->Minerals()[0]->Pos().getDistance(area.Minerals()[0]->Pos());
-		const auto _dist = Global::map().map.GetPath(prev->Bases()[0].Center(), area.Bases()[0].Center()).size();
+		// Compute distance the latest base expansion
+		const auto _dist = Global::map().map.GetPath(prev->Bases()[0].Center(),
+		                                             area.Bases()[0].Center()).size();
 		if (_dist < dist)
 		{
 			new_area = &area;
@@ -502,8 +498,6 @@ const BWEM::Area* ProductionManager::createNewExpo()
 
 	Global::map().expos.push_back(new_area);
 	m_build_queue_.push_front(BWAPI::UnitTypes::Protoss_Nexus);
-	// TODO: Cannons require a pylon, so it will glitch out if the pylon hasn't been built yet... find a way to fix this bug
-	//m_build_queue_.push_front(BWAPI::UnitTypes::Protoss_Photon_Cannon);
 	m_build_queue_.push_front(BWAPI::UnitTypes::Protoss_Pylon);
 
 	return new_area;

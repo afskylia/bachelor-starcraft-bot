@@ -468,12 +468,8 @@ void CombatManager::cleanUpTargets()
 void CombatManager::startRushing()
 {
 	std::cout << "Start rushing!\n";
-
 	attacking = true;
 	rallying = false;
-	//rallying = true;
-	/*auto enemy_base = Global::information().enemy_start_location;
-	rush_target_pos = BWAPI::Position(enemy_base);*/
 
 	setRushTarget();
 	rallied_rushers = 0;
@@ -482,6 +478,7 @@ void CombatManager::startRushing()
 
 	std::vector<BWAPI::Unit> rush_squad = {};
 	auto count = 0;
+	
 	// Turn half of our attack units into combat units
 	for (auto* u : m_attack_units)
 	{
@@ -516,14 +513,12 @@ void CombatManager::retreatFromCombat()
 // Get closest target from (visible/known?) targets
 BWAPI::Unit CombatManager::chooseTarget(BWAPI::Unit unit, bool same_area)
 {
-	// same_area: Whether target needs to be in same area as unit
+	// same_area: Whether target needs to be in same area as unit or not
 	const auto* area = Global::map().map.GetNearestArea(unit->getTilePosition());
 	auto neighbors = area->AccessibleNeighbours();
 
 	// First try to find a target that has at most 2 other units assigned to it
 	BWAPI::Unitset available_targets = {};
-	// TODO: Global::information().enemy_units i stedet for targets
-
 	for (auto& t : targets)
 	{
 		if (target_attackers[t] > 4) continue;
