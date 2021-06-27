@@ -167,16 +167,6 @@ void WorkerData::setWorkerJob(BWAPI::Unit unit, enum WorkerJob job, BWAPI::Unit 
 			m_workerMineralMap[unit] = mineral_to_mine;
 			m_workersOnMineralPatch[mineral_to_mine]++;
 
-			////if (!mineral_to_mine->Unit()->isVisible()) unit->move(mineral_to_mine->Pos());
-			//	//if (!mineral_to_mine->Unit()->isVisible()) unit->attack(p);
-			//else
-			//{
-			//	// First send unit to position
-			//	unit->attack(p);
-
-			//	// Next start mining the mineral
-			//	unit->gather(mineral_to_mine->Unit(), true);
-			//}
 			break;
 		}
 
@@ -227,27 +217,26 @@ void WorkerData::setWorkerJob(BWAPI::Unit unit, enum WorkerJob job, struct Build
 
 const BWEM::Mineral* WorkerData::getMineralToMine(BWAPI::Unit unit)
 {
+	// Get all minerals in the worker's designated area
 	auto minerals_in_base = m_workerAreaMap[unit]->Minerals();
 	if (minerals_in_base.empty()) return nullptr;
-	auto base = m_workerAreaMap[unit];
-	auto a1 = base->Bases()[0].Center();
 
+	// Choose the closest available mineral patch
 	const BWEM::Mineral* closest = nullptr;
 	auto closest_distance = FLT_MAX;
 	for (const auto* mineral : minerals_in_base)
 	{
 		// We want at most 3 workers per mineral patch
 		if (m_workersOnMineralPatch[mineral] >= 3) continue;
-		//const auto distance = mineral->Unit()->getDistance(unit);
-		const auto distance = mineral->Pos().getDistance(unit->getPosition());
 
+		// Check if this mineral patch is closer
+		const auto distance = mineral->Pos().getDistance(unit->getPosition());
 		if (distance < closest_distance)
 		{
 			closest = mineral;
 			closest_distance = distance;
 		}
 	}
-
 	return closest;
 }
 
@@ -257,7 +246,8 @@ BWAPI::Unit WorkerData::getClosestRefinery(BWAPI::Unit unit)
 	auto sorted_units = Tools::sortUnitsByClosest(unit, all_units);
 	for (auto u : sorted_units)
 	{
-		if (u->getType().isRefinery()) // TODO: Check number of workers on the refinery?
+		if (u->getType().isRefinery() &&)
+			// TODO: Check number of workers on the refinery?
 		{
 			return u;
 		}
