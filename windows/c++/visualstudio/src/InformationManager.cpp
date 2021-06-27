@@ -46,7 +46,7 @@ void InformationManager::informationIsUpdated()
 }
 
 /// <summary>
-/// TODO support for expanding
+/// Update Enemy Strategy
 /// </summary>
 void InformationManager::updateEnemyStrategy()
 {
@@ -85,7 +85,6 @@ void InformationManager::logEnemyRaceAndStartLocation(BWAPI::Unit unit)
 		auto& start_locations = BWAPI::Broodwar->getStartLocations();
 
 		// Find closest starting location to enemy unit
-		// TODO: Also save locations of other enemy bases they might build later in the game
 		double shortest_distance = INT_MAX;
 		for (BWAPI::TilePosition position : start_locations)
 		{

@@ -94,7 +94,7 @@ void WorkerManager::activateIdleWorkers()
 
 			// We don't want more than 3 gas workers per refinery
 			if (refinery_count > 0 && gas_worker_count < mineral_worker_count / 4
-				&& gas_worker_count < Tools::countUnitsOfType(refinery_type) * 4) // TODO adjust gas worker count?
+				&& gas_worker_count < Tools::countUnitsOfType(refinery_type) * 4)
 				setGasWorker(worker);
 			else setMineralWorker(worker);
 		}
@@ -156,7 +156,6 @@ BWAPI::Unit WorkerManager::getClosestDepot(BWAPI::Unit worker)
 	double closestDistance = 0;
 	for (auto& unit : BWAPI::Broodwar->self()->getUnits())
 	{
-		// TODO: && !m_workerData.depotIsFull(unit)
 		if (unit->getType().isResourceDepot() && unit->isCompleted())
 		{
 			const double distance = unit->getDistance(worker);
@@ -304,8 +303,6 @@ void WorkerManager::handleIdleBuildWorker(BWAPI::Unit worker)
 	}
 	if (!built)
 	{
-		// TODO det er fx når en bygning som er et requirement er ved at blive bygget men ikke er completed endnu
-		// TODO fx robotics/observatory
 		std::cout << "Failed to build " << building_type.getName() << "\n";
 		m_workerData.setWorkerJob(worker, WorkerData::Idle, nullptr);
 		return;

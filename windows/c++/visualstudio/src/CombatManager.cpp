@@ -12,8 +12,6 @@ CombatManager::CombatManager() = default;
 
 void CombatManager::onFrame()
 {
-	// TODO: Don't call onFrame on every single frame
-
 	// Clean up targets that have gone invisible (e.g. in fog of war)
 	cleanUpTargets();
 
@@ -158,7 +156,6 @@ void CombatManager::resetTarget(BWAPI::Unit target)
 
 void CombatManager::resetCombatUnit(BWAPI::Unit unit)
 {
-	// TODO: remove from maps and stuff
 }
 
 void CombatManager::removeUnitTarget(BWAPI::Unit unit)
@@ -440,7 +437,7 @@ void CombatManager::updateAttackStatus()
 	// If not currently marked as under attack, check if we ARE under attack
 	for (auto* u : units_nearby)
 	{
-		if (u->getPlayer()->isEnemy(BWAPI::Broodwar->self())) // TODO m� godt v�re en worker
+		if (u->getPlayer()->isEnemy(BWAPI::Broodwar->self()))
 		{
 			std::cout << "We're under attack!\n";
 			under_attack = true;

@@ -74,7 +74,6 @@ void WorkerData::resetJob(BWAPI::Unit unit)
 	{
 	case Minerals:
 		{
-			//m_depotWorkerCount[m_workerDepotMap[unit]] -= 1; // TODO depots??
 
 			const auto* mineral = m_workerMineralMap[unit];
 			m_workersOnMineralPatch[mineral]--;

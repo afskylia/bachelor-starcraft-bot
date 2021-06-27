@@ -151,7 +151,6 @@ void MiraBotMain::onUnitDestroy(Unit unit)
 	// BWEM updates
 	Global::map().onUnitDestroy(unit);
 
-	// TODO maybe fix?
 	if (unit->getType().isWorker()) Global::workers().onUnitDestroy(unit);
 	Global::production().onUnitDestroy(unit);
 	Global::information().onUnitDestroy(unit);
@@ -177,7 +176,6 @@ void MiraBotMain::onSendText(std::string text)
 	else if (text == "rush") Global::combat().startRushing();
 	else if (text == "retreat") Global::combat().retreatFromCombat();
 
-		// TODO: Why doesn't this work????
 	else BWEM::utils::MapDrawer::ProcessCommand(text);
 }
 
