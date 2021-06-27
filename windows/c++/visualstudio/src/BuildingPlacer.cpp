@@ -1,3 +1,7 @@
+// THIS FILE IS FROM BWSAL - BWAPI STANDARD ADD-ON LIBRARY.
+// https://code.google.com/archive/p/bwsal/
+
+
 #include "BuildingPlacer.h"
 
 #include <set>
