@@ -286,8 +286,7 @@ void CombatManager::updateCombatStatus()
 
 			if (u->isStuck())
 			{
-				std::cout << "HALP\n";
-				u->stop(); // ikke sikker på om det virker
+				u->stop();
 			}
 		}
 	}
