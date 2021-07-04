@@ -289,12 +289,12 @@ void WorkerManager::handleIdleBuildWorker(BWAPI::Unit worker)
 		if (Tools::getUnitsOfType(building_type, false, false).empty())
 		{
 			std::cout << "you lying mofo\n";
-		}
-		else
-		{
+			Global::production().m_build_queue_.push_back(building_type);
 			m_workerData.setWorkerJob(worker, WorkerData::Idle, nullptr);
 			return;
 		}
+		m_workerData.setWorkerJob(worker, WorkerData::Idle, nullptr);
+		return;
 	}
 	if (building_type == BWAPI::UnitTypes::None || worker->isConstructing())
 	{
@@ -360,7 +360,8 @@ sup:
 	bool built = worker->build(building_type, building_pos);
 	if (!built)
 	{
-		std::cout << "Failed to build " << building_type.getName() << ", trying again\n";
+		std::cout << "Failed to build " << building_type.getName() << "\n";
+		m_workerData.setWorkerJob(worker, WorkerData::Idle, nullptr);
 		return;
 	}
 

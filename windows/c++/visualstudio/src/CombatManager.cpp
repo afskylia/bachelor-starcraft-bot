@@ -250,8 +250,13 @@ void CombatManager::handleIdleRallyer(BWAPI::Unit unit)
 void CombatManager::updateCombatStatus()
 {
 	// Check how the battle is going - should we retreat?
-	if (!attacking) return;
 
+	if (!attacking) return;
+	if (under_attack)
+	{
+		retreatFromCombat();
+		return;
+	}
 	// TODO: Check if we're outnumbered by enemy attack units (don't count workers)
 	/*auto t = targets
 	auto ratio = (total_rusher_count-lost_rusher_count)*/

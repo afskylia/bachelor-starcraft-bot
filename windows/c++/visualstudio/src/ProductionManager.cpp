@@ -6,7 +6,10 @@
 
 using namespace MiraBot;
 
-ProductionManager::ProductionManager() = default;
+ProductionManager::ProductionManager()
+{
+	m_building_placer_.setBuildDistance(5);
+}
 
 
 void ProductionManager::onFrame()
