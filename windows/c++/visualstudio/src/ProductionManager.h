@@ -61,7 +61,7 @@ namespace MiraBot
 		void onUnitComplete(BWAPI::Unit unit);
 		void buildGateway();
 		void buildAttackUnits();
-		BWAPI::UnitType getAttackUnitToTrain(std::map<BWAPI::UnitType, int> distribution, int minerals, int gas);
+		BWAPI::UnitType getUnitToTrain(std::map<BWAPI::UnitType, int> distribution, int minerals, int gas);
 		void buildAdditionalSupply();
 
 		void pollBuildOrder();

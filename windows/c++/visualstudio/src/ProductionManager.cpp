@@ -194,7 +194,7 @@ void ProductionManager::activateIdleBuildings()
 	{
 		for (auto* gateway : idle_gateways)
 		{
-			const auto attack_type = getAttackUnitToTrain(attack_unit_distribution, available_minerals, available_gas);
+			const auto attack_type = getUnitToTrain(attack_unit_distribution, available_minerals, available_gas);
 
 			// If we don't have enough resources to train attack units right now
 			if (attack_type == BWAPI::UnitTypes::None) break;
@@ -339,12 +339,56 @@ void ProductionManager::buildAttackUnits()
 	}
 }
 
-BWAPI::UnitType ProductionManager::getAttackUnitToTrain(std::map<BWAPI::UnitType, int> distribution, int minerals,
-                                                        int gas)
+BWAPI::UnitType ProductionManager::getUnitToTrain(std::map<BWAPI::UnitType, int> distribution, int minerals, int gas)
 {
-	// TODO
-	if (minerals > 120) return BWAPI::UnitTypes::Protoss_Zealot;
-	return BWAPI::UnitTypes::None;
+	auto type_to_train = BWAPI::UnitTypes::None;
+
+	// If we don't have any attack units, build a zealot
+	if (distribution.empty())
+	{
+		if (minerals >= 100) type_to_train = BWAPI::UnitTypes::Protoss_Zealot;
+		return type_to_train;
+	}
+
+	if (minerals < 100) return type_to_train;
+
+	type_to_train = BWAPI::UnitTypes::Protoss_Zealot;
+
+	// Compute total amount of attack units in unit distribution map
+	auto total_attack_units = 0;
+	for (auto [type, amount] : distribution) total_attack_units += amount;
+
+	// Get the attack unit type we have the least of (with regards to the goal percentage)
+	auto least_percentage = FLT_MAX;
+	for (auto [percentage_of_units_needed, unit_type] : m_build_order_data.attack_unit_list)
+	{
+		// Check if unit requirements are met, e.g. Gateways for Dragoons
+		auto requirements_met = true;
+		for (auto req : unit_type.requiredUnits())
+		{
+			if (Tools::countUnitsOfType(req.first) < req.second)
+			{
+				requirements_met = false;
+				break;
+			}
+		}
+
+		// Check if we can afford it
+		if (unit_type.mineralPrice() > minerals || unit_type.gasPrice() > gas) requirements_met = false;
+
+		// Continue if requirements for this unit type are not met
+		if (!requirements_met) continue;
+
+		// Compute percentage of units owned and compare with current least perecentage owned
+		auto percentage_owned = static_cast<float>(distribution[unit_type]) / static_cast<float>(total_attack_units);
+		if (percentage_owned < least_percentage)
+		{
+			type_to_train = unit_type;
+			least_percentage = percentage_owned;
+		}
+	}
+
+	return type_to_train;
 }
 
 // Builds additional supply if needed
@@ -538,7 +582,7 @@ const BWEM::Area* ProductionManager::createNewExpo()
 	}
 
 	Global::map().expos.push_back(new_area);
-	m_build_queue_.push_front(BWAPI::UnitTypes::Protoss_Nexus);
+	m_build_queue_.push_back(BWAPI::UnitTypes::Protoss_Nexus);
 	m_build_queue_.push_front(BWAPI::UnitTypes::Protoss_Pylon);
 
 	return new_area;

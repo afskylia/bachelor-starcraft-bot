@@ -49,8 +49,8 @@ namespace MiraBot
 			//{18, std::make_pair(BWAPI::UnitTypes::Protoss_Dragoon, 20)},
 			{26, std::make_pair(BWAPI::UnitTypes::Protoss_Robotics_Facility, 1)},
 			{30, std::make_pair(BWAPI::UnitTypes::Protoss_Citadel_of_Adun, 1)},
-			{40, std::make_pair(BWAPI::UnitTypes::Protoss_Templar_Archives, 1)},
-			{45, std::make_pair(BWAPI::UnitTypes::Protoss_Observatory, 1)},
+			//{40, std::make_pair(BWAPI::UnitTypes::Protoss_Templar_Archives, 1)},
+			//{45, std::make_pair(BWAPI::UnitTypes::Protoss_Observatory, 1)},
 			// Tweaks by us
 			//{41, std::make_pair(BWAPI::UnitTypes::Protoss_Fleet_Beacon, 1)},
 		};
