@@ -157,6 +157,10 @@ void ProductionManager::tryBuildOrTrainUnit()
 	if (!m_build_queue_.empty())
 	{
 		const auto& unit_type = m_build_queue_.front();
+		if (unit_type == BWAPI::UnitTypes::Protoss_Nexus)
+		{
+			int i = 0;
+		}
 		if (unit_type.isBuilding() && buildBuilding(unit_type) || trainUnit(unit_type))
 		{
 			std::cout << "Building first choice " << unit_type << "\n";
@@ -166,7 +170,7 @@ void ProductionManager::tryBuildOrTrainUnit()
 		}
 
 		// Nexuses take 400 so we'll allow some specific types to be built before it
-		if (unit_type == BWAPI::UnitTypes::Protoss_Nexus)
+		if (unit_type == BWAPI::UnitTypes::Protoss_Nexus && m_build_queue_.size() >= 2)
 		{
 			const auto& second_unit_type = m_build_queue_.at(1);
 			std::vector<BWAPI::UnitType> allowed_types = {
@@ -175,7 +179,7 @@ void ProductionManager::tryBuildOrTrainUnit()
 
 			if (std::count(allowed_types.begin(), allowed_types.end(), second_unit_type))
 			{
-				if (unit_type.isBuilding() && buildBuilding(second_unit_type) || trainUnit(second_unit_type))
+				if (second_unit_type.isBuilding() && buildBuilding(second_unit_type) || trainUnit(second_unit_type))
 				{
 					std::cout << "Building second choice " << second_unit_type << "\n";
 					m_build_queue_.erase(m_build_queue_.begin() + 1);
@@ -219,8 +223,8 @@ void ProductionManager::activateIdleBuildings()
 
 	// Activate each idle gateway
 	auto idle_gateways = Tools::getUnitsOfType(BWAPI::UnitTypes::Protoss_Gateway, true);
-	auto available_minerals = getTotalMinerals();
-	auto available_gas = getTotalGas();
+	auto available_minerals = getTotalMinerals(true);
+	auto available_gas = getTotalGas(true);
 
 	if (!idle_gateways.empty())
 	{
@@ -455,23 +459,34 @@ int ProductionManager::pendingBuildingsCount(BWAPI::UnitType type)
 }
 
 // Return currently owned minerals, minus the cost of pending build jobs
-int ProductionManager::getTotalMinerals()
+int ProductionManager::getTotalMinerals(bool excludingFrontOfBuildQueue)
 {
 	auto total_minerals = BWAPI::Broodwar->self()->minerals();
 	for (auto& build_job : Global::workers().getActiveBuildJobs())
 	{
 		total_minerals -= build_job.unitType.mineralPrice();
 	}
+
+	if (excludingFrontOfBuildQueue && !m_build_queue_.empty())
+	{
+		total_minerals -= m_build_queue_.front().mineralPrice();
+	}
+
 	return total_minerals;
 }
 
 // Return currently owned vespene gas, minus the cost of pending build jobs
-int ProductionManager::getTotalGas()
+int ProductionManager::getTotalGas(bool excludingFrontOfBuildQueue)
 {
 	auto total_gas = BWAPI::Broodwar->self()->gas();
 	for (auto& build_job : Global::workers().getActiveBuildJobs())
 	{
 		total_gas -= build_job.unitType.gasPrice();
+	}
+
+	if (excludingFrontOfBuildQueue && !m_build_queue_.empty())
+	{
+		total_gas -= m_build_queue_.front().gasPrice();
 	}
 	return total_gas;
 }

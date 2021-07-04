@@ -206,6 +206,7 @@ void WorkerData::setWorkerJob(BWAPI::Unit unit, enum WorkerJob job, struct Build
 
 	m_workerJobMap[unit] = job;
 	m_workerBuildingTypeMap[unit] = buildJob.unitType;
+	m_initiatedBuildingMap[unit] = false;
 	m_workerMoveMap[unit] = BWAPI::Position(buildJob.tilePos);
 	m_buildPosMap[unit] = buildJob.tilePos;
 

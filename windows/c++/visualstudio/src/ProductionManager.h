@@ -73,8 +73,8 @@ namespace MiraBot
 		int pendingBuildingsCount();
 		int pendingBuildingsCount(BWAPI::UnitType type);
 
-		int getTotalMinerals();
-		int getTotalGas();
+		int getTotalMinerals(bool excludingFrontOfBuildQueue = false);
+		int getTotalGas(bool excludingFrontOfBuildQueue = false);
 
 		bool buildBuilding(BWAPI::UnitType type);
 		bool buildBuilding(BWAPI::UnitType type, const BWEM::Area* area);

@@ -63,6 +63,7 @@ namespace MiraBot
 		// Tile position where the unit should place a building
 		std::map<BWAPI::Unit, BWAPI::UnitType> m_workerBuildingTypeMap; // Type of building to be built by builder
 		std::map<BWAPI::Unit, const BWEM::Area*> m_workerAreaMap;
+		std::map<BWAPI::Unit, bool> m_initiatedBuildingMap;
 
 		std::map<const BWEM::Mineral*, int> m_workersOnMineralPatch;
 

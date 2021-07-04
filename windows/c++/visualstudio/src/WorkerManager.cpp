@@ -276,14 +276,27 @@ void WorkerManager::handleIdleBuildWorker(BWAPI::Unit worker)
 	// Get build job assigned to worker
 	const auto building_type = m_workerData.m_workerBuildingTypeMap[worker];
 	auto building_pos = m_workerData.m_buildPosMap[worker];
+	auto initiatedBuilding = m_workerData.m_initiatedBuildingMap[worker];
+
+	if (building_type == BWAPI::UnitTypes::Protoss_Nexus)
+	{
+		int i = 0;
+	}
 
 	// If worker idling because build job is completed, set job to idle
-	if (building_type == BWAPI::UnitTypes::None && !worker->isConstructing())
+	if (initiatedBuilding && !worker->isConstructing())
 	{
-		m_workerData.setWorkerJob(worker, WorkerData::Idle, nullptr);
-		return;
+		if (Tools::getUnitsOfType(building_type, false, false).empty())
+		{
+			std::cout << "you lying mofo\n";
+		}
+		else
+		{
+			m_workerData.setWorkerJob(worker, WorkerData::Idle, nullptr);
+			return;
+		}
 	}
-	if (building_type == BWAPI::UnitTypes::None)
+	if (building_type == BWAPI::UnitTypes::None || worker->isConstructing())
 	{
 		std::cout << "wut\n";
 	}
@@ -352,7 +365,8 @@ sup:
 	}
 
 	// Used in the beginning of the function next frame
-	m_workerData.m_workerBuildingTypeMap[worker] = BWAPI::UnitTypes::None;
+	//m_workerData.m_workerBuildingTypeMap[worker] = BWAPI::UnitTypes::None;
+	m_workerData.m_initiatedBuildingMap[worker] = true;
 	std::cout << "Now building " << building_type.getName() << "\n";
 }
 
