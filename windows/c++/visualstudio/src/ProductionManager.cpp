@@ -187,8 +187,9 @@ void ProductionManager::activateIdleBuildings()
 
 	// Activate each idle gateway
 	auto idle_gateways = Tools::getUnitsOfType(BWAPI::UnitTypes::Protoss_Gateway, true);
-	auto available_minerals = BWAPI::Broodwar->self()->minerals();
-	auto available_gas = BWAPI::Broodwar->self()->gas();
+	auto available_minerals = getTotalMinerals();
+	auto available_gas = getTotalGas();
+
 	if (!idle_gateways.empty())
 	{
 		for (auto* gateway : idle_gateways)
@@ -196,25 +197,15 @@ void ProductionManager::activateIdleBuildings()
 			const auto attack_type = getAttackUnitToTrain(attack_unit_distribution, available_minerals, available_gas);
 
 			// If we don't have enough resources to train attack units right now
-			if (attack_type == BWAPI::UnitTypes::None)
-			{
-				if (!attack_type)
-				{
-					int hej = 0;
-				}
-				break;
-			}
+			if (attack_type == BWAPI::UnitTypes::None) break;
 
+			// Try to train the attack unit
 			if (gateway->train(attack_type))
 			{
 				std::cout << "Training " << attack_type << "\n";
 				attack_unit_distribution[attack_type]++;
 				available_minerals -= attack_type.mineralPrice();
 				available_gas -= attack_type.gasPrice();
-			}
-			else
-			{
-				int i = 0;
 			}
 		}
 	}
