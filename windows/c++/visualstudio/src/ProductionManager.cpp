@@ -17,13 +17,14 @@ void ProductionManager::onFrame()
 	// Try to build unit from build queue
 	tryBuildOrTrainUnit();
 
-	// Make idle buildings produce units if possible
-	activateIdleBuildings();
-
+	// Build additional if needed
 	buildAdditionalSupply();
 
 	// Checks all buildings if they can be upgraded.
 	checkIfUpgradesAreAvailable();
+
+	// Make idle buildings produce units if possible
+	activateIdleBuildings();
 }
 
 // Check if anything should be added to the build queue
@@ -176,8 +177,49 @@ void ProductionManager::activateIdleBuildings()
 	 * (I.e. it won't make us too poor to afford higher priority units/upgrades.)
 	 */
 
-	buildAttackUnits();
+	/**
+	 * Go through idle Gateways and activate them.
+	 */
 
+	// Fill map with amount of our different attack units
+	std::map<BWAPI::UnitType, int> attack_unit_distribution = {};
+	for (auto* unit : Global::combat().m_attack_units) attack_unit_distribution[unit->getType()]++;
+
+	// Activate each idle gateway
+	auto idle_gateways = Tools::getUnitsOfType(BWAPI::UnitTypes::Protoss_Gateway, true);
+	auto available_minerals = BWAPI::Broodwar->self()->minerals();
+	auto available_gas = BWAPI::Broodwar->self()->gas();
+	if (!idle_gateways.empty())
+	{
+		for (auto* gateway : idle_gateways)
+		{
+			const auto attack_type = getAttackUnitToTrain(attack_unit_distribution, available_minerals, available_gas);
+
+			// If we don't have enough resources to train attack units right now
+			if (attack_type == BWAPI::UnitTypes::None)
+			{
+				if (!attack_type)
+				{
+					int hej = 0;
+				}
+				break;
+			}
+
+			if (gateway->train(attack_type))
+			{
+				std::cout << "Training " << attack_type << "\n";
+				attack_unit_distribution[attack_type]++;
+				available_minerals -= attack_type.mineralPrice();
+				available_gas -= attack_type.gasPrice();
+			}
+			else
+			{
+				int i = 0;
+			}
+		}
+	}
+
+	// Go through idle Nexuses and activate them
 	const auto worker_type = BWAPI::Broodwar->self()->getRace().getWorker();
 	const auto num_workers = Global::workers().m_workerData.getWorkers(WorkerData::Minerals).size();
 	const auto max_workers = Global::workers().max_workers;
@@ -304,6 +346,14 @@ void ProductionManager::buildAttackUnits()
 			trainUnitInBuilding(unit_type, owned + 1);
 		}
 	}
+}
+
+BWAPI::UnitType ProductionManager::getAttackUnitToTrain(std::map<BWAPI::UnitType, int> distribution, int minerals,
+                                                        int gas)
+{
+	// TODO
+	if (minerals > 120) return BWAPI::UnitTypes::Protoss_Zealot;
+	return BWAPI::UnitTypes::None;
 }
 
 // Builds additional supply if needed
