@@ -243,15 +243,7 @@ void CombatManager::handleIdleRallyer(BWAPI::Unit unit)
 
 	if (rallied_rushers == (total_rusher_count - lost_rusher_count))
 	{
-		rallying = false;
-		std::cout << "Rushers grouped up - start attacking!\n";
-		for (auto* u : m_attack_units)
-		{
-			if (fighter_status_map[u] == Enums::attacking || fighter_status_map[u] == Enums::rallying)
-			{
-				goAttack(u);
-			}
-		}
+		ralliedUpNowAttack();
 	}
 }
 
@@ -271,20 +263,15 @@ void CombatManager::updateCombatStatus()
 		return;
 	}
 
+	// Stop units that are stuck or their target position is unwalkable
 	if (rallying && rallied_rushers > (total_rusher_count - lost_rusher_count) / 2)
 	{
-		std::cout << "RALLIED!\n";
-		for (auto u : m_attack_units)
+		for (auto* u : m_attack_units)
 		{
 			if (fighter_status_map[u] != Enums::rallying || fighter_status_map[u] != Enums::attacking) continue;
-			if (!Global::map().isWalkable(u->getTilePosition()))
+			if (!Global::map().isWalkable(u->getTilePosition()) || u->isStuck())
 			{
-				std::cout << "NOT WALKABLE\n";
-				u->stop();
-			}
-
-			if (u->isStuck())
-			{
+				std::cout << "u->stop()\n";
 				u->stop();
 			}
 		}
@@ -299,29 +286,9 @@ void CombatManager::updateCombatStatus()
 				return;
 
 		// Start rushing is everyone is within 200 pixels of rallying point or in area
-		startRushing();
+		//startRushing();
+		ralliedUpNowAttack();
 	}
-
-	/*auto idle_count = 0;
-	for (auto u : m_attack_units)
-	{
-		if (fighter_status_map[u] != Enums::attacking) continue;
-		if (!u->isIdle()) continue;
-		if (targets.empty()) continue;
-
-		idle_count++;
-		auto a = u->isMoving();
-		auto b = u->isAttacking();
-		auto c = u->isIdle();
-		auto d = u->getLastCommand().getType();
-		std::cout << a << ", " << b << ", " << c << ", " << d << "\n";
-	}
-
-	if (idle_count >= (total_rusher_count - lost_rusher_count) / 2)
-	{
-		std::cout << "idle_count >= rushers\n";
-		retreatFromCombat();
-	}*/
 }
 
 void CombatManager::setTarget(BWAPI::Unit unit, BWAPI::Unit target)
@@ -469,7 +436,7 @@ void CombatManager::startRushing()
 {
 	std::cout << "Start rushing!\n";
 	attacking = true;
-	rallying = false;
+	rallying = true;
 
 	setRushTarget();
 	rallied_rushers = 0;
@@ -506,6 +473,19 @@ void CombatManager::retreatFromCombat()
 			u->stop();
 			goRetreat(u);
 			std::cout << u->getType() << " retreats from combat\n";
+		}
+	}
+}
+
+void CombatManager::ralliedUpNowAttack()
+{
+	std::cout << "Rushers grouped up - start attacking!\n";
+	rallying = false;
+	for (auto* u : m_attack_units)
+	{
+		if (fighter_status_map[u] == Enums::attacking || fighter_status_map[u] == Enums::rallying)
+		{
+			goAttack(u);
 		}
 	}
 }

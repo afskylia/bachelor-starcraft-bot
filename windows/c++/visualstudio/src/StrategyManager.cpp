@@ -42,27 +42,53 @@ std::map<int, std::pair<BWAPI::UnitType, int>> StrategyManager::setBuildOrder(BW
 			break;
 		}
 	}
-
-	if (prev_build_order != m_build_order)
+	std::vector<int> new_enqueued_levels = {4};
+	if (prev_build_order != new_build_order)
 	{
+		std::cout << "ENQUEUED LEVELS: ";
+		for (auto p : Global::production().enqueued_levels)
+		{
+			std::cout << p << " ";
+		}
+		std::cout << "\n";
+
+		std::cout << "OLD BUILD ORDER: ";
+		for (auto p : prev_build_order)
+		{
+			std::cout << "(" << p.first << ", " << p.second.first << ") ";
+		}
+
+		std::cout << "\nNEW BUILD ORDER: ";
+		for (auto p : new_build_order)
+		{
+			std::cout << "(" << p.first << ", " << p.second.first << ") ";
+		}
+		std::cout << "\n";
+
 		// Reset build order information in production manager
-		Global::production().enqueued_levels = {4};
+		auto enqueued_levels = Global::production().enqueued_levels;
 		for (auto [lvl, pair] : prev_build_order)
 		{
 			if (new_build_order[lvl].first == pair.first)
 			{
-				std::cout << lvl << " SAME\n";
-				Global::production().enqueued_levels.push_back(lvl);
-				Global::production().prev_supply = lvl;
+				if (std::count(enqueued_levels.begin(), enqueued_levels.end(), lvl))
+				{
+					new_enqueued_levels.push_back(lvl);
+					Global::production().prev_supply = lvl;
+				}
+				else break;
 			}
 		}
 	}
+
+	Global::production().enqueued_levels = new_enqueued_levels;
+	m_build_order = new_build_order;
 	return new_build_order;
 }
 
 StrategyManager::StrategyManager()
 {
-	m_build_order = setBuildOrder();
+	setBuildOrder();
 };
 
 void StrategyManager::onFrame()
@@ -78,8 +104,8 @@ void StrategyManager::informationUpdate()
 	if (BWAPI::Broodwar->self()->supplyUsed() <= 20)
 	{
 		// Update build order
-		m_build_order = setBuildOrder(Global::information().enemy_race,
-		                              Global::information().m_current_enemy_strategy);
+		setBuildOrder(Global::information().enemy_race,
+		              Global::information().m_current_enemy_strategy);
 	}
 }
 

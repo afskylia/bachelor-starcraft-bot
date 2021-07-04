@@ -43,9 +43,9 @@ void ProductionManager::pollBuildOrder()
 		if (Global::strategy().m_build_order.count(supply))
 		{
 			pushToBuildQueue(supply);
+			prev_supply = supply;
 		}
 
-		prev_supply = supply;
 		return;
 
 		/*prev_supply = supply;
@@ -118,6 +118,17 @@ bool ProductionManager::pushToBuildQueue(BWAPI::UnitType unit_type)
 			Tools::countUnitsOfType(req_type, false) || is_active_buildjob)
 			continue;
 
+		auto flag = true;
+		for (auto u : BWAPI::Broodwar->getAllUnits())
+		{
+			if (u->getType() == req_type && (u->getPlayer() == BWAPI::Broodwar->self() || u->getPlayer()->isNeutral()))
+			{
+				flag = true;
+				break;
+			}
+		}
+		if (!flag) continue;
+
 		std::cout << "Enqueueing missing requirement for " << unit_type << ", " << req_type << "\n";
 		pushToBuildQueue(req_type);
 		//// Count number of enqueued units + number of completed units
@@ -146,10 +157,31 @@ void ProductionManager::tryBuildOrTrainUnit()
 	if (!m_build_queue_.empty())
 	{
 		const auto& unit_type = m_build_queue_.front();
-		if ((unit_type.isBuilding() && buildBuilding(unit_type)) || trainUnit(unit_type))
+		if (unit_type.isBuilding() && buildBuilding(unit_type) || trainUnit(unit_type))
 		{
+			std::cout << "Building first choice " << unit_type << "\n";
+
 			m_build_queue_.pop_front();
 			return;
+		}
+
+		// Nexuses take 400 so we'll allow some specific types to be built before it
+		if (unit_type == BWAPI::UnitTypes::Protoss_Nexus)
+		{
+			const auto& second_unit_type = m_build_queue_.at(1);
+			std::vector<BWAPI::UnitType> allowed_types = {
+				BWAPI::UnitTypes::Protoss_Cybernetics_Core, BWAPI::UnitTypes::Protoss_Forge
+			};
+
+			if (std::count(allowed_types.begin(), allowed_types.end(), second_unit_type))
+			{
+				if (unit_type.isBuilding() && buildBuilding(second_unit_type) || trainUnit(second_unit_type))
+				{
+					std::cout << "Building second choice " << second_unit_type << "\n";
+					m_build_queue_.erase(m_build_queue_.begin() + 1);
+					return;
+				}
+			}
 		}
 	}
 
@@ -582,7 +614,7 @@ const BWEM::Area* ProductionManager::createNewExpo()
 	}
 
 	Global::map().expos.push_back(new_area);
-	m_build_queue_.push_back(BWAPI::UnitTypes::Protoss_Nexus);
+	m_build_queue_.push_front(BWAPI::UnitTypes::Protoss_Nexus);
 	m_build_queue_.push_front(BWAPI::UnitTypes::Protoss_Pylon);
 
 	return new_area;
