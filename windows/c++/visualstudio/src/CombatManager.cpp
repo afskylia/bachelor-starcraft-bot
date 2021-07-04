@@ -478,7 +478,7 @@ void CombatManager::startRushing()
 
 	std::vector<BWAPI::Unit> rush_squad = {};
 	auto count = 0;
-	
+
 	// Turn half of our attack units into combat units
 	for (auto* u : m_attack_units)
 	{

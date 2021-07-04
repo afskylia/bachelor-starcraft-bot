@@ -24,6 +24,7 @@ void WorkerManager::onFrame()
 	if (BWAPI::Broodwar->getFrameCount() % 7919 == 0 && should_have_new_scout)
 	{
 		auto* new_scout = getAnyWorker();
+		std::cout << "SCOUTJOB: " << m_workerData.getWorkerJob(new_scout) << "\n";
 		m_workerData.setWorkerJob(new_scout, WorkerData::Scout, scout_last_known_position);
 		should_have_new_scout = false;
 	}
@@ -38,8 +39,7 @@ void WorkerManager::updateWorkerStatus()
 
 
 		// Workers can be idle for various reasons, e.g. a builder waiting to build
-		if (worker->isIdle() || (job == WorkerData::Scout && worker->isStuck())
-			//|| worker->isStuck() || !worker->isAccelerating()
+		if (worker->isIdle() || job == WorkerData::Scout && worker->isStuck()
 		)
 		{
 			switch (job)
@@ -283,35 +283,77 @@ void WorkerManager::handleIdleBuildWorker(BWAPI::Unit worker)
 		m_workerData.setWorkerJob(worker, WorkerData::Idle, nullptr);
 		return;
 	}
+	if (building_type == BWAPI::UnitTypes::None)
+	{
+		std::cout << "wut\n";
+	}
 
 	// Otherwise, worker is idling because it is waiting for the required resources
 	if (building_type.mineralPrice() > 0 && building_type.mineralPrice() + 10 > BWAPI::Broodwar->self()->minerals())
 		return;
 	if (building_type.gasPrice() > 0 && building_type.gasPrice() + 10 > BWAPI::Broodwar->self()->gas()) return;
 
+	// Check build position validity
+	auto canbuild = BWAPI::Broodwar->canBuildHere(building_pos, building_type, worker);
+	if (!canbuild)
+	{
+		if (building_pos != BWAPI::TilePositions::None)
+		{
+			building_pos = Global::production().m_building_placer_.getBuildLocationNear(building_pos, building_type);
+			canbuild = BWAPI::Broodwar->canBuildHere(building_pos, building_type, worker);
+			if (canbuild)
+			{
+				std::cout << building_type << ": Just required a reshuffling\n";
+				goto sup;
+			}
+		}
+
+		// First attempt: Build position based on builder position
+		building_pos = Global::production().m_building_placer_.getBuildLocationNear(
+			worker->getTilePosition(), building_type);
+		canbuild = BWAPI::Broodwar->canBuildHere(building_pos, building_type, worker);
+		if (canbuild)
+		{
+			std::cout << building_type << ": Worked on first attempt\n";
+			goto sup;
+		}
+
+		// Second attempt: Build position using built-in StarCraft building placer
+		building_pos = BWAPI::Broodwar->getBuildLocation(building_type, worker->getTilePosition(), 400);
+		canbuild = BWAPI::Broodwar->canBuildHere(building_pos, building_type, worker);
+		if (canbuild)
+		{
+			std::cout << building_type << ": Worked on second attempt\n";
+			goto sup;
+		}
+
+		// Final attempt: Get any damn build position
+		building_pos = Global::production().m_building_placer_.getBuildLocation(building_type);
+		canbuild = BWAPI::Broodwar->canBuildHere(building_pos, building_type, worker);
+		if (canbuild)
+		{
+			std::cout << building_type << ": Worked on third attempt\n";
+			goto sup;
+		}
+
+		std::cout << "Wow you're screwed boi, " << building_type << "\n";
+		m_workerData.setWorkerJob(worker, WorkerData::Idle, nullptr);
+		return;
+	}
+sup:
+
 
 	// Try to place the building and generate new position if the first one fails
-	auto attempts = 0;
-	auto canbuild = BWAPI::Broodwar->canBuildHere(building_pos, building_type);
 	bool built = worker->build(building_type, building_pos);
-	while (!built && attempts < 5)
-	{
-		//building_pos = BWAPI::Broodwar->getBuildLocation(building_type, building_pos, 100, creep);
-		building_pos = Global::production().m_building_placer_.getBuildLocationNear(building_pos, building_type);
-		canbuild = BWAPI::Broodwar->canBuildHere(building_pos, building_type);
-		built = worker->build(building_type, building_pos);
-		attempts++;
-	}
 	if (!built)
 	{
-		std::cout << "Failed to build " << building_type.getName() << "\n";
-		m_workerData.setWorkerJob(worker, WorkerData::Idle, nullptr);
+		std::cout << "Failed to build " << building_type.getName() << ", trying again\n";
 		return;
 	}
 
 	// Used in the beginning of the function next frame
 	m_workerData.m_workerBuildingTypeMap[worker] = BWAPI::UnitTypes::None;
-	std::cout << "Now building " << building_type.getName() << ", failcount: " << attempts << ", " << canbuild << "\n";
+	std::cout << "Now building " << building_type.getName() << "\n";
 }
 
 // Send worker to unexplored scout position
