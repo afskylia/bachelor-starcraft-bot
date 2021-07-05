@@ -291,7 +291,8 @@ void CombatManager::updateCombatStatus()
 			}
 		}
 
-		if (rallied_count >= total_rusher_count - lost_rusher_count - 2)
+		//if (rallied_count >= total_rusher_count - lost_rusher_count - 2)
+		if (rallied_count >= (total_rusher_count - lost_rusher_count) * 0.85)
 		{
 			ralliedUpNowAttack();
 		}
