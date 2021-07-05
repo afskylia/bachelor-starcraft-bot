@@ -60,6 +60,7 @@ namespace MiraBot
 		//BWAPI::Position rush_target_pos = BWAPI::Positions::None;
 		const BWEM::Area* rush_target; // Target area of current rush
 		const BWEM::Area* rally_point; // Area in which to group up before rushing target
+		BWAPI::Position rally_pos; // position instead of area
 		int rallied_rushers; // Number of rushers who arrived at rally point
 		int total_rusher_count = 0; // How many attack units we started rushing with in this rush
 		int lost_rusher_count = 0; // How many of our attack units have died this rush
