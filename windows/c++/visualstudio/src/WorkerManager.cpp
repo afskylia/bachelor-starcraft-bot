@@ -360,7 +360,9 @@ sup:
 	bool built = worker->build(building_type, building_pos);
 	if (!built)
 	{
-		std::cout << "Failed to build " << building_type.getName() << ", trying again\n";
+		std::cout << "Failed to build " << building_type.getName() << "\n";
+		m_workerData.setWorkerJob(worker, WorkerData::Idle, nullptr);
+
 		return;
 	}
 
