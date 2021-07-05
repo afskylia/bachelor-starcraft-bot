@@ -310,6 +310,26 @@ bool ProductionManager::buildBuilding(BWAPI::UnitType type)
 		area = fewest_pylons;
 	}
 
+	// Evenly distributes the areas where pylons are built
+	if (type == BWAPI::UnitTypes::Protoss_Photon_Cannon)
+	{
+		const BWEM::Area* fewest_pylons = nullptr;
+		auto lowest_count = INT_MAX;
+		for (auto area : Global::map().expos)
+		{
+			auto count = 0;
+			for (auto* u : BWAPI::Broodwar->getUnitsInRadius(area->Bases()[0].Center(), 550))
+				if (u->getType() == type && Global::map().map.GetNearestArea(u->getTilePosition()) == area) count++;
+
+			if (count < lowest_count)
+			{
+				fewest_pylons = area;
+				lowest_count = count;
+			}
+		}
+		area = fewest_pylons;
+	}
+
 	return buildBuilding(type, area);
 }
 
@@ -629,6 +649,9 @@ const BWEM::Area* ProductionManager::createNewExpo()
 	}
 
 	Global::map().expos.push_back(new_area);
+	m_build_queue_keep_building_.push_front(BWAPI::UnitTypes::Protoss_Photon_Cannon);
+	m_build_queue_keep_building_.push_front(BWAPI::UnitTypes::Protoss_Photon_Cannon);
+	m_build_queue_keep_building_.push_front(BWAPI::UnitTypes::Protoss_Photon_Cannon);
 	m_build_queue_.push_front(BWAPI::UnitTypes::Protoss_Nexus);
 	m_build_queue_.push_front(BWAPI::UnitTypes::Protoss_Pylon);
 

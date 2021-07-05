@@ -186,25 +186,26 @@ void CombatManager::handleIdleDefender(BWAPI::Unit unit)
 
 void CombatManager::handleIdleRetreater(BWAPI::Unit unit)
 {
-	goDefend(unit);
+	// check that we are actually there
+	if (unit->getDistance(rally_point->Bases()[0].Center()) > 300)
+	{
+		unit->move(rally_point->Bases()[0].Center());
+		return;
+	}
 
 	auto idle_retreater_count = 0;
 	for (auto* u : m_attack_units)
-		if (fighter_status_map[u] == Enums::retreating || u->isIdle())
+		if (fighter_status_map[u] == Enums::retreating && u->isIdle())
 		{
 			idle_retreater_count++;
-			//return;
 		}
+
 	if (idle_retreater_count >= (total_rusher_count - lost_rusher_count) * 0.8)
 	{
-		// send alle til at defende!
-		/*for (auto* u : m_attack_units)
-		{
-			if (fighter_status_map[u])
-		}*/
 		retreating = false;
 	}
-	//retreating = false;
+
+	goDefend(unit);
 }
 
 void CombatManager::handleIdleAttacker(BWAPI::Unit unit)
@@ -304,7 +305,8 @@ void CombatManager::goRetreat(BWAPI::Unit unit)
 	//if (rallying == true) lost_rusher_count++;
 	lost_rusher_count++;
 	fighter_status_map[unit] = Enums::retreating;
-	unit->move(BWAPI::Position(Global::map().expos.front()->Bases()[0].Center()));
+	//unit->move(BWAPI::Position(Global::map().expos.front()->Bases()[0].Center()));
+	unit->move(rally_point->Bases()[0].Center());
 }
 
 void CombatManager::goAttack(BWAPI::Unit unit)
@@ -313,7 +315,6 @@ void CombatManager::goAttack(BWAPI::Unit unit)
 
 	if (targets.empty())
 	{
-		std::cout << "TARGETS EMPTY\n";
 		unit->attack(rush_target->Bases()[0].Center());
 		return;
 	}
