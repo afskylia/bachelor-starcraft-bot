@@ -112,7 +112,6 @@ void MiraBotMain::onEnd(bool isWinner)
 	logResult(isWinner);
 	std::cout << "We " << (isWinner ? "won!" : "lost!") << "\n";
 	is_game_ongoing = false;
-	std::exit(1);
 }
 
 // Called on each frame of the game

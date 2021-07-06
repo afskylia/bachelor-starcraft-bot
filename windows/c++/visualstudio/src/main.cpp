@@ -136,4 +136,6 @@ void PlayGame()
 	}
 
 	std::cout << "Game Over\n";
+	std::getchar();
+	std::exit(1);
 }

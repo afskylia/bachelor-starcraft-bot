@@ -114,6 +114,23 @@ BWAPI::Position CombatManager::getChokepointToGuard(BWAPI::Unit unit)
 	auto count_closest = INT_MAX;
 	for (auto cp : chokepoints)
 	{
+		auto nearest_area = Global::map().map.GetNearestArea(BWAPI::TilePosition(cp));
+		if (std::find(Global::information().enemy_areas.begin(), Global::information().enemy_areas.end(), nearest_area)
+			!= Global::information().enemy_areas.end())
+			continue;
+		auto enemy_flag = false;
+		for (auto p : nearest_area->AccessibleNeighbours())
+		{
+			if (!enemy_flag && std::find(Global::information().enemy_areas.begin(),
+			                             Global::information().enemy_areas.end(), p) !=
+				Global::information().enemy_areas.end())
+			{
+				enemy_flag = true;
+				break;
+			}
+		}
+
+		if (enemy_flag) continue;
 		// Count how many guards are assigned to this chokepoint
 		auto count = 0;
 		for (auto& [_, _cp] : guard_map) count += _cp == cp;
