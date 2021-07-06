@@ -28,32 +28,16 @@ void WorkerManager::onFrame()
 		should_have_new_scout = false;
 	}
 
-
-	// Hotfix
-	while (Global::combat().m_attack_units.size() > 30 && m_workerData.getWorkers(WorkerData::Repair).size() < 6)
+	if (lateScout)
 	{
-		if (m_workerData.getWorkers(WorkerData::Minerals).size() <= 40) break;
-
-		std::cout << "Making late game scout\n";
-		m_workerData.setLateGameScout(getAnyWorker());
-	}
-
-	/*if (m_workerData.getWorkers(WorkerData::Minerals).empty())
-	{
-		for (auto s : m_workerData.getWorkers(WorkerData::Repair))
+		// Hotfix
+		while (Global::combat().m_attack_units.size() > 30 && m_workerData.getWorkers(WorkerData::Repair).size() < 6)
 		{
-			std::cout << "TEST\n";
-			setMineralWorker(s);
-		}
-	}*/
+			if (m_workerData.getWorkers(WorkerData::Minerals).size() <= 40) break;
 
-	for (auto s : m_workerData.getWorkers(WorkerData::Repair))
-	{
-		//if (s->isStuck())
-		//{
-		//	//s->stop();
-		//	m_workerData.setLateGameScout(getAnyWorker());
-		//}
+			std::cout << "Making late game scout\n";
+			m_workerData.setLateGameScout(getAnyWorker());
+		}
 	}
 }
 
@@ -184,6 +168,10 @@ void WorkerManager::updateWorkerCounts()
 	}
 	//max_workers = num_patches * 3 + m_workerData.getWorkers(WorkerData::Scout).size() + 5;
 	max_workers = 65;
+}
+
+void WorkerManager::sendScouts(int num)
+{
 }
 
 BWAPI::Unit WorkerManager::getClosestDepot(BWAPI::Unit worker)

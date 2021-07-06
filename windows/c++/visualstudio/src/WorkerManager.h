@@ -25,6 +25,8 @@ namespace MiraBot
 		void onUnitComplete(BWAPI::Unit unit);
 		void onUnitDestroy(BWAPI::Unit unit);
 		void updateWorkerCounts();
+		void sendScouts(int num);
+		bool lateScout = false;
 
 		void setScout(BWAPI::Unit unit);
 		void setMineralWorker(BWAPI::Unit unit);

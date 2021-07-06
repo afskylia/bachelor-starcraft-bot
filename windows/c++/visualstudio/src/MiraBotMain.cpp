@@ -32,7 +32,7 @@ void MiraBotMain::onStart()
 		srand(time(nullptr));
 
 		// Set initial local game speed
-		Broodwar->setLocalSpeed(0); // 10
+		Broodwar->setLocalSpeed(10); // 10
 		Broodwar->setFrameSkip(0);
 
 		// Enable the flag that tells BWAPI to let users enter input while bot plays
@@ -169,14 +169,14 @@ void MiraBotMain::onSendText(std::string text)
 {
 	if (text == "speed0") Broodwar->setLocalSpeed(25); // Slowest speed
 	else if (text == "speed1") Broodwar->setLocalSpeed(17);
-	else if (text == "speed2") Broodwar->setLocalSpeed(10);
+	else if (text == "speed2") Broodwar->setLocalSpeed(7);
 	else if (text == "speed3") Broodwar->setLocalSpeed(0); // Fastest speed
 		//else if (text == "/map")Global::map().toggleDraw();
 
 	else if (text == "production") Global::production().printDebugData();
 	else if (text == "rush") Global::combat().startRushing();
 	else if (text == "retreat") Global::combat().retreatFromCombat();
-
+	else if (text == "scout") Global::workers().lateScout = true;
 	else BWEM::utils::MapDrawer::ProcessCommand(text);
 }
 
