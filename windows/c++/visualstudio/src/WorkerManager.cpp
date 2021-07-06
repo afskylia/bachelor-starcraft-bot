@@ -31,10 +31,18 @@ void WorkerManager::onFrame()
 
 
 	// Hotfix
-	while (Global::combat().m_attack_units.size() > 30 && m_workerData.getWorkers(WorkerData::Repair).size() < 6)
+	while (Global::combat().m_attack_units.size() > 30 && m_workerData.getWorkers(WorkerData::Repair).size() < 7)
 	{
 		std::cout << "Making late game scout\n";
 		m_workerData.setLateGameScout(getAnyWorker());
+	}
+	for (auto s : m_workerData.getWorkers(WorkerData::Repair))
+	{
+		if (s->isStuck())
+		{
+			s->stop();
+			m_workerData.setLateGameScout(getAnyWorker());
+		}
 	}
 }
 
