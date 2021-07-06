@@ -38,8 +38,6 @@ void ProductionManager::pollBuildOrder()
 	if (supply == prev_supply) return;
 	if (prev_supply > supply)
 	{
-		std::cout << "prev > supply\n";
-
 		if (Global::strategy().m_build_order.count(supply))
 		{
 			pushToBuildQueue(supply);
@@ -60,8 +58,6 @@ void ProductionManager::pollBuildOrder()
 		{
 			if (!pushToBuildQueue(lvl))
 			{
-				std::cout << "!pushToBuildQueue(lvl), " << Global::strategy().m_build_order[lvl].first << "\n";
-				//break;
 				prev_supply = lvl;
 				return;
 			}
@@ -96,7 +92,6 @@ bool ProductionManager::pushToBuildQueue(int supply_lvl)
 		return true;
 	}
 
-	std::cout << "already enqueued " << unit << "\n";
 	return false;
 }
 
@@ -163,8 +158,6 @@ void ProductionManager::tryBuildOrTrainUnit()
 		}
 		if (unit_type.isBuilding() && buildBuilding(unit_type) || trainUnit(unit_type))
 		{
-			std::cout << "Building first choice " << unit_type << "\n";
-
 			m_build_queue_.pop_front();
 			return;
 		}
@@ -181,7 +174,6 @@ void ProductionManager::tryBuildOrTrainUnit()
 			{
 				if (second_unit_type.isBuilding() && buildBuilding(second_unit_type) || trainUnit(second_unit_type))
 				{
-					std::cout << "Building second choice " << second_unit_type << "\n";
 					m_build_queue_.erase(m_build_queue_.begin() + 1);
 					return;
 				}
@@ -238,7 +230,7 @@ void ProductionManager::activateIdleBuildings()
 			// Try to train the attack unit
 			if (gateway->train(attack_type))
 			{
-				std::cout << "Training " << attack_type << "\n";
+				//BWAPI::Broodwar->printf("Training %s", attack_type.c_str());
 				attack_unit_distribution[attack_type]++;
 				available_minerals -= attack_type.mineralPrice();
 				available_gas -= attack_type.gasPrice();

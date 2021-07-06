@@ -24,23 +24,34 @@ void WorkerManager::onFrame()
 	if (BWAPI::Broodwar->getFrameCount() % 7919 == 0 && should_have_new_scout)
 	{
 		auto* new_scout = getAnyWorker();
-		std::cout << "SCOUTJOB: " << m_workerData.getWorkerJob(new_scout) << "\n";
 		m_workerData.setWorkerJob(new_scout, WorkerData::Scout, scout_last_known_position);
 		should_have_new_scout = false;
 	}
 
 
 	// Hotfix
-	while (Global::combat().m_attack_units.size() > 30 && m_workerData.getWorkers(WorkerData::Repair).size() < 7)
+	while (Global::combat().m_attack_units.size() > 30 && m_workerData.getWorkers(WorkerData::Repair).size() < 3)
 	{
+		if (m_workerData.getWorkers(WorkerData::Minerals).size() <= 40) break;
+
 		std::cout << "Making late game scout\n";
 		m_workerData.setLateGameScout(getAnyWorker());
 	}
+
+	/*if (m_workerData.getWorkers(WorkerData::Minerals).empty())
+	{
+		for (auto s : m_workerData.getWorkers(WorkerData::Repair))
+		{
+			std::cout << "TEST\n";
+			setMineralWorker(s);
+		}
+	}*/
+
 	for (auto s : m_workerData.getWorkers(WorkerData::Repair))
 	{
 		if (s->isStuck())
 		{
-			s->stop();
+			//s->stop();
 			m_workerData.setLateGameScout(getAnyWorker());
 		}
 	}
@@ -75,7 +86,6 @@ void WorkerManager::updateWorkerStatus()
 				}
 			case WorkerData::Repair:
 				{
-					std::cout << "MOVING LATE GAME SCOUT\n";
 					auto random_pos = Global::map().map.RandomPosition();
 					auto pos = BWAPI::Position(Global::production().m_building_placer_.getBuildLocationNear(
 						BWAPI::TilePosition(random_pos), BWAPI::UnitTypes::Protoss_Nexus));
@@ -313,7 +323,6 @@ void WorkerManager::handleIdleBuildWorker(BWAPI::Unit worker)
 	{
 		if (Tools::getUnitsOfType(building_type, false, false).empty())
 		{
-			std::cout << "you lying mofo\n";
 		}
 		else
 		{
@@ -323,7 +332,6 @@ void WorkerManager::handleIdleBuildWorker(BWAPI::Unit worker)
 	}
 	if (building_type == BWAPI::UnitTypes::None || worker->isConstructing())
 	{
-		std::cout << "wut\n";
 	}
 
 	// Otherwise, worker is idling because it is waiting for the required resources
@@ -341,7 +349,6 @@ void WorkerManager::handleIdleBuildWorker(BWAPI::Unit worker)
 			canbuild = BWAPI::Broodwar->canBuildHere(building_pos, building_type, worker);
 			if (canbuild)
 			{
-				std::cout << building_type << ": Just required a reshuffling\n";
 				goto sup;
 			}
 		}
@@ -352,7 +359,6 @@ void WorkerManager::handleIdleBuildWorker(BWAPI::Unit worker)
 		canbuild = BWAPI::Broodwar->canBuildHere(building_pos, building_type, worker);
 		if (canbuild)
 		{
-			std::cout << building_type << ": Worked on first attempt\n";
 			goto sup;
 		}
 
@@ -361,7 +367,6 @@ void WorkerManager::handleIdleBuildWorker(BWAPI::Unit worker)
 		canbuild = BWAPI::Broodwar->canBuildHere(building_pos, building_type, worker);
 		if (canbuild)
 		{
-			std::cout << building_type << ": Worked on second attempt\n";
 			goto sup;
 		}
 
@@ -370,11 +375,9 @@ void WorkerManager::handleIdleBuildWorker(BWAPI::Unit worker)
 		canbuild = BWAPI::Broodwar->canBuildHere(building_pos, building_type, worker);
 		if (canbuild)
 		{
-			std::cout << building_type << ": Worked on third attempt\n";
 			goto sup;
 		}
 
-		std::cout << "Wow you're screwed boi, " << building_type << "\n";
 		m_workerData.setWorkerJob(worker, WorkerData::Idle, nullptr);
 		return;
 	}
@@ -394,7 +397,7 @@ sup:
 	// Used in the beginning of the function next frame
 	//m_workerData.m_workerBuildingTypeMap[worker] = BWAPI::UnitTypes::None;
 	m_workerData.m_initiatedBuildingMap[worker] = true;
-	std::cout << "Now building " << building_type.getName() << "\n";
+	//BWAPI::Broodwar->printf("Building %s", building_type.getName().c_str());
 }
 
 // Send worker to unexplored scout position

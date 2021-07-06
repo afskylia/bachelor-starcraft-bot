@@ -106,37 +106,6 @@ BWAPI::Unit Tools::getDepot()
 	return getUnitOfType(depot, true);
 }
 
-void Tools::drawUnitCommands()
-{
-	for (auto& unit : BWAPI::Broodwar->self()->getUnits())
-	{
-		if (unit->isIdle()) continue;
-
-		const BWAPI::UnitCommand& command = unit->getLastCommand();
-		// If the previous command had a ground position target, draw it in green
-		// Example: move to location on the map
-		if (command.getTargetPosition() != BWAPI::Positions::None)
-		{
-			BWAPI::Broodwar->drawLineMap(unit->getPosition(), command.getTargetPosition(), BWAPI::Colors::Green);
-		}
-
-			// If the previous command had a tile position target, draw it in red
-			// Example: build at given tile position location
-		else if (command.getTargetTilePosition() != BWAPI::TilePositions::None)
-		{
-			BWAPI::Broodwar->drawLineMap(unit->getPosition(), BWAPI::Position(command.getTargetTilePosition()),
-			                             BWAPI::Colors::Red);
-		}
-
-			// If the previous command had a unit target, draw it in white
-			// Example: attack unit, mine mineral, etc
-		else if (command.getTarget() != nullptr)
-		{
-			BWAPI::Broodwar->drawLineMap(unit->getPosition(), command.getTarget()->getPosition(), BWAPI::Colors::White);
-		}
-	}
-}
-
 void Tools::drawUnitBoundingBoxes()
 {
 	for (auto& unit : BWAPI::Broodwar->getAllUnits())

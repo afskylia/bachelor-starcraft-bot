@@ -139,7 +139,7 @@ void MiraBotMain::onFrame()
 // Draw some relevant information to the screen to help us debug the bot
 void MiraBotMain::drawDebugInformation()
 {
-	Tools::drawUnitCommands();
+	Global::map().drawUnitCommands();
 	Tools::drawUnitBoundingBoxes();
 	Global::map().drawCircles();
 	//if (Global::information().found_enemy) Tools::drawEnemyBases(Global::information().enemy_start_location);

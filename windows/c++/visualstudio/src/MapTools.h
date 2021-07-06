@@ -66,6 +66,7 @@ namespace MiraBot
 		bool isBuildable(const BWAPI::TilePosition& tile) const;
 		bool isDepotBuildableTile(int tile_x, int tile_y) const;
 		static void drawTile(int tile_x, int tile_y, const BWAPI::Color& color);
+		void drawUnitCommands();
 
 		int MapTools::lastSeen(BWAPI::TilePosition pos);
 		std::vector<BWEM::ChokePoint*> getChokePoints();
