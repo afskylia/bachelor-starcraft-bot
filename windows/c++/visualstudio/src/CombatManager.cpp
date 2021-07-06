@@ -114,6 +114,23 @@ BWAPI::Position CombatManager::getChokepointToGuard(BWAPI::Unit unit)
 	auto count_closest = INT_MAX;
 	for (auto cp : chokepoints)
 	{
+		auto nearest_area = Global::map().map.GetNearestArea(BWAPI::TilePosition(cp));
+		if (std::find(Global::information().enemy_areas.begin(), Global::information().enemy_areas.end(), nearest_area)
+			!= Global::information().enemy_areas.end())
+			continue;
+		auto enemy_flag = false;
+		for (auto p : nearest_area->AccessibleNeighbours())
+		{
+			if (!enemy_flag && std::find(Global::information().enemy_areas.begin(),
+			                             Global::information().enemy_areas.end(), p) !=
+				Global::information().enemy_areas.end())
+			{
+				enemy_flag = true;
+				break;
+			}
+		}
+
+		if (enemy_flag) continue;
 		// Count how many guards are assigned to this chokepoint
 		auto count = 0;
 		for (auto& [_, _cp] : guard_map) count += _cp == cp;
@@ -212,21 +229,14 @@ void CombatManager::handleIdleRetreater(BWAPI::Unit unit)
 void CombatManager::handleIdleAttacker(BWAPI::Unit unit)
 {
 	if (rallying) return;
+	std::cout << unit->getType() << " #" << unit->getID() << " idling\n";
 
 	// Remove current target
 	removeUnitTarget(unit);
 
 
 	// Set new target
-	auto* const target = chooseTarget(unit);
-	if (!target)
-	{
-		goAttack(unit);
-	}
-	else
-	{
-		setTarget(unit, target);
-	}
+	goAttack(unit);
 }
 
 void CombatManager::handleIdleRallyer(BWAPI::Unit unit)
@@ -253,6 +263,18 @@ void CombatManager::updateCombatStatus()
 {
 	// Check how the battle is going - should we retreat?
 	if (!attacking) return;
+
+	/*if (endStage && !targets.empty())
+	{
+		for (auto u : m_attack_units)
+		{
+			if (fighter_status_map[u] == Enums::attacking && !u->isAttacking() && !fighter_target_map[u])
+			{
+				std::cout << "*\n*\n*\nSTOPPPPPP\n*\n*\n*\n";
+				u->stop();
+			}
+		}
+	}*/
 
 	// TODO: Check if we're outnumbered by enemy attack units (don't count workers)
 	/*auto t = targets
@@ -312,10 +334,30 @@ void CombatManager::updateCombatStatus()
 
 void CombatManager::setTarget(BWAPI::Unit unit, BWAPI::Unit target)
 {
+	if (endStage && !target)
+	{
+		std::cout << "endStage attacking random pos\n";
+		auto random_pos = Global::map().map.RandomPosition();
+		auto pos = BWAPI::Position(Global::production().m_building_placer_.getBuildLocationNear(
+			BWAPI::TilePosition(random_pos), BWAPI::UnitTypes::Protoss_Nexus));
+		//rush_target = Global::map().map.GetNearestArea(BWAPI::TilePosition(rush_pos));
+		unit->attack(pos);
+		return;
+	}
+	if (!target) return;
 	// Set target and attack it
 	target_attackers[target]++;
 	fighter_target_map[unit] = target;
-	unit->attack(target);
+	if (target->isVisible())
+	{
+		std::cout << "setting regular target\n";
+		unit->attack(target);
+	}
+	else
+	{
+		std::cout << "going to invisible target\n";
+		unit->attack(target->getPosition());
+	}
 }
 
 void CombatManager::goRetreat(BWAPI::Unit unit)
@@ -331,18 +373,36 @@ void CombatManager::goAttack(BWAPI::Unit unit)
 {
 	std::cout << unit->getType() << " #" << unit->getID() << ": goAttack()\n";
 	fighter_status_map[unit] = Enums::attacking;
+	auto* const target = chooseTarget(unit);
 
-	if (targets.empty())
+	if (!target)
 	{
-		std::cout << "TARGETS EMPTY\n";
-		if (Global::map().map.GetNearestArea(unit->getTilePosition()) == rush_target)
+		std::cout << "HAS NO TARGET\n";
+		if ((Global::map().map.GetNearestArea(unit->getTilePosition()) == rush_target))
+			//  || rush_target != Global::map().map.GetNearestArea(Global::information().enemy_start_location)
 		{
-			setHotfixTarget();
+			std::cout << "*\n*\n*\n*\n*\n" << target << "\n*\n*\n*\n*\n";
+			endStage = true;
+			setTarget(unit, nullptr);
+			return;
 		}
+		std::cout << target << "else attack rush pos\n";
 		unit->attack(rush_pos);
 		return;
 	}
-	auto* const target = chooseTarget(unit);
+
+	//if (endStage && !fighter_target_map[unit])
+	//{
+	//	std::cout << "endStage attacking random pos\n";
+	//	auto random_pos = Global::map().map.RandomPosition();
+	//	auto pos = BWAPI::Position(Global::production().m_building_placer_.getBuildLocationNear(
+	//		BWAPI::TilePosition(random_pos), BWAPI::UnitTypes::Protoss_Nexus));
+	//	//rush_target = Global::map().map.GetNearestArea(BWAPI::TilePosition(rush_pos));
+	//	unit->attack(pos);
+	//	return;
+	//}
+
+	// Otherwise just use the given target
 	setTarget(unit, target);
 }
 
@@ -532,6 +592,7 @@ BWAPI::Unit CombatManager::chooseTarget(BWAPI::Unit unit, bool same_area)
 	for (auto& t : targets)
 	{
 		if (target_attackers[t] > 4) continue;
+		if (!t->isVisible()) continue;
 
 		const auto target_area = Global::map().map.GetNearestArea(t->getTilePosition());
 
@@ -545,6 +606,8 @@ BWAPI::Unit CombatManager::chooseTarget(BWAPI::Unit unit, bool same_area)
 	// Return the closest target (out of all targets if no targets w. <=2 units assigned)
 	if (available_targets.empty() && !same_area) return Tools::getClosestUnitTo(unit->getPosition(), targets);
 	if (available_targets.empty()) return nullptr;
+
+	if (available_targets.empty()) return Tools::getClosestUnitTo(unit->getPosition(), targets);
 	return Tools::getClosestUnitTo(unit->getPosition(), available_targets);
 }
 

@@ -66,6 +66,7 @@ namespace MiraBot
 		int total_rusher_count = 0; // How many attack units we started rushing with in this rush
 		int lost_rusher_count = 0; // How many of our attack units have died this rush
 		void setRushTarget();
+		bool endStage = false;
 
 		// Set of all our attack units
 		BWAPI::Unitset m_attack_units = BWAPI::Unitset::none;
@@ -75,6 +76,7 @@ namespace MiraBot
 
 		// Set of targets (visible enemy units)
 		BWAPI::Unitset targets;
+		BWAPI::Unitset enemy_buildings;
 
 		// Map of enemy targets and the number of our attack units that are targeting them
 		std::map<BWAPI::Unit, int> target_attackers;
