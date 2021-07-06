@@ -347,11 +347,40 @@ bool ProductionManager::buildBuilding(const BWAPI::UnitType type, const BWEM::Ar
 
 	// Get building location near the desired position for the type, using BuildingPlacer from bwsal
 	auto build_pos = m_building_placer_.getBuildLocationNear(desired_pos, type);
+	if (type == BWAPI::UnitTypes::Protoss_Assimilator)
+	{
+		auto existing_refineries = Tools::getUnitsOfType(BWAPI::UnitTypes::Protoss_Assimilator, false, false);
+		BWAPI::Unit closest_geyser = nullptr;
+		auto dist = DBL_MAX;
+		for (const auto& g : Global::map().map.Geysers())
+		{
+			auto d = g->Unit()->getPosition().getDistance(BWAPI::Position(BWAPI::Broodwar->self()->getStartLocation()));
+			if (d < dist)
+			{
+				auto noflag = false;
+				for (auto ref : existing_refineries)
+				{
+					if (ref->getPosition().getDistance(g->Unit()->getPosition()) < 100)
+					{
+						noflag = true;
+						break;
+					}
+				}
+				if (noflag) continue;
+
+				closest_geyser = g->Unit();
+				dist = d;
+			}
+		}
+		build_pos = m_building_placer_.getBuildLocationNear(BWAPI::TilePosition(closest_geyser->getPosition()), type);
+	}
 	if (!m_building_placer_.canBuildHereWithSpace(build_pos, type))
 	{
 		// Pick any valid build location if the found one doesn't work
 		build_pos = m_building_placer_.getBuildLocation(type);
+		if (type == BWAPI::UnitTypes::Protoss_Assimilator) return false;
 	}
+
 
 	// Return false if this can't be built for whatever reason
 	if (!BWAPI::Broodwar->canBuildHere(BWAPI::TilePosition(build_pos), type))

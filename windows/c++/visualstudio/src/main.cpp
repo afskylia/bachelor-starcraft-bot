@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
 void PlayGame()
 {
 	MiraBotMain bot;
-
+	auto doneflag = false;
 	// The main game loop, which continues while we are connected to BWAPI and in a game
 	while (BWAPI::BWAPIClient.isConnected() && BWAPI::Broodwar->isInGame())
 	{
@@ -126,9 +126,11 @@ void PlayGame()
 		if (!BWAPI::BWAPIClient.isConnected())
 		{
 			std::cout << "Disconnected\n";
-
+			doneflag = true;
 			break;
 		}
+
+		if (doneflag) break;
 	}
 
 	std::cout << "Game Over\n";
