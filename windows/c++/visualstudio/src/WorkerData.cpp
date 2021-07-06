@@ -254,6 +254,14 @@ BWAPI::Unit WorkerData::getClosestRefinery(BWAPI::Unit unit)
 	return nullptr;
 }
 
+void WorkerData::setLateGameScout(BWAPI::Unit unit)
+{
+	auto random_pos = Global::map().map.RandomPosition();
+	auto pos = BWAPI::Position(Global::production().m_building_placer_.getBuildLocationNear(
+		BWAPI::TilePosition(random_pos), BWAPI::UnitTypes::Protoss_Nexus));
+	setWorkerJob(unit, Repair, pos);
+}
+
 WorkerData::WorkerJob WorkerData::getWorkerJob(BWAPI::Unit unit)
 {
 	if (!unit) { return Default; }

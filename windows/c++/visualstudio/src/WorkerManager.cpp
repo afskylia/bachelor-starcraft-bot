@@ -28,6 +28,14 @@ void WorkerManager::onFrame()
 		m_workerData.setWorkerJob(new_scout, WorkerData::Scout, scout_last_known_position);
 		should_have_new_scout = false;
 	}
+
+
+	// Hotfix
+	while (Global::combat().m_attack_units.size() > 30 && m_workerData.getWorkers(WorkerData::Repair).size() < 6)
+	{
+		std::cout << "Making late game scout\n";
+		m_workerData.setLateGameScout(getAnyWorker());
+	}
 }
 
 void WorkerManager::updateWorkerStatus()
@@ -55,6 +63,15 @@ void WorkerManager::updateWorkerStatus()
 				{
 					// Scout is idle when it has reached its current scouting target
 					handleIdleScout(worker);
+					break;
+				}
+			case WorkerData::Repair:
+				{
+					std::cout << "MOVING LATE GAME SCOUT\n";
+					auto random_pos = Global::map().map.RandomPosition();
+					auto pos = BWAPI::Position(Global::production().m_building_placer_.getBuildLocationNear(
+						BWAPI::TilePosition(random_pos), BWAPI::UnitTypes::Protoss_Nexus));
+					worker->move(pos);
 					break;
 				}
 			case WorkerData::Move:

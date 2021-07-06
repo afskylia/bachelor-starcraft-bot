@@ -32,7 +32,7 @@ void MiraBotMain::onStart()
 		srand(time(nullptr));
 
 		// Set initial local game speed
-		Broodwar->setLocalSpeed(10); // 10
+		Broodwar->setLocalSpeed(0); // 10
 		Broodwar->setFrameSkip(0);
 
 		// Enable the flag that tells BWAPI to let users enter input while bot plays
