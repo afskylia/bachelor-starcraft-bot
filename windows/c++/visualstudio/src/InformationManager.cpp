@@ -115,12 +115,16 @@ void InformationManager::addOrRemoveEnemyUnit(BWAPI::Unit unit, bool remove_unit
 	auto it = enemy_units.find(unit);
 
 	// if not in the unit set, add it, if in the set and should remove then remove it 
-	if (it == enemy_units.end())
+	if (!remove_unit)
 	{
+		if (it != enemy_units.end())
+		{
+			enemy_units.erase(it);
+		}
 		enemy_units.insert(unit);
 		informationUpdateShouldHappen();
 	}
-	else if (remove_unit)
+	else
 	{
 		enemy_units.erase(it);
 		informationUpdateShouldHappen();
