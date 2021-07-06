@@ -30,7 +30,7 @@ void WorkerManager::onFrame()
 
 
 	// Hotfix
-	while (Global::combat().m_attack_units.size() > 30 && m_workerData.getWorkers(WorkerData::Repair).size() < 3)
+	while (Global::combat().m_attack_units.size() > 30 && m_workerData.getWorkers(WorkerData::Repair).size() < 6)
 	{
 		if (m_workerData.getWorkers(WorkerData::Minerals).size() <= 40) break;
 
@@ -49,11 +49,11 @@ void WorkerManager::onFrame()
 
 	for (auto s : m_workerData.getWorkers(WorkerData::Repair))
 	{
-		if (s->isStuck())
-		{
-			//s->stop();
-			m_workerData.setLateGameScout(getAnyWorker());
-		}
+		//if (s->isStuck())
+		//{
+		//	//s->stop();
+		//	m_workerData.setLateGameScout(getAnyWorker());
+		//}
 	}
 }
 
