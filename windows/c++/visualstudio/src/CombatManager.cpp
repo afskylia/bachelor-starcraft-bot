@@ -329,11 +329,17 @@ void CombatManager::goRetreat(BWAPI::Unit unit)
 
 void CombatManager::goAttack(BWAPI::Unit unit)
 {
+	std::cout << unit->getType() << " #" << unit->getID() << ": goAttack()\n";
 	fighter_status_map[unit] = Enums::attacking;
 
 	if (targets.empty())
 	{
-		unit->attack(rush_target->Bases()[0].Center());
+		std::cout << "TARGETS EMPTY\n";
+		if (Global::map().map.GetNearestArea(unit->getTilePosition()) == rush_target)
+		{
+			setHotfixTarget();
+		}
+		unit->attack(rush_pos);
 		return;
 	}
 	auto* const target = chooseTarget(unit);
@@ -542,6 +548,15 @@ BWAPI::Unit CombatManager::chooseTarget(BWAPI::Unit unit, bool same_area)
 	return Tools::getClosestUnitTo(unit->getPosition(), available_targets);
 }
 
+void CombatManager::setHotfixTarget()
+{
+	std::cout << "Choosing random target!\n";
+	auto random_pos = Global::map().map.RandomPosition();
+	rush_pos = BWAPI::Position(Global::production().m_building_placer_.getBuildLocationNear(
+		BWAPI::TilePosition(random_pos), BWAPI::UnitTypes::Protoss_Nexus));
+	rush_target = Global::map().map.GetNearestArea(BWAPI::TilePosition(rush_pos));
+}
+
 void CombatManager::setRushTarget()
 {
 	std::cout << "Setting rush targets\n";
@@ -554,6 +569,7 @@ void CombatManager::setRushTarget()
 	// Pick closest enemy base to our main base
 	//rush_target = Global::map().getClosestArea(Global::map().expos.front(), Global::information().enemy_areas);
 	rush_target = Global::map().map.GetNearestArea(Global::information().enemy_start_location);
+	rush_pos = rush_target->Bases()[0].Center();
 
 	// Choose rally point
 	//const auto target_neighbors = rush_target->AccessibleNeighbours();

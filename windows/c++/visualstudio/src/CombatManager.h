@@ -59,6 +59,7 @@ namespace MiraBot
 		// Variables used for rushing
 		//BWAPI::Position rush_target_pos = BWAPI::Positions::None;
 		const BWEM::Area* rush_target; // Target area of current rush
+		BWAPI::Position rush_pos;
 		const BWEM::Area* rally_point; // Area in which to group up before rushing target
 		BWAPI::Position rally_pos; // position instead of area
 		int rallied_rushers; // Number of rushers who arrived at rally point
@@ -83,5 +84,6 @@ namespace MiraBot
 
 		// Map of our attack units and their current target
 		std::map<BWAPI::Unit, BWAPI::Unit> fighter_target_map;
+		void setHotfixTarget();
 	};
 }
