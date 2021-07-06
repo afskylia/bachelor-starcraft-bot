@@ -40,6 +40,7 @@ namespace MiraBot
 
 		bool depotIsFull(BWAPI::Unit depot);
 		int getMineralsNearDepot(BWAPI::Unit depot);
+		void setLateGameScout(BWAPI::Unit unit);
 
 		WorkerJob getWorkerJob(BWAPI::Unit unit);
 		//MoveData		getWorkerMoveData(BWAPI::Unit unit);

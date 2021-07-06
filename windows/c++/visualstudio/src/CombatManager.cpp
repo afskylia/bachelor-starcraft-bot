@@ -114,6 +114,23 @@ BWAPI::Position CombatManager::getChokepointToGuard(BWAPI::Unit unit)
 	auto count_closest = INT_MAX;
 	for (auto cp : chokepoints)
 	{
+		auto nearest_area = Global::map().map.GetNearestArea(BWAPI::TilePosition(cp));
+		if (std::find(Global::information().enemy_areas.begin(), Global::information().enemy_areas.end(), nearest_area)
+			!= Global::information().enemy_areas.end())
+			continue;
+		auto enemy_flag = false;
+		for (auto p : nearest_area->AccessibleNeighbours())
+		{
+			if (!enemy_flag && std::find(Global::information().enemy_areas.begin(),
+			                             Global::information().enemy_areas.end(), p) !=
+				Global::information().enemy_areas.end())
+			{
+				enemy_flag = true;
+				break;
+			}
+		}
+
+		if (enemy_flag) continue;
 		// Count how many guards are assigned to this chokepoint
 		auto count = 0;
 		for (auto& [_, _cp] : guard_map) count += _cp == cp;
@@ -172,7 +189,6 @@ void CombatManager::handleIdleDefender(BWAPI::Unit unit)
 	auto was_attacking = unit->getLastCommand().getType() == BWAPI::UnitCommandTypes::Attack_Unit;
 	if (was_attacking && !under_attack)
 	{
-		std::cout << "Going back to defenses\n";
 		removeUnitTarget(unit);
 		goDefend(unit);
 	}
@@ -233,7 +249,6 @@ void CombatManager::handleIdleRallyer(BWAPI::Unit unit)
 {
 	if (Global::map().map.GetNearestArea(unit->getTilePosition()) == rally_point)
 	{
-		std::cout << unit->getType() << " idling (at rally point hopefully)\n";
 		rallied_rushers++;
 		fighter_status_map[unit] = Enums::attacking;
 	}
@@ -260,7 +275,6 @@ void CombatManager::updateCombatStatus()
 
 	if (lost_rusher_count >= total_rusher_count * 0.33)
 	{
-		std::cout << "lost_rushers >= initial_rushers*0.4\n";
 		retreatFromCombat();
 		return;
 	}
@@ -273,7 +287,6 @@ void CombatManager::updateCombatStatus()
 			if (fighter_status_map[u] != Enums::rallying || fighter_status_map[u] != Enums::attacking) continue;
 			if (!Global::map().isWalkable(u->getTilePosition()) || u->isStuck())
 			{
-				std::cout << "u->stop()\n";
 				u->stop();
 			}
 		}
@@ -348,7 +361,6 @@ void CombatManager::goAttack(BWAPI::Unit unit, BWAPI::Position target_pos)
 
 void CombatManager::goRally(BWAPI::Unit unit)
 {
-	std::cout << unit->getType() << " going to rally point\n";
 	fighter_status_map[unit] = Enums::rallying;
 
 	unit->attack(rally_pos);
@@ -453,7 +465,7 @@ void CombatManager::cleanUpTargets()
 
 void CombatManager::startRushing()
 {
-	std::cout << "Start rushing!\n";
+	std::cout << "Attack initiated! Grouping up...\n";
 	attacking = true;
 	rallying = true;
 
@@ -470,7 +482,6 @@ void CombatManager::startRushing()
 	{
 		if (u->getType() == BWAPI::UnitTypes::Protoss_High_Templar)
 		{
-			std::cout << u->canAttack() << "\n";
 			continue;
 		}
 		if (count >= m_attack_units.size() * 0.75) break;
@@ -496,7 +507,6 @@ void CombatManager::retreatFromCombat()
 		{
 			u->stop();
 			goRetreat(u);
-			std::cout << u->getType() << " retreats from combat\n";
 		}
 	}
 }
@@ -526,6 +536,7 @@ BWAPI::Unit CombatManager::chooseTarget(BWAPI::Unit unit, bool same_area)
 	for (auto& t : targets)
 	{
 		if (target_attackers[t] > 4) continue;
+		if (t->getPosition() == BWAPI::Positions::None || t->getPosition() == BWAPI::Positions::None) continue;
 
 		const auto target_area = Global::map().map.GetNearestArea(t->getTilePosition());
 
@@ -544,10 +555,9 @@ BWAPI::Unit CombatManager::chooseTarget(BWAPI::Unit unit, bool same_area)
 
 void CombatManager::setRushTarget()
 {
-	std::cout << "Setting rush targets\n";
 	if (Global::information().enemy_areas.empty())
 	{
-		std::cout << "Enemy areas empty\n";
+		std::cout << "Enemy areas empty!\n";
 		return;
 	}
 

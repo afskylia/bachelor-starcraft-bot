@@ -9,6 +9,8 @@
 #include "BWEM/src/bwem.h"
 #include <iostream>
 
+#include "WorkerManager.h"
+
 using namespace MiraBot;
 using namespace BWEM;
 
@@ -352,6 +354,40 @@ bool MapTools::canWalk(const int tile_x, const int tile_y)
 bool MapTools::canBuild(const int tile_x, const int tile_y)
 {
 	return BWAPI::Broodwar->isBuildable(BWAPI::TilePosition(tile_x, tile_y));
+}
+
+void MapTools::drawUnitCommands()
+{
+	for (auto& unit : BWAPI::Broodwar->self()->getUnits())
+	{
+		if (unit->isIdle()) continue;
+		if (unit->getType().isWorker() && Global::workers().m_workerData.getWorkerJob(unit) == Global::workers().
+			m_workerData.Repair)
+			continue;
+
+		const BWAPI::UnitCommand& command = unit->getLastCommand();
+		// If the previous command had a ground position target, draw it in green
+		// Example: move to location on the map
+		if (command.getTargetPosition() != BWAPI::Positions::None)
+		{
+			BWAPI::Broodwar->drawLineMap(unit->getPosition(), command.getTargetPosition(), BWAPI::Colors::Green);
+		}
+
+			// If the previous command had a tile position target, draw it in red
+			// Example: build at given tile position location
+		else if (command.getTargetTilePosition() != BWAPI::TilePositions::None)
+		{
+			BWAPI::Broodwar->drawLineMap(unit->getPosition(), BWAPI::Position(command.getTargetTilePosition()),
+			                             BWAPI::Colors::Red);
+		}
+
+			// If the previous command had a unit target, draw it in white
+			// Example: attack unit, mine mineral, etc
+		else if (command.getTarget() != nullptr)
+		{
+			BWAPI::Broodwar->drawLineMap(unit->getPosition(), command.getTarget()->getPosition(), BWAPI::Colors::White);
+		}
+	}
 }
 
 void MapTools::draw() const

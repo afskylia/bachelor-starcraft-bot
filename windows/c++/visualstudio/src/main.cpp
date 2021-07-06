@@ -126,9 +126,17 @@ void PlayGame()
 		if (!BWAPI::BWAPIClient.isConnected())
 		{
 			std::cout << "Disconnected\n";
+
 			break;
 		}
 	}
 
 	std::cout << "Game Over\n";
+	if (bot.is_game_ongoing)
+	{
+		std::cout << "Surrendering!\n";
+		bot.onEnd(false);
+	}
+	std::getchar();
+	std::exit(1);
 }

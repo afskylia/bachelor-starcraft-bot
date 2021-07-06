@@ -18,6 +18,7 @@ namespace MiraBot
 
 	public:
 		MiraBotMain();
+		bool is_game_ongoing = true;
 
 		// helper functions to get you started with bot programming and learn the API
 		void drawDebugInformation();

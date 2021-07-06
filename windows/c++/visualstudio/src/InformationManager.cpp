@@ -141,6 +141,7 @@ void InformationManager::onUnitShow(BWAPI::Unit unit)
 		if (unit->getType().isBuilding() && !std::count(enemy_areas.begin(), enemy_areas.end(), area))
 		{
 			enemy_areas.push_back(area);
+			Global::map().addCircle(unit->getPosition(), "ENEMY AREA\n");
 		}
 
 		logEnemyRaceAndStartLocation(unit);

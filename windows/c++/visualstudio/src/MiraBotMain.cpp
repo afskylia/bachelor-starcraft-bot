@@ -32,7 +32,7 @@ void MiraBotMain::onStart()
 		srand(time(nullptr));
 
 		// Set initial local game speed
-		Broodwar->setLocalSpeed(10); // 10
+		Broodwar->setLocalSpeed(0); // 10
 		Broodwar->setFrameSkip(0);
 
 		// Enable the flag that tells BWAPI to let users enter input while bot plays
@@ -111,7 +111,7 @@ void MiraBotMain::onEnd(bool isWinner)
 {
 	logResult(isWinner);
 	std::cout << "We " << (isWinner ? "won!" : "lost!") << "\n";
-	std::exit(1);
+	is_game_ongoing = false;
 }
 
 // Called on each frame of the game
@@ -139,7 +139,7 @@ void MiraBotMain::onFrame()
 // Draw some relevant information to the screen to help us debug the bot
 void MiraBotMain::drawDebugInformation()
 {
-	Tools::drawUnitCommands();
+	Global::map().drawUnitCommands();
 	Tools::drawUnitBoundingBoxes();
 	Global::map().drawCircles();
 	//if (Global::information().found_enemy) Tools::drawEnemyBases(Global::information().enemy_start_location);

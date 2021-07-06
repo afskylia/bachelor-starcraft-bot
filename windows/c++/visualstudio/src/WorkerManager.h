@@ -33,6 +33,7 @@ namespace MiraBot
 
 		void handleIdleBuildWorker(BWAPI::Unit worker);
 		void handleIdleScout(BWAPI::Unit worker);
+		BWAPI::Unit lateGameScout;
 
 		//BWAPI::Unit getBuilder(Building& b, bool setJobAsBuilder = true);
 		//BWAPI::Unit getMoveWorker(BWAPI::Position p);
